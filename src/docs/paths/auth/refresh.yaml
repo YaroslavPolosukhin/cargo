@@ -1,0 +1,41 @@
+post:
+  tags:
+    - Authentication
+  summary: Refresh the access and refresh tokens for a user.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            refreshToken:
+              type: string
+              description: The refresh token that was issued on login or previous token refresh.
+              required: true
+  responses:
+    '200':
+      description: Successfully generated new access and refresh tokens.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                description: New JWT access token for authentication.
+              refreshToken:
+                type: string
+                description: New refresh token for generating further access tokens.
+    '401':
+      description: Unauthorized request due to missing or invalid refresh token.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message indicating the reason for the unauthorized status.
+    '500':
+      description: Internal server error.

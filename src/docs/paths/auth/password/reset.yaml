@@ -1,0 +1,59 @@
+post:
+  tags:
+    - Authentication
+  summary: Reset user password
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - phone
+            - code
+            - password
+          properties:
+            phone:
+              type: string
+              description: The phone number of the user.
+              example: "89123943921"
+            code:
+              type: string
+              description: 6-digit code sent in SMS.
+              example: "123456"
+            password:
+              type: string
+              description: New password for the user.
+              example: "password"
+  responses:
+    '200':
+      description: Password was successfully changed.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Password was successfully changed.
+    '400':
+      description: The code is incorrect, expired or maximum number of incorrect code input attempts exceeded.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The code is incorrect, expired or maximum number of incorrect code input attempts exceeded.
+    '500':
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Internal server error.

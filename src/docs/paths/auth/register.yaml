@@ -1,0 +1,66 @@
+post:
+  tags:
+    - Authentication
+  summary: Register a new user
+  description: This endpoint registers a new user with a phone number and password.
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - phone
+            - password
+          properties:
+            phone:
+              type: string
+              description: The phone number of the user.
+              example: "1234567890"
+            password:
+              type: string
+              description: The password for the user's account.
+              example: "password123"
+            fcmToken:
+              type: string
+              description: Firebase Cloud Messaging token for push notifications (optional).
+              example: "your_fcm_token"
+  responses:
+    '201':
+      description: User registered successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                description: JWT access token for authentication.
+              refreshToken:
+                type: string
+                description: Refresh token for generating new access tokens.
+              user:
+                type: object
+                properties:
+                  phone:
+                    type: string
+                    description: Phone number of the registered user.
+                  role:
+                    type: string
+                    description: Role of the registered user.
+                  approved:
+                    type: boolean
+                    description: Approval status of the user's account.
+    '400':
+      description: User already registered or validation error on input.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message indicating the reason for the registration failure.
+    '500':
+      description: Internal server error.

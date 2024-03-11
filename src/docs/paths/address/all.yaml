@@ -1,0 +1,16 @@
+get:
+  summary: Retrieve all addresses
+  operationId: getAllAddresses
+  tags:
+    - Addresses
+  responses:
+    '200':
+      description: An array of addresses
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/shipping.yaml#/components/schemas/Address'
+    '500':
+      description: Internal Server Error

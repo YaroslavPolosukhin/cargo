@@ -1,0 +1,22 @@
+post:
+  summary: Create a new address
+  operationId: createAddress
+  tags:
+    - Addresses
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/shipping.yaml#/components/schemas/Address'
+  responses:
+    '201':
+      description: Address created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/shipping.yaml#/components/schemas/Address'
+    '400':
+      description: Validation error
+    '500':
+      description: Internal Server Error

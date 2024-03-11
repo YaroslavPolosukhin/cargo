@@ -1,0 +1,60 @@
+post:
+  tags:
+    - Order
+  summary: Confirms an order and updates its status to "Loading".
+  operationId: confirmOrder
+  requestBody:
+    description: Order confirmation details.
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            orderId:
+              type: integer
+              description: The unique identifier of the order to confirm.
+              example: 1
+            plannedLoadingDate:
+              type: string
+              format: date-time
+              description: The planned loading date.
+              example: "2021-04-01"
+            plannedArrivalDate:
+              type: integer
+              format: date-time
+              description: The planned arrival date.
+              example: "2021-04-01"
+            vinCode:
+              type: string
+              description: The Vehicle Identification Number of the truck.
+              example: "1HGBH41JXMN109186"
+          required:
+            - orderId
+            - plannedLoadingDate
+            - plannedArrivalDate
+            - vinCode
+  responses:
+    '200':
+      description: Order confirmed and status updated to loading.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Description of the result of confirming the order.
+                example: Order confirmed by manager and marked as loading.
+    '400':
+      description: Bad Request, e.g., order not in confirmation status.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Order not found or not in confirmation status.
+    '500':
+      description: Internal Server Error.

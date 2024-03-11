@@ -1,0 +1,169 @@
+components:
+  schemas:
+    Nomenclature:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the nomenclature
+          readOnly: true
+        name:
+          type: string
+          description: Name of the nomenclature
+        measureId:
+          type: integer
+          format: int64
+          description: Identifier for the related measure
+      required:
+        - name
+        - measureId
+      example:
+        id: 1
+        name: "Widget"
+        measureId: 5
+
+    Address:
+      type: object
+      required:
+        - name
+        - city
+        - street
+        - postcode
+      properties:
+        name:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        house:
+          type: string
+        building:
+          type: string
+        floor:
+          type: integer
+        postcode:
+          type: string
+
+    Measure:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the measure
+          readOnly: true
+        name:
+          type: string
+          description: Name of the measure
+
+    Contact:
+      type: object
+      required:
+        - name
+        - surname
+        - jobTitle
+        - phone
+        - email
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        patronymic:
+          type: string
+        jobTitle:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        telegram:
+          type: string
+
+    Order:
+      type: object
+      required:
+        - id
+        - departure_id
+        - destination_id
+        - status
+        - manager_id
+        - gross_weight
+        - net_weight
+      properties:
+        id:
+          type: integer
+          example: 1
+        departure_id:
+          type: integer
+          example: 10
+        destination_id:
+          type: integer
+          example: 20
+        driver_id:
+          type: integer
+          nullable: true
+          example: 30
+        status:
+          type: string
+          enum: [created, confirmation, loading, departed, completed, cancelled]
+        manager_id:
+          type: integer
+          example: 40
+        gross_weight:
+          type: number
+          format: float
+          example: 1000.5
+        net_weight:
+          type: number
+          format: float
+          example: 950.3
+        costPerRoute:
+          type: number
+          format: float
+          example: 100.1
+        costPerTon:
+          type: number
+          format: float
+          example: 100.1
+        priceNonCash:
+          type: number
+          format: float
+          example: 100.1
+        priceCash:
+          type: number
+          format: float
+          example: 100.1
+        delivery_date_plan:
+          type: string
+          format: date-time
+          nullable: true
+        delivery_date_fact:
+          type: string
+          format: date-time
+          nullable: true
+        departure_date_plan:
+          type: string
+          format: date-time
+          nullable: true
+        departure_date_fact:
+          type: string
+          format: date-time
+          nullable: true
+        truck_id:
+          type: integer
+          nullable: true
+          example: 50
+        departure:
+          $ref: '#/components/schemas/Address'
+        destination:
+          $ref: '#/components/schemas/Address'
+        nomenclatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Nomenclature'
+

@@ -1,0 +1,28 @@
+put:
+  summary: Update address
+  operationId: updateAddress
+  tags:
+    - Addresses
+  parameters:
+    - name: addressId
+      in: path
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/shipping.yaml#/components/schemas/Address'
+  responses:
+    '200':
+      description: Address updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/shipping.yaml#/components/schemas/Address'
+    '400':
+      description: Validation error
+    '500':
+      description: Internal Server Error

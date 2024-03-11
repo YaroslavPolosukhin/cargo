@@ -1,0 +1,43 @@
+get:
+  summary: Searches nomenclatures by name (or by part of the name)
+  operationId: getNomenclaturesByName
+  tags:
+    - Nomenclature
+  security:
+    - BearerAuth: [ ]
+  parameters:
+    - in: path
+      name: name
+      required: true
+      description: Nomenclature name or a part of the name
+      schema:
+        type: string
+  responses:
+    '200':
+      description: An array of nomenclatures
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
+    '400':
+      description: Missing name.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Name is required.
+    '500':
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Internal server error.

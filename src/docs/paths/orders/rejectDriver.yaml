@@ -1,0 +1,37 @@
+post:
+  tags:
+    - Order
+  summary: Rejects the confirmation request from a driver
+  requestBody:
+    description: JSON object containing the order ID
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            orderId:
+              type: integer
+              format: int64
+              description: Unique identifier of the order
+  responses:
+    '200':
+      description: Driver confirmation request rejected, order status reset to created
+    '400':
+      description: Bad request response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '500':
+      description: Internal server error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string

@@ -1,0 +1,38 @@
+put:
+  summary: Update logistics point
+  operationId: updateLogisticsPoint
+  tags:
+    - Logistics Points
+  parameters:
+    - name: pointId
+      in: path
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of the logistics point
+            address_id:
+              type: integer
+              format: int64
+              description: Foreign key for the associated address
+            contacts:
+              type: array
+              items:
+                type: integer
+                format: int64
+                description: Contacts ids
+  responses:
+    '200':
+      description: Logistics point updated successfully (returns updated logistics point)
+    '400':
+      description: Validation error or error updating new logistics point
+    '500':
+      description: Internal Server Error

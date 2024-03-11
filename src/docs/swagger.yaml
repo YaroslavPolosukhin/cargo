@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: API доставки грузов
+  version: 1.0.0
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - BearerAuth: []
+paths:
+  # AUTH
+  /api/auth/signUp:
+    $ref: 'src/docs/paths/auth/register.yaml'
+  /api/auth/signIn:
+    $ref: 'src/docs/paths/auth/login.yaml'
+  /api/auth/refresh:
+    $ref: 'src/docs/paths/auth/refresh.yaml'
+  /api/auth/logout:
+    $ref: 'src/docs/paths/auth/logout.yaml'
+  /api/auth/user:
+    $ref: 'src/docs/paths/auth/user.yaml'
+  /api/auth/password/recover:
+    $ref: 'src/docs/paths/auth/password/recover.yaml'
+  /api/auth/password/checkcode:
+    $ref: 'src/docs/paths/auth/password/checkcode.yaml'
+  /api/auth/password/reset:
+    $ref: 'src/docs/paths/auth/password/reset.yaml'
+
+  # DRIVERS
+  /api/drivers/approved:
+    $ref: 'src/docs/paths/drivers/approved.yaml'
+  /api/drivers/unapproved:
+    $ref: 'src/docs/paths/drivers/unapproved.yaml'
+  /api/drivers/confirm:
+    $ref: 'src/docs/paths/drivers/confirm.yaml'
+
+  # CONTACTS
+  /api/contacts/all:
+    $ref: 'src/docs/paths/contacts/all.yaml'
+  /api/contacts:
+    $ref: 'src/docs/paths/contacts/create.yaml'
+  /api/contacts/:contactId:
+    $ref: 'src/docs/paths/contacts/update.yaml'
+
+
+  #Measures
+  /api/measures/all:
+    $ref: 'src/docs/paths/measures/all.yaml'
+
+  # ADDRESS
+  /api/address/all:
+    $ref: 'src/docs/paths/address/all.yaml'
+  /api/address:
+    $ref: 'src/docs/paths/address/create.yaml'
+  /api/address/:addressId:
+    $ref: 'src/docs/paths/address/update.yaml'
+
+  # Logistic points
+  /api/logisticPoint/all:
+    $ref: 'src/docs/paths/logisticsPoint/all.yaml'
+  /api/logisticPoint:
+    $ref: 'src/docs/paths/logisticsPoint/create.yaml'
+  /api/logisticPoint/:pointId:
+    $ref: 'src/docs/paths/logisticsPoint/update.yaml'
+
+  # Nomenclature
+  /api/nomenclature/all:
+    $ref: 'src/docs/paths/nomenclature/all.yaml'
+  /api/nomenclature/search:
+    $ref: 'src/docs/paths/nomenclature/search.yaml'
+  /api/nomenclature:
+    $ref: 'src/docs/paths/nomenclature/create.yaml'
+  /api/nomenclature/:nomenclatureId:
+    $ref: 'src/docs/paths/nomenclature/update.yaml'
+
+  # Order
+  /api/orders/available:
+    $ref: 'src/docs/paths/orders/available.yaml'
+
+  /api/orders/current:
+    $ref: 'src/docs/paths/orders/current.yaml'
+
+  /api/orders/all:
+    $ref: 'src/docs/paths/orders/all.yaml'
+
+  /api/orders/:orderId:
+    $ref: 'src/docs/paths/orders/order.yaml'
+
+  /api/orders/drivers:
+    $ref: 'src/docs/paths/orders/driversOnTrip.yaml'
+
+  /api/orders/create:
+    $ref: 'src/docs/paths/orders/create.yaml'
+
+  /api/orders/take:
+    $ref: 'src/docs/paths/orders/take.yaml'
+
+  /api/orders/confirm:
+    $ref: 'src/docs/paths/orders/confirm.yaml'
+
+  /api/orders/rejectDriver:
+    $ref: 'src/docs/paths/orders/rejectDriver.yaml'
+
+  /api/orders/depart:
+    $ref: 'src/docs/paths/orders/markDeparted.yaml'
+
+  /api/orders/complete:
+    $ref: 'src/docs/paths/orders/markCompleted.yaml'
+
+  /api/orders/updateGeo:
+    $ref: 'src/docs/paths/orders/updateGeo.yaml'

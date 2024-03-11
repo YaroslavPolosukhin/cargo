@@ -1,0 +1,16 @@
+get:
+  summary: Retrieves all nomenclatures
+  operationId: getNomenclatures
+  tags:
+    - Nomenclature
+  responses:
+    '200':
+      description: An array of nomenclatures
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
+    '500':
+      description: Error retrieving nomenclatures

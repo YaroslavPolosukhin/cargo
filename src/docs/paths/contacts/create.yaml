@@ -1,0 +1,22 @@
+post:
+  summary: Create a new contact
+  operationId: createContact
+  tags:
+    - Contacts
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/shipping.yaml#/components/schemas/Contact'
+  responses:
+    '201':
+      description: Contact created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/shipping.yaml#/components/schemas/Contact'
+    '400':
+      description: Validation error
+    '500':
+      description: Internal Server Error

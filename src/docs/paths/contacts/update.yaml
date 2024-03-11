@@ -1,0 +1,28 @@
+put:
+  summary: Update contact
+  operationId: updateContact
+  tags:
+    - Contacts
+  parameters:
+    - name: contactId
+      in: path
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/shipping.yaml#/components/schemas/Contact'
+  responses:
+    '200':
+      description: Contact updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/shipping.yaml#/components/schemas/Contact'
+    '400':
+      description: Validation error
+    '500':
+      description: Internal Server Error

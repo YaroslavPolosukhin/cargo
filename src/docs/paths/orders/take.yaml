@@ -1,0 +1,53 @@
+post:
+  tags:
+    - Order
+  summary: Takes an order and marks it as "Waiting for Confirmation".
+  operationId: takeOrder
+  requestBody:
+    description: Order ID to be taken.
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            orderId:
+              type: integer
+              description: The unique identifier of the order to be taken.
+              example: 1
+          required:
+            - orderId
+  responses:
+    '200':
+      description: Order marked as waiting for confirmation.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Description of the result of taking the order.
+                example: Order marked as waiting for confirmation.
+    '400':
+      description: Bad Request, e.g., the driver already has an active order.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Driver already has an active order.
+    '404':
+      description: Order not found or driver not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Driver not found.
+    '500':
+      description: Internal Server Error.

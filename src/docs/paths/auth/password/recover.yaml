@@ -1,0 +1,49 @@
+post:
+  tags:
+    - Authentication
+  summary: Initiate password recovery
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - phone
+          properties:
+            phone:
+              type: string
+              description: The phone number of the user.
+              example: "89123943921"
+  responses:
+    '200':
+      description: If there is an user with this phone, the code is sent to this phone.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: If there is an user with this phone, the code is sent to this phone.
+    '429':
+      description: The code was sent less than a minute ago. Please wait a minute before trying again.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The code was sent less than a minute ago. Please wait a minute before trying again.
+    '500':
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Internal server error.

@@ -1,0 +1,117 @@
+post:
+  tags:
+    - Drivers
+  summary: Confirm driver registration
+  description: >
+    This endpoint confirms a driver's registration after validating the provided information.
+    It requires manager role and allows up to 6 photos to be uploaded.
+  operationId: confirmDriver
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            userId:
+              type: integer
+              description: Numeric ID of the user
+            name:
+              type: string
+              description: Name of the driver
+            surname:
+              type: string
+              description: Surname of the driver
+            patronymic:
+              type: string
+              description: Patronymic of the driver
+              nullable: true
+            inn:
+              type: integer
+              description: Taxpayer Identification Number (INN)
+            employmentType:
+              type: string
+              enum: [self_employed, individual, company]
+              description: Employment type of the driver
+            jobPositionId:
+              type: integer
+              description: Numeric ID of the job position
+            email:
+              type: string
+              format: email
+              description: Email address of the driver
+            telegram:
+              type: string
+              description: Telegram handle of the driver
+              nullable: true
+            contragentName:
+              type: string
+              description: Name of the contragent
+            contragentINN:
+              type: integer
+              description: Taxpayer Identification Number (INN) of the contragent
+            kpp:
+              type: integer
+              description: Code of reason for registration (KPP)
+              nullable: true
+            companyType:
+              type: string
+              description: Company type
+            passportSeries:
+              type: string
+              description: Series of the passport
+            passportNumber:
+              type: string
+              description: Number of the passport
+            passportIssuedBy:
+              type: string
+              description: Authority that issued the passport
+            passportIssueDate:
+              type: string
+              format: date-time
+              description: Date when the passport was issued
+            passportDepartmentCode:
+              type: string
+              description: Department code of the passport
+            photos:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Passport photos of the driver
+              maxItems: 6
+  responses:
+    '200':
+      description: Driver registration confirmed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '400':
+      description: Bad Request - Validation failed or job position not found or driver not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    msg:
+                      type: string
+    '404':
+      description: User not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '500':
+      description: Internal server error

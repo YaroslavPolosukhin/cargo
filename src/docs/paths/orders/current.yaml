@@ -1,0 +1,16 @@
+get:
+  summary: Get the current order for the authenticated user (driver only)
+  operationId: getCurrentOrder
+  tags:
+    - Order
+  responses:
+    '200':
+      description: Details of the current order
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/shipping.yaml#/components/schemas/Order'
+    '404':
+      description: No active order found for the driver or driver not found
+    '500':
+      description: A server error occurred

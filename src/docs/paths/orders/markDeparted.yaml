@@ -1,0 +1,37 @@
+post:
+  tags:
+    - Order
+  summary: Marks an order as departed
+  requestBody:
+    description: JSON object containing the order ID
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            orderId:
+              type: integer
+              format: int64
+              description: Unique identifier of the order
+  responses:
+    '200':
+      description: Driver has departed and order status updated
+    '404':
+      description: Order not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '500':
+      description: Internal server error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string

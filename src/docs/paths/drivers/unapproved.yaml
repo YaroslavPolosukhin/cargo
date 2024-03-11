@@ -1,0 +1,31 @@
+get:
+  tags:
+    - Drivers
+  summary: Get a list of unapproved drivers
+  description: Retrieves a list of drivers who have not been approved yet. Accessible only by users with the MANAGER role.
+  operationId: getUnapprovedDrivers
+  parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+  responses:
+    '200':
+      description: A list of unapproved drivers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              users:
+                type: array
+                items:
+                  $ref: '../../components/users.yaml#/components/schemas/User'
+    '401':
+      description: Unauthorized. User does not have the MANAGER role.
+    '500':
+      description: Internal Server Error

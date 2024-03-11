@@ -1,0 +1,229 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        phone:
+          type: string
+        password:
+          type: string
+        role_id:
+          type: integer
+          format: int32
+        approved:
+          type: boolean
+        responsible_user:
+          type: integer
+          format: int32
+          nullable: true
+        refresh_token:
+          type: string
+          nullable: true
+        fcm_token:
+          type: string
+          nullable: true
+      required:
+        - phone
+        - password
+        - role_id
+        - approved
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+      required:
+        - name
+
+    PasswordRecoveryAttempt:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        user_id:
+          type: integer
+          format: int32
+          example: 2
+        sms_code:
+          type: string
+          example: 321435
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - id
+        - user_id
+      example:
+        id: 1
+        user_id: 2
+        sms_code: "321435"
+
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: "John"
+        surname:
+          type: string
+          example: "Doe"
+        patronymic:
+          type: string
+          example: "Michael"
+        inn:
+          type: string
+          example: "123456789012"
+        self_employed:
+          type: boolean
+          example: false
+        individual:
+          type: boolean
+          example: false
+        company:
+          type: boolean
+          example: false
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        telegram:
+          type: string
+          example: "@johndoe"
+        user_id:
+          type: integer
+          format: int32
+          example: 2
+        job_position_id:
+          type: integer
+          format: int32
+          example: 3
+        passport_id:
+          type: integer
+          format: int32
+          example: 4
+        contragent_id:
+          type: integer
+          format: int32
+          example: 5
+        user:
+          $ref: '#/components/schemas/User'
+        jobPosition:
+          $ref: '#/components/schemas/JobPosition'
+        passport:
+          $ref: '#/components/schemas/Passport'
+        contragent:
+          $ref: '#/components/schemas/Contragent'
+      required:
+        - id
+        - user_id
+        - self_employed
+        - individual
+        - company
+      example:
+        id: 1
+        name: "John"
+        surname: "Doe"
+        patronymic: "Michael"
+        inn: "123456789012"
+        self_employed: false
+        individual: false
+        company: false
+        email: "john.doe@example.com"
+        telegram: "@johndoe"
+        user_id: 2
+        job_position_id: 3
+        passport_id: 4
+        contragent_id: 5
+
+    Contragent:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the contragent.
+        name:
+          type: string
+          description: Name of the contragent.
+        inn:
+          type: string
+          description: Taxpayer Identification Number (INN) of the contragent.
+        kpp:
+          type: string
+          description: Reason Code of Registration (KPP) of the contragent.
+        supplier:
+          type: boolean
+          default: false
+          description: Indicates if the contragent is a supplier.
+        buyer:
+          type: boolean
+          default: false
+          description: Indicates if the contragent is a buyer.
+        transport_company:
+          type: boolean
+          default: false
+          description: Indicates if the contragent is a transport company.
+
+    JobPosition:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the job position.
+        name:
+          type: string
+          description: Name of the job position.
+
+    Passport:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        series:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+        authority:
+          type: string
+        date_of_issue:
+          type: string
+          format: date-time
+        department_code:
+          type: string
+      required:
+        - series
+        - number
+        - authority
+        - date_of_issue
+        - department_code
+
+    PassportPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        passport_id:
+          type: integer
+          format: int32
+        photo_url:
+          type: string
+      required:
+        - passport_id
+        - photo_url

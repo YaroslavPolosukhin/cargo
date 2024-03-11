@@ -1,0 +1,80 @@
+post:
+  summary: Create a new order
+  operationId: createOrder
+  tags:
+    - Order
+  requestBody:
+    description: The order details
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            departureId:
+              type: integer
+              format: int64
+              description: The ID of the departure logistics point
+            destinationId:
+              type: integer
+              format: int64
+              description: The ID of the destination logistics point
+            grossWeight:
+              type: number
+              format: float
+              description: Gross weight of the cargo
+            netWeight:
+              type: number
+              format: float
+              description: Net weight of the cargo
+            costPerRoute:
+              type: number
+              format: float
+              description: Cost per route
+            costPerTon:
+              type: number
+              format: float
+              description: Cost per ton
+            priceNonCash:
+              type: number
+              format: float
+              description: Non-cash price
+            priceCash:
+              type: number
+              format: float
+              description: Cash price
+            plannedLoadingDate:
+              type: string
+              format: date-time
+              description: The planned loading date
+            plannedDeliveryDate:
+              type: string
+              format: date-time
+              description: The planned delivery date
+            nomenclatureIds:
+              type: array
+              items:
+                type: integer
+                format: int64
+              description: List of nomenclature IDs associated with the order
+          required:
+            - departureId
+            - destinationId
+            - grossWeight
+            - netWeight
+            - plannedLoadingDate
+            - plannedDeliveryDate
+            - nomenclatureIds
+  responses:
+    '201':
+      description: The created order
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/shipping.yaml#/components/schemas/Order'
+    '400':
+      description: Validation errors in request
+    '404':
+      description: Manager, departure, or destination not found
+    '500':
+      description: An error occurred while creating the order

@@ -1,0 +1,28 @@
+get:
+  summary: Retrieve all measures
+  operationId: getAllMeasures
+  tags:
+    - Measures
+  parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+  responses:
+    '200':
+      description: A list of measures
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              measures:
+                type: array
+                items:
+                  $ref: '../../components/shipping.yaml#/components/schemas/Measure'
+    '500':
+      description: Internal Server Error

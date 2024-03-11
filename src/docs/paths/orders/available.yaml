@@ -1,0 +1,28 @@
+get:
+  summary: Get a list of available orders
+  operationId: getAvailableOrders
+  tags:
+    - Order
+  parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+  responses:
+    '200':
+      description: An array of available orders
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              orders:
+                type: array
+                items:
+                  $ref: '../../components/shipping.yaml#/components/schemas/Order'
+    '500':
+      description: A server error occurred

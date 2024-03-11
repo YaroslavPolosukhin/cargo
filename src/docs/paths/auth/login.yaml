@@ -1,0 +1,64 @@
+post:
+  tags:
+    - Authentication
+  summary: Authenticate a user and return access and refresh tokens.
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            phone:
+              type: string
+              description: Phone number of the user trying to sign in.
+              required: true
+            password:
+              type: string
+              description: Password of the user trying to sign in.
+              required: true
+            fcmToken:
+              type: string
+              description: Firebase Cloud Messaging token for the device.
+              required: false
+  responses:
+    '200':
+      description: Authentication successful.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                description: JWT access token for authentication.
+              refreshToken:
+                type: string
+                description: Refresh token for generating new access tokens.
+              user:
+                type: object
+                properties:
+                  phone:
+                    type: string
+                    description: Phone number of the authenticated user.
+                  role:
+                    type: string
+                    description: Role of the authenticated user.
+                  approved:
+                    type: boolean
+                    description: Approval status of the user's account.
+    '400':
+      description: Bad request due to invalid input data.
+    '401':
+      description: Authentication failed due to incorrect phone or password.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message indicating that authentication has failed.
+    '500':
+      description: Internal server error.

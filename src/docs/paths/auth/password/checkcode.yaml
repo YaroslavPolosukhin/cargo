@@ -1,0 +1,54 @@
+post:
+  tags:
+    - Authentication
+  summary: Check SMS code for password recovery
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - phone
+            - code
+          properties:
+            phone:
+              type: string
+              description: The phone number of the user.
+              example: "89123943921"
+            code:
+              type: string
+              description: 6-digit code sent in SMS
+              example: "123456"
+  responses:
+    '200':
+      description: The code is correct.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The code is correct, please proceed with changing your password.
+    '400':
+      description: The code is incorrect, expired or maximum number of incorrect code input attempts exceeded.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The code is incorrect, expired or maximum number of incorrect code input attempts exceeded.
+    '500':
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Internal server error.
