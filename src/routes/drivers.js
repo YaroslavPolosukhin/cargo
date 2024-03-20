@@ -1,5 +1,4 @@
 import express from "express";
-import driversController from "../controllers/driversController.js";
 import checkRole from "../middlewares/checkRole.js";
 import paginationMiddleware from "../middlewares/paginationMiddleware.js";
 import Roles from "../enums/roles.js";
@@ -8,6 +7,7 @@ import {
   updateDriverValidator,
 } from "../validators/drivers.js";
 import { passportUpload } from "../config/multer.js";
+import * as driversController from '../controllers/driversController.js'
 
 const router = express.Router();
 
@@ -36,5 +36,10 @@ router.post(
   confirmDriverValidator,
   driversController.confirm
 );
+
+router.get(
+  '/jobs',
+  checkRole([Roles.MANAGER]),
+  driversController.getJobs)
 
 export default router;

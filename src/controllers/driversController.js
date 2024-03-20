@@ -270,4 +270,12 @@ export const confirm = async (req, res) => {
   }
 };
 
-export default { getUnapproved, getApproved, confirm, update };
+export const getJobs = async (req, res) => {
+  try {
+    const jobs = await models.JobPosition.findAll();
+    res.status(200).json({ jobs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
+};
