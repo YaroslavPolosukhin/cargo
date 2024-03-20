@@ -551,6 +551,36 @@ export const updateGeo = async (req, res) => {
   }
 };
 
+export const getManagerPhone = async (req, res) => {
+  const person = await models.Person.findOne({
+    where: { user_id: req.user.id },
+  });
+
+  const order = await models.Order.findOne({
+    where: { driver_id: person.id },
+    include: [
+      {
+        model: models.Person,
+        as: "manager",
+      },
+    ]
+  });
+
+  if (!order) {
+    return res.status(404).send({ message: "Order not found" });
+  }
+
+  const user = await models.User.findOne({
+    where: { id: order.manager.user_id }
+  });
+
+  if (!user) {
+    return res.status(404).send({ message: "User not found" });
+  }
+
+  return res.status(200).send({ phone: user.phone });
+}
+
 export default {
   getAvailableOrders,
   getCurrentOrder,
@@ -565,4 +595,5 @@ export default {
   getDriversOnTrip,
   updateGeo,
   updateOrder,
+  getManagerPhone
 };
