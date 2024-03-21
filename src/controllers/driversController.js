@@ -158,7 +158,10 @@ export const update = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "The user's personal data has been updated" });
+      .json({
+        message: "The user's personal data has been updated",
+        person
+      });
   } catch (error) {
     console.error(error);
     res.status(500).send();
@@ -263,7 +266,10 @@ export const confirm = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "Driver registration confirmed successfully" });
+      .json({
+        message: "Driver registration confirmed successfully",
+        person
+      });
   } catch (error) {
     console.error(error);
     res.status(500).send();

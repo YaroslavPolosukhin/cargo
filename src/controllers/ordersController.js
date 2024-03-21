@@ -288,6 +288,13 @@ export const takeOrder = async (req, res) => {
           [Op.not]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
         },
       },
+      include: [
+        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver" },
+        { model: models.LogisticsPoint, as: "departure" },
+        { model: models.LogisticsPoint, as: "destination" },
+        { model: models.Truck, as: "truck"}
+      ]
     });
 
     if (existingOrder) {
@@ -310,7 +317,10 @@ export const takeOrder = async (req, res) => {
 
     res
       .status(200)
-      .send({ message: "Order marked as waiting for confirmation" });
+      .send({
+        message: "Order marked as waiting for confirmation",
+        existingOrder
+      });
   } catch (error) {
     console.error(error);
     res.status(500).send();
@@ -356,9 +366,23 @@ export const confirmOrder = async (req, res) => {
         .send({ message: "Order not found or not in confirmation status" });
     }
 
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver" },
+        { model: models.LogisticsPoint, as: "departure" },
+        { model: models.LogisticsPoint, as: "destination" },
+        { model: models.Truck, as: "truck"}
+      ]
+    })
+
     return res
       .status(200)
-      .send({ message: "Order confirmed by manager and marked as loading" });
+      .send({
+        message: "Order confirmed by manager and marked as loading",
+        order
+      });
   } catch (error) {
     console.error(error);
     return res.status(500).send();
@@ -393,9 +417,21 @@ export const rejectDriver = async (req, res) => {
         .send({ message: "Order not found or not in confirmation status" });
     }
 
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver" },
+        { model: models.LogisticsPoint, as: "departure" },
+        { model: models.LogisticsPoint, as: "destination" },
+        { model: models.Truck, as: "truck"}
+      ]
+    })
+
     return res.status(200).send({
       message:
         "Driver confirmation request rejected, order status reset to created",
+      order
     });
   } catch (error) {
     console.error(error);
@@ -431,9 +467,20 @@ export const markOrderAsDeparted = async (req, res) => {
         .send({ message: "Order not found or not in loading status" });
     }
 
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver" },
+        { model: models.LogisticsPoint, as: "departure" },
+        { model: models.LogisticsPoint, as: "destination" },
+        { model: models.Truck, as: "truck"}
+      ]
+    })
+
     return res
       .status(200)
-      .send({ message: "Driver has departed and order status updated" });
+      .send({ message: "Driver has departed and order status updated", order });
   } catch (error) {
     console.error(error);
     return res.status(500).send();
@@ -468,9 +515,20 @@ export const markOrderAsCompleted = async (req, res) => {
         .send({ message: "Order not found or not in departed status" });
     }
 
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver" },
+        { model: models.LogisticsPoint, as: "departure" },
+        { model: models.LogisticsPoint, as: "destination" },
+        { model: models.Truck, as: "truck"}
+      ]
+    })
+
     return res
       .status(200)
-      .send({ message: "Order has been completed successfully" });
+      .send({ message: "Order has been completed successfully", order });
   } catch (error) {
     console.error(error);
     return res.status(500).send();
@@ -527,7 +585,16 @@ export const getDriversOnTrip = async (req, res) => {
 export const updateGeo = async (req, res) => {
   try {
     const { orderId, latitude, longitude } = req.body;
-    const order = await models.Order.findByPk(orderId);
+    const order = await models.Order.findByPk(orderId, {
+      include: [
+        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver" },
+        { model: models.LogisticsPoint, as: "departure" },
+        { model: models.LogisticsPoint, as: "destination" },
+        { model: models.Truck, as: "truck"}
+      ]
+    });
+
     if (!order) {
       return res.status(404).send({ message: "Order not found" });
     }
@@ -542,7 +609,7 @@ export const updateGeo = async (req, res) => {
 
     order.geo = { type: "Point", coordinates: [longitude, latitude] };
     await order.save();
-    return res.status(200).send({ message: "Order geo updated successfully" });
+    return res.status(200).send({ message: "Order geo updated successfully", order });
   } catch (error) {
     console.error(error);
     return res
@@ -562,6 +629,7 @@ export const getManagerPhone = async (req, res) => {
       {
         model: models.Person,
         as: "manager",
+        include: { model: models.User, as: "user" },
       },
     ]
   });
@@ -578,7 +646,10 @@ export const getManagerPhone = async (req, res) => {
     return res.status(404).send({ message: "User not found" });
   }
 
-  return res.status(200).send({ phone: user.phone });
+  return res.status(200).send({
+    phone: user.phone,
+    manager: order.manager
+  });
 }
 
 export default {

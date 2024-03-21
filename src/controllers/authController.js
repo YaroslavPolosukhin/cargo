@@ -75,28 +75,28 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role_id: 1,
       fcm_token: fcmToken,
+    },
+    {
+      include: [
+        {
+          model: models.Role,
+          as: "role",
+        }
+      ]
     });
 
-    await models.Person.create({
-      user_id: user.id,
-    });
+    await models.Person.create(
+      {
+        user_id: user.id,
+      });
 
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
-    const role = await user.getRole();
 
-    await models.User.update(
-      { refresh_token: refreshToken },
-      { where: { id: user.id } }
-    );
     res.status(201).send({
       accessToken,
       refreshToken,
-      user: {
-        phone: user.phone,
-        role: role.name,
-        approved: user.approved,
-      },
+      user
     });
   } catch (error) {
     console.log(error);
@@ -116,6 +116,7 @@ export const login = async (req, res) => {
     const phone = req.body.phone.toString();
     const user = await models.User.scope("withPassword").findOne({
       where: { phone },
+      include: [{ model: models.Role, as: "role" }],
     });
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
       return res.status(401).send({ message: "Authentication failed" });
@@ -123,7 +124,6 @@ export const login = async (req, res) => {
 
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
-    const role = await user.getRole();
 
     await models.User.update(
       { refresh_token: refreshToken, fcm_token: fcmToken },
@@ -133,11 +133,7 @@ export const login = async (req, res) => {
     res.status(200).send({
       accessToken,
       refreshToken,
-      user: {
-        phone: user.phone,
-        role: role.name,
-        approved: user.approved,
-      },
+      user
     });
   } catch (error) {
     console.log(error);
@@ -155,6 +151,7 @@ export const refreshToken = async (req, res) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await models.User.findOne({
       where: { id: decoded.id, refresh_token: refreshToken },
+      include: [{ model: models.Role, as: "role" }],
     });
 
     if (!user) {
@@ -172,6 +169,7 @@ export const refreshToken = async (req, res) => {
     res.status(200).send({
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
+      user
     });
   } catch (error) {
     res.status(500).send();
