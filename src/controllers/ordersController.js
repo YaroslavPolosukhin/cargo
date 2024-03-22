@@ -1,7 +1,7 @@
-import { Op } from "sequelize";
-import { validationResult } from "express-validator";
-import OrderStatus from "../enums/orderStatus.js";
-import { models, sequelize } from "../models/index.js";
+import { Op } from 'sequelize'
+import { validationResult } from 'express-validator'
+import OrderStatus from '../enums/orderStatus.js'
+import { models, sequelize } from '../models/index.js'
 
 /**
  * Retrieves the list of available orders.
@@ -61,11 +61,21 @@ export const getCurrentOrder = async (req, res) => {
         },
       },
       include: [
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
-        { model: models.Nomenclature, as: "nomenclatures" },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: { model: models.Address, as: "Address" },
+        },
+        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
       ],
     });
 
@@ -74,6 +84,13 @@ export const getCurrentOrder = async (req, res) => {
         .status(404)
         .send({ message: "No active order found for the driver" });
     }
+
+    const orderNomenclatures = await models.OrderNomenclature.findAll({
+      where: { order_id: activeOrder.id }
+    });
+    activeOrder.dataValues.nomenclatures = await models.Nomenclature.findAll({
+      where: { id: orderNomenclatures.map((item) => item.nomenclature_id) }
+    });
 
     res.json({ order: activeOrder });
   } catch (error) {
@@ -95,23 +112,27 @@ export const getOrderById = async (req, res) => {
             model: models.Address,
             as: "Address",
           },
-          attributes: ["name", "id"],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
           include: { model: models.Address, as: "Address" },
-          attributes: ["name", "id"],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
-        { model: models.Nomenclature, as: "nomenclatures" },
       ],
     });
 
     if (!order) {
       return res.status(404).send({ message: "Order not found" });
     }
+
+    const orderNomenclatures = await models.OrderNomenclature.findAll({
+      where: { order_id: activeOrder.id }
+    });
+    activeOrder.dataValues.nomenclatures = await models.Nomenclature.findAll({
+      where: { id: orderNomenclatures.map((item) => item.nomenclature_id) }
+    });
 
     res.json(order);
   } catch (error) {
