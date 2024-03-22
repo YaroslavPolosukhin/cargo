@@ -1,0 +1,15 @@
+components:
+  schemas:
+    Jobs:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+      required:
+        - name
+      example:
+        id: 1
+        name: "Job 1"

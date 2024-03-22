@@ -17,6 +17,18 @@ post:
   responses:
     '200':
       description: Driver has departed and order status updated
+      content:
+          application/json:
+          schema:
+              type: object
+              properties:
+              message:
+                  type: string
+                  description: Driver has departed and order status updated
+                  example: Driver has departed and order status updated
+              order:
+                  type: object
+                  $ref: '../../components/shipping.yaml#/components/schemas/Order'
     '404':
       description: Order not found
       content:

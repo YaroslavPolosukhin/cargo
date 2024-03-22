@@ -29,6 +29,9 @@ post:
                 type: string
                 description: Description of the result of taking the order.
                 example: Order marked as waiting for confirmation.
+              order:
+                type: object
+                $ref: '../../components/shipping.yaml#/components/schemas/Order'
     '400':
       description: Bad Request, e.g., the driver already has an active order.
       content:

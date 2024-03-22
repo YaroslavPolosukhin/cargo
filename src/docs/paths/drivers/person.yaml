@@ -1,0 +1,72 @@
+put:
+  tags:
+    - drivers
+  summary: Update driver information
+  description: >
+    Update driver information
+    It requires manager or driver role
+  operationId: updateDriver
+  requestParams:
+    personId:
+      description: The driver id.
+      required: true
+      schema:
+        type: integer
+        example: 1234567890
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - job_position_id
+            - passport_id
+            - contragent_id
+          properties:
+            job_position_id:
+              type: integer
+              description: The job position id of the driver.
+              example: 1
+            passport_id:
+              type: integer
+              description: The passport id of the driver.
+              example: 1
+            contragent_id:
+              type: integer
+              description: The contragent id of the driver.
+              example: 1
+  responses:
+    '200':
+      description: Driver information updated successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The user's personal data has been updated
+              person:
+                type: object
+                $ref: '../../components/user.yaml#/components/schemas/Person'
+    '404':
+        description: Job/Passport/Contragent not found. / Access denied / Person not found / You can only update the personal data of drivers
+        content:
+            application/json:
+            schema:
+                type: object
+                properties:
+                  error:
+                      type: string
+                      description: Job/Passport/Contragent with id ${name_id} not found / Access denied / Person not found / You can only update the personal data of drivers
+    '401':
+      description: Unauthorized request due to missing or invalid refresh token.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message indicating the reason for the unauthorized status.

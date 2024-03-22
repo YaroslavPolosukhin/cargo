@@ -46,6 +46,38 @@ components:
         postcode:
           type: string
 
+    LogisticPoint:
+      type: object
+      required:
+        - name
+        - geo
+        - address
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the logistic point
+          readOnly: true
+        name:
+          type: string
+          description: Name of the logistic point
+        geo:
+          type: geometry(point)
+        address:
+          $ref: '#/components/schemas/Address'
+      example:
+        id: 1
+        name: "Warehouse 1"
+        geo: "POINT(37.617635 55.755814)"
+        address:
+          name: "Warehouse 1"
+          city: "Moscow"
+          street: "Lenina"
+          house: "1"
+          building: "2"
+          floor: 1
+          postcode: "123456"
+
     Measure:
       type: object
       required:
@@ -158,10 +190,14 @@ components:
           type: integer
           nullable: true
           example: 50
+        driver:
+          $ref: 'src/docs/components/users.yaml#/components/schemas/Person'
+        manager:
+          $ref: 'src/docs/components/users.yaml#/components/schemas/Person'
         departure:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/LogisticPoint'
         destination:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/LogisticPoint'
         nomenclatures:
           type: array
           items:

@@ -1,0 +1,25 @@
+get:
+  tags:
+    - Orders
+  summary: Get manager phone
+  description: >
+    This endpoint returns the phone number of the manager responsible for the order.
+    It requires driver role
+  operationId: getManagerPhone
+  responses:
+    '200':
+      description: The phone number of the manager
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              phone:
+                type: string
+                example: "+1234567890"
+    '401':
+        description: Authentication failed
+    '404':
+        description: Order/User not found
+    '500':
+      description: Internal server error

@@ -17,6 +17,18 @@ post:
   responses:
     '200':
       description: Driver confirmation request rejected, order status reset to created
+      content:
+          application/json:
+          schema:
+              type: object
+              properties:
+              message:
+                  type: string
+                  description: Driver confirmation request rejected, order status reset to created
+                  example: Driver confirmation request rejected, order status reset to created
+              order:
+                  type: object
+                  $ref: '../../components/shipping.yaml#/components/schemas/Order'
     '400':
       description: Bad request response
       content:

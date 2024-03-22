@@ -36,6 +36,10 @@ paths:
     $ref: 'src/docs/paths/drivers/unapproved.yaml'
   /api/drivers/confirm:
     $ref: 'src/docs/paths/drivers/confirm.yaml'
+  /api/drivers/jobs:
+    $ref: 'src/docs/paths/drivers/jobs.yaml'
+  /api/drivers/:personId:
+    $ref: 'src/docs/paths/drivers/person.yaml'
 
   # CONTACTS
   /api/contacts/all:
@@ -112,3 +116,6 @@ paths:
 
   /api/orders/updateGeo:
     $ref: 'src/docs/paths/orders/updateGeo.yaml'
+
+  /api/orgers/getManagerPhone:
+    $ref: 'src/docs/paths/orders/getManagerPhone.yaml'

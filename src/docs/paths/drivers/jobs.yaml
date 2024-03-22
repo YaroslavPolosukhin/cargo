@@ -1,0 +1,22 @@
+get:
+  tags:
+    - Drivers
+  summary: Get available jobs
+  description: >
+    This endpoint returns a list of available jobs for drivers.
+    It requires manager role
+  operationId: getJobs
+  responses:
+    '200':
+      description: A list of available jobs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/drivers.yaml#/components/schemas/Jobs'
+
+    '401':
+        description: Authentication failed
+    '500':
+      description: Internal server error

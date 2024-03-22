@@ -38,16 +38,7 @@ post:
                 description: Refresh token for generating new access tokens.
               user:
                 type: object
-                properties:
-                  phone:
-                    type: string
-                    description: Phone number of the authenticated user.
-                  role:
-                    type: string
-                    description: Role of the authenticated user.
-                  approved:
-                    type: boolean
-                    description: Approval status of the user's account.
+                $ref: '../../components/users.yaml#/components/schemas/User'
     '400':
       description: Bad request due to invalid input data.
     '401':

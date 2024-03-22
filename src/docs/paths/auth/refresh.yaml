@@ -27,6 +27,9 @@ post:
               refreshToken:
                 type: string
                 description: New refresh token for generating further access tokens.
+              user:
+                type: object
+                $ref: '../../components/users.yaml#/components/schemas/User'
     '401':
       description: Unauthorized request due to missing or invalid refresh token.
       content:

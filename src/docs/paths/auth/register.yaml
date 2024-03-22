@@ -42,16 +42,7 @@ post:
                 description: Refresh token for generating new access tokens.
               user:
                 type: object
-                properties:
-                  phone:
-                    type: string
-                    description: Phone number of the registered user.
-                  role:
-                    type: string
-                    description: Role of the registered user.
-                  approved:
-                    type: boolean
-                    description: Approval status of the user's account.
+                $ref: '../../components/users.yaml#/components/schemas/User'
     '400':
       description: User already registered or validation error on input.
       content:

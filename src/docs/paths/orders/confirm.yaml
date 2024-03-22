@@ -46,6 +46,9 @@ post:
                 type: string
                 description: Description of the result of confirming the order.
                 example: Order confirmed by manager and marked as loading.
+              order:
+                type: object
+                $ref: '../../components/shipping.yaml#/components/schemas/Order'
     '400':
       description: Bad Request, e.g., order not in confirmation status.
       content:
