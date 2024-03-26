@@ -8,7 +8,7 @@ const router = express.Router()
 
 router.get('/available', paginationMiddleware, ordersController.getAvailableOrders)
 router.get('/current', ordersController.getCurrentOrder)
-router.get('/all', checkRole([Roles.MANAGER]), ordersController.getAll)
+router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, ordersController.getAll)
 router.get('/getManagerPhone', checkRole([Roles.DRIVER]), ordersController.getManagerPhone)
 router.get('/:orderId', checkRole([Roles.MANAGER]), ordersController.getOrderById)
 router.get('/drivers', checkRole([Roles.MANAGER]), ordersController.getDriversOnTrip)

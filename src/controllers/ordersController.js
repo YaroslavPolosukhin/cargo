@@ -167,7 +167,7 @@ export const getAll = async (req, res) => {
   const { limit, offset } = req.pagination;
   const { status = "all" } = req.query;
 
-  let _status = [OrderStatus.COMPLETED, OrderStatus.CANCELLED];
+  let _status = [OrderStatus.LOADING, OrderStatus.DEPARTED, OrderStatus.CREATED, OrderStatus.CONFIRMATION, OrderStatus.COMPLETED, OrderStatus.CANCELLED];
   switch (status.toLowerCase()) {
     case "confirmation":
       _status = [OrderStatus.CONFIRMATION];
@@ -178,16 +178,45 @@ export const getAll = async (req, res) => {
     case "available":
       _status = [OrderStatus.CREATED];
       break;
+    case "completed":
+      _status = [OrderStatus.COMPLETED];
+      break;
+    case "cancelled":
+      _status = [OrderStatus.CANCELLED];
+      break;
   }
+
+  console.log(status, _status)
 
   const options = {
     where: { status: { [Op.in]: _status } },
     include: [
-      { model: models.LogisticsPoint, as: "departure" },
-      { model: models.LogisticsPoint, as: "destination" },
-      { model: models.Person, as: "driver" },
-      { model: models.Person, as: "manager" },
-      { model: models.Nomenclature, as: "nomenclatures" },
+      {
+        model: models.LogisticsPoint,
+        as: "departure",
+        include: {
+          model: models.Address,
+          as: "Address",
+        }
+      },
+      {
+        model: models.LogisticsPoint,
+        as: "destination",
+        include: {
+          model: models.Address,
+          as: "Address"
+        }
+      },
+      {
+        model: models.Person,
+        as: "driver",
+        include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+      },
+      {
+        model: models.Person,
+        as: "manager",
+        include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+      },
     ],
   };
 
