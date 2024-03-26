@@ -39,7 +39,7 @@ post:
                 example: Order geo updated successfully
               order:
                 type: object
-                $ref: '#/components/schemas/Order'
+                $ref: '../../components/shipping.yaml#/components/schemas/Order'
     '404':
       description: Order not found response
       content:

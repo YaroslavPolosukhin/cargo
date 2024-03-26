@@ -93,7 +93,7 @@ post:
                 description: Driver registration confirmed successfully
               person:
                 type: object
-                $ref: '../../components/user.yaml#/components/schemas/Person'
+                $ref: '../../components/users.yaml#/components/schemas/Person'
     '400':
       description: Bad Request - Validation failed or job position not found or driver not found
       content:

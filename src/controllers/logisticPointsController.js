@@ -50,21 +50,50 @@ export const getAll = async (req, res) => {
   const { limit, offset } = req.pagination;
 
   try {
-    const count = await models.Order.count({});
+    const count = await models.LogisticsPoint.count({});
     const logisticPoints = await models.LogisticsPoint.findAll({
       include: [
         {
           model: models.Address,
           as: "Address",
-        },
-        {
-          model: models.Contact,
-          as: "contacts",
-        },
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+          ]
+        }
       ],
       limit,
       offset,
     });
+
+    for (const point of logisticPoints) {
+      const logisticPointContacts = await models.LogisticsPointContacts.findAll({
+        where: {
+          logistics_point_id: point.id
+        },
+        include: [
+          {
+            model: models.Contact,
+            as: "contact",
+          }
+        ],
+        attributes: [
+          "contact_id",
+        ]
+      });
+      point.dataValues.contacts = logisticPointContacts;
+    }
+
     const totalPages = Math.ceil(count / limit);
     res.json({ totalPages, count, logisticPoints });
   } catch (error) {

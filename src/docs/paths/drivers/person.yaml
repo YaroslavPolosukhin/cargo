@@ -49,7 +49,7 @@ put:
                 description: The user's personal data has been updated
               person:
                 type: object
-                $ref: '../../components/user.yaml#/components/schemas/Person'
+                $ref: '../../components/users.yaml#/components/schemas/Person'
     '404':
         description: Job/Passport/Contragent not found. / Access denied / Person not found / You can only update the personal data of drivers
         content:

@@ -33,10 +33,10 @@ export default (sequelize) => {
           key: "id",
         },
       },
-      // geo: {
-      //   type: DataTypes.GEOMETRY('POINT'),
-      //   allowNull: true
-      // }
+      geo: {
+        type: DataTypes.GEOMETRY('POINT'),
+        allowNull: true
+      }
     },
     {
       sequelize,

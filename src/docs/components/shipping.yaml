@@ -191,9 +191,9 @@ components:
           nullable: true
           example: 50
         driver:
-          $ref: 'src/docs/components/users.yaml#/components/schemas/Person'
+          $ref: 'users.yaml#/components/schemas/Person'
         manager:
-          $ref: 'src/docs/components/users.yaml#/components/schemas/Person'
+          $ref: 'users.yaml#/components/schemas/Person'
         departure:
           $ref: '#/components/schemas/LogisticPoint'
         destination:
