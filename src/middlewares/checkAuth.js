@@ -12,9 +12,9 @@ export default async (req, res, next) => {
       return res.status(401).send({ message: 'Authentication failed' })
     }
 
-    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
     const user = await models.User.findOne({
-      where: { phone: token },
+      where: { id: decodedToken.id },
       include: [{
         model: models.Role,
         as: 'role'

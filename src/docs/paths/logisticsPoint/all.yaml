@@ -22,20 +22,6 @@ get:
                 example: 1
               logisticPoints:
                 type: array
-                items:
-                  type: object
-                  required:
-                    - name
-                    - addressId
-                  properties:
-                    name:
-                      type: string
-                    addressId:
-                      type: integer
-                      format: int64
-                    contacts:
-                      type: array
-                      items:
-                        $ref: '../../components/shipping.yaml#/components/schemas/Contact'
+                $ref: '../../components/shipping.yaml#/components/schemas/LogisticPoint'
     '500':
       description: Internal Server Error
