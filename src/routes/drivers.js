@@ -40,6 +40,7 @@ router.post(
 router.get(
   '/jobs',
   checkRole([Roles.MANAGER]),
-  driversController.getJobs)
+  driversController.getJobs
+)
 
 export default router;

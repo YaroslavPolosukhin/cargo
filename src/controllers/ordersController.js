@@ -16,16 +16,38 @@ export const getAvailableOrders = async (req, res) => {
   const options = {
     where: { status: OrderStatus.CREATED },
     include: [
-      { model: models.LogisticsPoint, as: "departure" },
-      { model: models.LogisticsPoint, as: "destination" },
-      { model: models.Person, as: "driver" },
-      { model: models.Person, as: "manager" },
+      {
+        model: models.LogisticsPoint,
+        as: "departure",
+        include: {
+          model: models.Address,
+          as: "Address",
+        }
+      },
+      {
+        model: models.LogisticsPoint,
+        as: "destination",
+        include: {
+          model: models.Address,
+          as: "Address"
+        }
+      },
+      {
+        model: models.Person,
+        as: "driver",
+        include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+      },
+      {
+        model: models.Person,
+        as: "manager",
+        include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+      },
       { model: models.Nomenclature, as: "nomenclatures" },
     ],
   };
 
   try {
-    const count = await models.Person.count(options);
+    const count = await models.Order.count(options);
     const orders = await models.Order.findAll({ ...options, limit, offset });
 
     const totalPages = Math.ceil(count / limit);
