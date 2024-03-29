@@ -53,7 +53,9 @@ export const updateDriverValidator = [
       "self_employed",
       "telegram",
       "contragentId",
+      "personId",
     ];
+
     const bodyFields = Object.keys(req.body);
     const missingFields = bodyFields.filter(
       (field) => !allowedFields.includes(field)
@@ -64,8 +66,17 @@ export const updateDriverValidator = [
     }
     return true;
   }),
-  body("name").optional().isString().withMessage("Name must be a string"),
-  body("surname").optional().isString().withMessage("Surname must be a string"),
+  body("personId")
+    .isNumeric()
+    .withMessage("Person ID must be numeric"),
+  body("name")
+    .optional()
+    .isString()
+    .withMessage("Name must be a string"),
+  body("surname")
+    .optional()
+    .isString()
+    .withMessage("Surname must be a string"),
   body("patronymic")
     .optional()
     .isString()

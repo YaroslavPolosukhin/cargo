@@ -78,7 +78,11 @@ export const update = async (req, res) => {
     return res.status(400).json({ message: errors.array() });
   }
 
-  const { personId } = req.params;
+  const body = JSON.parse(JSON.stringify(req.body));
+  if (!body.hasOwnProperty("personId")) {
+    return res.status(400).json({ error: "Person ID is required" });
+  }
+  const personId = body.personId;
 
   try {
     const person = await models.Person.findByPk(personId, {
@@ -115,8 +119,6 @@ export const update = async (req, res) => {
     if (role === Roles.DRIVER && person.id !== id) {
       return res.status(404).json({ error: `Access denied` });
     }
-
-    const body = JSON.parse(JSON.stringify(req.body));
 
     if (body.hasOwnProperty("job_position_id")) {
       const jobPositionId = body.job_position_id;

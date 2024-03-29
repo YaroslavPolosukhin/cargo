@@ -24,7 +24,7 @@ router.get(
   driversController.getUnapproved
 );
 router.put(
-  "/:personId",
+  "/update",
   checkRole([Roles.MANAGER, Roles.DRIVER]),
   updateDriverValidator,
   driversController.update
