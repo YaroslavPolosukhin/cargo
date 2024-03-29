@@ -17,11 +17,29 @@ export const getAvailableOrders = async (req, res) => {
     where: { status: OrderStatus.CREATED },
     include: [
       {
+        model: models.Truck,
+        as: "truck",
+      },
+      {
         model: models.LogisticsPoint,
         as: "departure",
         include: {
           model: models.Address,
           as: "Address",
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            }
+          ]
         }
       },
       {
@@ -29,7 +47,21 @@ export const getAvailableOrders = async (req, res) => {
         as: "destination",
         include: {
           model: models.Address,
-          as: "Address"
+          as: "Address",
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            }
+          ]
         }
       },
       {
@@ -84,17 +116,52 @@ export const getCurrentOrder = async (req, res) => {
       },
       include: [
         {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
           model: models.LogisticsPoint,
           as: "departure",
           include: {
             model: models.Address,
             as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
           },
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: { model: models.Address, as: "Address" },
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
         },
         { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
         { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
@@ -128,17 +195,52 @@ export const getOrderById = async (req, res) => {
       where: { id: orderId },
       include: [
         {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
           model: models.LogisticsPoint,
           as: "departure",
           include: {
             model: models.Address,
             as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
           },
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: { model: models.Address, as: "Address" },
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -186,17 +288,33 @@ export const getAll = async (req, res) => {
       break;
   }
 
-  console.log(status, _status)
-
   const options = {
     where: { status: { [Op.in]: _status } },
     include: [
+      {
+        model: models.Truck,
+        as: "truck",
+      },
       {
         model: models.LogisticsPoint,
         as: "departure",
         include: {
           model: models.Address,
           as: "Address",
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            }
+          ]
         }
       },
       {
@@ -204,7 +322,21 @@ export const getAll = async (req, res) => {
         as: "destination",
         include: {
           model: models.Address,
-          as: "Address"
+          as: "Address",
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            }
+          ]
         }
       },
       {
@@ -302,6 +434,66 @@ export const createOrder = async (req, res) => {
     const orderWithNomenclatures = await models.Order.findOne(
       {
         where: { id: newOrder.id },
+        include: [
+          {
+            model: models.Truck,
+            as: "truck",
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "departure",
+            include: {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            }
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "destination",
+            include: {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            }
+          },
+          {
+            model: models.Person,
+            as: "driver",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Person,
+            as: "manager",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+        ],
       },
       { transaction }
     );
@@ -325,7 +517,70 @@ export const updateOrder = async (req, res) => {
   const dataForUpdate = req.body;
 
   try {
-    const order = await models.Order.findByPk(orderId);
+    const order = await models.Order.findByPk(
+      orderId,
+      {
+        include: [
+          {
+            model: models.Truck,
+            as: "truck",
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "departure",
+            include: {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            }
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "destination",
+            include: {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            }
+          },
+          {
+            model: models.Person,
+            as: "driver",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Person,
+            as: "manager",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+        ],
+      });
     if (order === null) {
       return res.status(404).json({ error: "Order not found" });
     }
@@ -361,12 +616,65 @@ export const takeOrder = async (req, res) => {
         },
       },
       include: [
-        { model: models.Person, as: "manager" },
-        { model: models.Person, as: "driver" },
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Truck, as: "truck"}
-      ]
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          }
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          }
+        },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+      ],
     });
 
     if (existingOrder) {
@@ -441,13 +749,58 @@ export const confirmOrder = async (req, res) => {
     const order = await models.Order.findOne({
       where: { id: orderId },
       include: [
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
         { model: models.Person, as: "driver" },
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Truck, as: "truck"}
-      ]
-    })
+        { model: models.Person, as: "manager" },
+      ],
+    });
 
     return res
       .status(200)
@@ -492,13 +845,58 @@ export const rejectDriver = async (req, res) => {
     const order = await models.Order.findOne({
       where: { id: orderId },
       include: [
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
         { model: models.Person, as: "driver" },
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Truck, as: "truck"}
-      ]
-    })
+        { model: models.Person, as: "manager" },
+      ],
+    });
 
     return res.status(200).send({
       message:
@@ -542,13 +940,58 @@ export const markOrderAsDeparted = async (req, res) => {
     const order = await models.Order.findOne({
       where: { id: orderId },
       include: [
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
         { model: models.Person, as: "driver" },
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Truck, as: "truck"}
-      ]
-    })
+        { model: models.Person, as: "manager" },
+      ],
+    });
 
     return res
       .status(200)
@@ -590,13 +1033,58 @@ export const markOrderAsCompleted = async (req, res) => {
     const order = await models.Order.findOne({
       where: { id: orderId },
       include: [
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
         { model: models.Person, as: "driver" },
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Truck, as: "truck"}
-      ]
-    })
+        { model: models.Person, as: "manager" },
+      ],
+    });
 
     return res
       .status(200)
@@ -616,29 +1104,66 @@ export const markOrderAsCompleted = async (req, res) => {
  */
 export const getDriversOnTrip = async (req, res) => {
   try {
+
     const departedOrders = await models.Order.findAll({
       where: { status: OrderStatus.DEPARTED },
       include: [
         {
-          model: models.Person,
-          as: "driver",
-          attributes: ["id", "name", "surname"],
+          model: models.Truck,
+          as: "truck",
         },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        { model: models.Person, as: "driver" },
+        { model: models.Person, as: "manager" },
       ],
-      attributes: ["id", "geo"],
     });
 
-    const departedOrdersWithDrivers = departedOrders.map((order) => ({
-      orderId: order.id,
-      geo: order.geo,
-      driver: {
-        id: order.driver.id,
-        name: order.driver.name,
-        surname: order.driver.surname,
-      },
-    }));
+    const drivers = departedOrders.map((order) => order.driver);
 
-    return res.status(200).send(departedOrdersWithDrivers);
+    return res.status(200).send(drivers);
   } catch (error) {
     console.error(error);
     return res
@@ -657,14 +1182,60 @@ export const getDriversOnTrip = async (req, res) => {
 export const updateGeo = async (req, res) => {
   try {
     const { orderId, latitude, longitude } = req.body;
-    const order = await models.Order.findByPk(orderId, {
+    const order = await models.Order.findOne({
+      where: { id: orderId },
       include: [
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
         { model: models.Person, as: "driver" },
-        { model: models.LogisticsPoint, as: "departure" },
-        { model: models.LogisticsPoint, as: "destination" },
-        { model: models.Truck, as: "truck"}
-      ]
+        { model: models.Person, as: "manager" },
+      ],
     });
 
     if (!order) {
