@@ -117,5 +117,5 @@ paths:
   /api/orders/updateGeo:
     $ref: 'src/docs/paths/orders/updateGeo.yaml'
 
-  /api/orgers/getManagerPhone:
+  /api/orders/getManagerPhone:
     $ref: 'src/docs/paths/orders/getManagerPhone.yaml'

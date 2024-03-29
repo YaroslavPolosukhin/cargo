@@ -1,6 +1,6 @@
 get:
   tags:
-    - Orders
+    - Order
   summary: Get manager phone
   description: >
     This endpoint returns the phone number of the manager responsible for the order.
