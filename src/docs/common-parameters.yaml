@@ -18,3 +18,13 @@ parameters:
       type: integer
       default: 0
       minimum: 0
+
+  StatusQueryParam:
+    in: query
+    name: status
+    required: false
+    description: The field to sort by status.
+    schema:
+      type: string
+      default: all
+      enum: [confirmation, inwork, available, completed, cancelled, all]
