@@ -43,4 +43,10 @@ router.get(
   driversController.getJobs
 )
 
+router.get(
+  '/getManagerPhone',
+  checkRole([Roles.DRIVER]),
+  driversController.getManagerPhone
+)
+
 export default router;

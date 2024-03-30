@@ -1,0 +1,23 @@
+get:
+  tags:
+    - Drivers
+  summary: Get the phone number of the manager
+  description: Retrieve the phone number of the manager of the driver.
+  operationId: getManagerPhone
+  responses:
+    '200':
+      description: The phone number of the manager
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              phone:
+                type: string
+                example: 123456789
+              manager:
+                $ref: '../../components/users.yaml#/components/schemas/Person'
+    '404':
+      description: Manager not found.
+    '500':
+      description: Internal Server Error

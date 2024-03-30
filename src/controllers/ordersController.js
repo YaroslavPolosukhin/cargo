@@ -686,7 +686,69 @@ export const takeOrder = async (req, res) => {
     // Mark the order as "Waiting for Confirmation"
     const result = await models.Order.update(
       { status: OrderStatus.CONFIRMATION, driver_id: person.id },
-      { where: { id: orderId, status: OrderStatus.CREATED } }
+      {
+        where: { id: orderId, status: OrderStatus.CREATED },
+        include: [
+          {
+            model: models.Truck,
+            as: "truck",
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "departure",
+            include: {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            }
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "destination",
+            include: {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            }
+          },
+          {
+            model: models.Person,
+            as: "driver",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Person,
+            as: "manager",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+        ],
+      }
     );
 
     if (result[0] === 0) {
@@ -699,7 +761,7 @@ export const takeOrder = async (req, res) => {
       .status(200)
       .send({
         message: "Order marked as waiting for confirmation",
-        existingOrder
+        result
       });
   } catch (error) {
     console.error(error);

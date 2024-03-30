@@ -287,3 +287,48 @@ export const getJobs = async (req, res) => {
     res.status(500).send();
   }
 };
+
+export const getManagerPhone = async (req, res) => {
+  try {
+    const driverUser = await models.User.findByPk(req.user.id);
+
+    const manager = await models.Person.findOne(
+      {
+        where: { user_id: driverUser.responsible_user },
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role'
+              }
+            ]
+          },
+          {
+            model: models.Contragent,
+            as: 'contragent'
+          },
+          {
+            model: models.JobPosition,
+            as: 'jobPosition'
+          },
+          {
+            model: models.Passport,
+            as: 'passport'
+          }
+        ]
+      }
+    )
+
+    if (!manager) {
+      return res.status(404).json({ message: 'Manager not found'})
+    }
+
+    return res.status(200).json({ phone: manager.user.phone, manager})
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+};
