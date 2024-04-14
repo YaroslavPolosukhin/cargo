@@ -7,8 +7,7 @@ export const createOrderValidator = [
   body('netWeight').notEmpty().withMessage('Net weight is required.').isFloat({ min: 0 }).withMessage('Net weight must be a positive number.'),
   body('plannedLoadingDate').notEmpty().withMessage('Planned loading date is required.'),
   body('plannedDeliveryDate').notEmpty().withMessage('Planned delivery date is required.'),
-  body('costPerRoute').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cost per route must be a positive number.'),
-  body('costPerTon').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cost per ton must be a positive number.'),
+  body('costType').optional().notEmpty().isString().withMessage('Cost per route must be a positive number.'),
   body('priceCash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cash price must be a positive number.'),
   body('priceNonCash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Non-cash price must be a positive number.'),
   body('nomenclatures').isArray().withMessage('Nomenclatures must be an array.')

@@ -27,14 +27,6 @@ post:
               type: number
               format: float
               description: Net weight of the cargo
-            costPerRoute:
-              type: number
-              format: float
-              description: Cost per route
-            costPerTon:
-              type: number
-              format: float
-              description: Cost per ton
             priceNonCash:
               type: number
               format: float
@@ -51,6 +43,9 @@ post:
               type: string
               format: date-time
               description: The planned delivery date
+            costType:
+              type: string
+              description: The cost type (ton, route)
             nomenclatures:
               type: array
               items:

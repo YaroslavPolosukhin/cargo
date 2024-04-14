@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import OrderStatus from "../../enums/orderStatus.js";
+import costType from '../../enums/costType.js'
 
 export default (sequelize) => {
   class Order extends Model {
@@ -81,12 +82,9 @@ export default (sequelize) => {
         type: DataTypes.FLOAT,
         allowNull: false,
       },
-      cost_per_route: {
-        type: DataTypes.FLOAT,
-        allowNull: true,
-      },
-      cost_per_ton: {
-        type: DataTypes.FLOAT,
+      cost_type: {
+        type: DataTypes.ENUM,
+        values: Object.values(costType),
         allowNull: true,
       },
       price_cash: {

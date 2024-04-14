@@ -2,6 +2,7 @@ import { Op } from 'sequelize'
 import { validationResult } from 'express-validator'
 import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
+import costType from '../enums/costType.js'
 
 /**
  * Retrieves the list of available orders.
@@ -408,6 +409,11 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Nomenclatures are required" });
     }
 
+    // Check if the cost type is valid
+    if (req.body?.costType && !Object.values(costType).includes(req.body.costType)){
+      return res.status(400).json({ message: `Invalid cost type. Must be one of ${Object.values(costType).join(", ")}` });
+    }
+
     // console.log("dgyjhdsgjhdjhg");
 
     // Create new order with the associated departure and destination
@@ -420,8 +426,7 @@ export const createOrder = async (req, res) => {
         net_weight: netWeight,
         departure_date_plan: new Date(plannedLoadingDate),
         delivery_date_plan: new Date(plannedDeliveryDate),
-        cost_per_route: req.body?.costPerRoute,
-        cost_per_ton: req.body?.costPerTon,
+        cost_type: req.body?.costType,
         price_cash: req.body?.priceCash,
         price_non_cash: req.body?.priceNonCash,
       },
