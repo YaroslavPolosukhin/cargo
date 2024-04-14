@@ -887,13 +887,15 @@ export const rejectDriver = async (req, res) => {
   try {
     const { orderId } = req.body;
 
+    const _status = [OrderStatus.CONFIRMATION, OrderStatus.LOADING, OrderStatus.CREATED];
+
     // Reset the order status to 'created' and clear the driver_id
     const [updated] = await models.Order.update(
       { status: OrderStatus.CREATED, driver_id: null, truck_id: null },
       {
         where: {
           id: orderId,
-          status: OrderStatus.CONFIRMATION,
+          status: { [Op.in]: _status }
         },
       }
     );
@@ -901,7 +903,7 @@ export const rejectDriver = async (req, res) => {
     if (updated === 0) {
       return res
         .status(400)
-        .send({ message: "Order not found or not in confirmation status" });
+        .send({ message: "Order not found" });
     }
 
     const order = await models.Order.findOne({
