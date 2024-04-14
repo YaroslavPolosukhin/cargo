@@ -7,14 +7,18 @@ export const create = async (req, res) => {
     return res.status(400).json({ message: errors.array() });
   }
 
-  const { name, addressId, contacts } = req.body;
+  let { name, addressId, contacts, geo } = req.body;
   const transaction = await sequelize.transaction();
+
+  if (geo)
+    geo = `POINT (${geo.lat} ${geo.lon})`
 
   try {
     const logisticsPoint = await models.LogisticsPoint.create(
       {
         name,
         address_id: addressId,
+        geo
       },
       { transaction }
     );

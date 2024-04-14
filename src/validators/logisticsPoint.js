@@ -10,6 +10,7 @@ export const createLogisticsPointValidator = [
       contacts.every((contact) => Number.isInteger(contact))
     )
     .withMessage("Contacts must be an array of numbers (IDs)."),
+  body("geo").optional().isObject().withMessage("Geo must be an object."),
 ];
 
 export const updateLogisticsPointValidator = [
