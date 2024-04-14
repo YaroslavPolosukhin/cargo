@@ -51,12 +51,20 @@ post:
               type: string
               format: date-time
               description: The planned delivery date
-            nomenclatureIds:
+            nomenclatures:
               type: array
               items:
-                type: integer
-                format: int64
-              description: List of nomenclature IDs associated with the order
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    description: The ID of the nomenclature
+                  weight:
+                    type: number
+                    format: float
+                    description: The weight of the nomenclature
+              description: List of nomenclature associated with the order
           required:
             - departureId
             - destinationId

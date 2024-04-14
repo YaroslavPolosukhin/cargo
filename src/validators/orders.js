@@ -11,7 +11,7 @@ export const createOrderValidator = [
   body('costPerTon').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cost per ton must be a positive number.'),
   body('priceCash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cash price must be a positive number.'),
   body('priceNonCash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Non-cash price must be a positive number.'),
-  body('nomenclatureIds').isArray().withMessage('Nomenclatures must be an array.')
+  body('nomenclatures').isArray().withMessage('Nomenclatures must be an array.')
 ]
 
 export const updateOrderValidator = [

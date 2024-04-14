@@ -385,7 +385,7 @@ export const createOrder = async (req, res) => {
       netWeight,
       plannedLoadingDate,
       plannedDeliveryDate,
-      nomenclatureIds,
+      nomenclatures,
     } = req.body;
 
     const person = await models.Person.findByUserId(req.user.id);
@@ -404,8 +404,8 @@ export const createOrder = async (req, res) => {
       return res.status(404).json({ message: "Destination not found." });
     }
 
-    if (!nomenclatureIds || !nomenclatureIds.length) {
-      return res.status(400).json({ message: "Nomenclature IDs are required" });
+    if (!nomenclatures || !nomenclatures.length) {
+      return res.status(400).json({ message: "Nomenclatures are required" });
     }
 
     // console.log("dgyjhdsgjhdjhg");
@@ -428,8 +428,28 @@ export const createOrder = async (req, res) => {
       { transaction }
     );
 
-    await newOrder.addNomenclatures(nomenclatureIds, { transaction });
     await transaction.commit();
+
+    // Associate the order with the nomenclatures
+    for (const nomenclature of nomenclatures){
+      const nomenclatureInstance = await models.Nomenclature.findByPk(nomenclature.id);
+      if (!nomenclatureInstance) {
+        return res.status(404).json({ message: `Nomenclature with ID ${nomenclature.id} not found` });
+      }
+
+      const nomenclatureTransaction = await sequelize.transaction();
+
+      await models.OrderNomenclature.create(
+        {
+          order_id: newOrder.id,
+          nomenclature_id: nomenclature.id,
+          weight: nomenclature.weight
+        },
+        { nomenclatureTransaction }
+      );
+
+      await nomenclatureTransaction.commit();
+    }
 
     const orderWithNomenclatures = await models.Order.findOne(
       {
@@ -494,13 +514,23 @@ export const createOrder = async (req, res) => {
             include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
           },
         ],
-      },
-      { transaction }
+      }
     );
+
+    orderWithNomenclatures.dataValues.nomenclatures = await models.OrderNomenclature.findAll({
+      where: { order_id: orderWithNomenclatures.id },
+      include: {
+        model: models.Nomenclature,
+        as: "nomenclature",
+        include: {
+          model: models.Measure,
+          as: "Measure"
+        }
+      }
+    });
 
     return res.status(201).json({ order: orderWithNomenclatures });
   } catch (error) {
-    await transaction.rollback();
     console.error(error);
     return res
       .status(500)

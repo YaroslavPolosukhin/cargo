@@ -29,7 +29,10 @@ export default (sequelize) => {
         key: 'id'
       },
       primaryKey: true
-    }
+    },
+    weight: {
+      type: DataTypes.FLOAT
+    },
   }, {
     sequelize,
     modelName: 'OrderNomenclature',

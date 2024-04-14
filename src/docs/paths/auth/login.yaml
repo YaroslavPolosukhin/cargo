@@ -14,14 +14,17 @@ post:
               type: string
               description: Phone number of the user trying to sign in.
               required: true
+              example: "1234567890"
             password:
               type: string
               description: Password of the user trying to sign in.
               required: true
+              example: "password123"
             fcmToken:
               type: string
               description: Firebase Cloud Messaging token for the device.
               required: false
+              example: "test"
   responses:
     '200':
       description: Authentication successful.
