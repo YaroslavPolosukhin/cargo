@@ -7,7 +7,7 @@ post:
     It requires manager role and allows up to 6 photos to be uploaded.
   operationId: confirmDriver
   requestBody:
-    required: true
+    required: false
     content:
       multipart/form-data:
         schema:
@@ -19,9 +19,11 @@ post:
             name:
               type: string
               description: Name of the driver
+              nullable: true
             surname:
               type: string
               description: Surname of the driver
+              nullable: true
             patronymic:
               type: string
               description: Patronymic of the driver
@@ -29,17 +31,21 @@ post:
             inn:
               type: integer
               description: Taxpayer Identification Number (INN)
+              nullable: true
             employmentType:
               type: string
               enum: [self_employed, individual, company]
               description: Employment type of the driver
+              nullable: true
             jobPositionId:
               type: integer
               description: Numeric ID of the job position
+              nullable: true
             email:
               type: string
               format: email
               description: Email address of the driver
+              nullable: true
             telegram:
               type: string
               description: Telegram handle of the driver
@@ -47,9 +53,11 @@ post:
             contragentName:
               type: string
               description: Name of the contragent
+              nullable: true
             contragentINN:
               type: integer
               description: Taxpayer Identification Number (INN) of the contragent
+              nullable: true
             kpp:
               type: integer
               description: Code of reason for registration (KPP)
@@ -57,22 +65,28 @@ post:
             companyType:
               type: string
               description: Company type
+              nullable: true
             passportSeries:
               type: string
               description: Series of the passport
+              nullable: true
             passportNumber:
               type: string
               description: Number of the passport
+              nullable: true
             passportIssuedBy:
               type: string
               description: Authority that issued the passport
+              nullable: true
             passportIssueDate:
               type: string
               format: date-time
               description: Date when the passport was issued
+              nullable: true
             passportDepartmentCode:
               type: string
               description: Department code of the passport
+              nullable: true
             photos:
               type: array
               items:
@@ -80,6 +94,7 @@ post:
                 format: binary
               description: Passport photos of the driver
               maxItems: 6
+              nullable: true
   responses:
     '200':
       description: Driver registration confirmed successfully

@@ -198,45 +198,57 @@ export const confirm = async (req, res) => {
   } = req.body;
 
   try {
-    const jobPosition = await models.JobPosition.findByPk(jobPositionId);
-    if (!jobPosition) {
-      return res.status(400).json({ message: "Job position not found" });
+    let jobPosition = null;
+    if (jobPositionId) {
+      jobPosition = await models.JobPosition.findByPk(jobPositionId);
+      if (!jobPosition) {
+        return res.status(400).json({ message: "Job position not found" });
+      }
     }
 
-    // Get or create Contragent
-    const [contragent] = await models.Contragent.findOrCreate({
-      where: { inn: contragentINN },
-      defaults: {
-        name: contragentName,
-        inn: contragentINN,
-        kpp,
-        supplier: companyType === "supplier",
-        buyer: companyType === "buyer",
-        transport_company: companyType === "transport_company",
-      },
-    });
+    let contragent = null;
+    if (contragentName) {
+      // Get or create Contragent
+      [contragent] = await models.Contragent.findOrCreate({
+        where: { inn: contragentINN },
+        defaults: {
+          name: contragentName,
+          inn: contragentINN,
+          kpp,
+          supplier: companyType === "supplier",
+          buyer: companyType === "buyer",
+          transport_company: companyType === "transport_company",
+        },
+      });
+    }
 
-    // Get or create Passport
-    const [passport] = await models.Passport.findOrCreate({
-      where: { series: passportSeries, number: passportNumber },
-      defaults: {
-        series: passportSeries,
-        number: passportNumber,
-        authority: passportIssuedBy,
-        date_of_issue: new Date(passportIssueDate).setHours(0, 0, 0, 0),
-        department_code: passportDepartmentCode,
-      },
-    });
+    let passport = null;
+    if (passportNumber) {
+      // Get or create Passport
+      [passport] = await models.Passport.findOrCreate({
+        where: {
+          series: passportSeries,
+          number: passportNumber
+        },
+        defaults: {
+          series: passportSeries,
+          number: passportNumber,
+          authority: passportIssuedBy,
+          date_of_issue: new Date(passportIssueDate).setHours(0, 0, 0, 0),
+          department_code: passportDepartmentCode,
+        },
+      });
 
-    const passportPhotos = req.files.map((file) => {
-      return {
-        passport_id: passport.id,
-        photo_url: file.path,
-      };
-    });
+      const passportPhotos = req.files.map((file) => {
+        return {
+          passport_id: passport.id,
+          photo_url: file.path,
+        };
+      });
 
-    if (passportPhotos.length > 0) {
-      await models.PassportPhoto.bulkCreate(passportPhotos);
+      if (passportPhotos.length > 0) {
+        await models.PassportPhoto.bulkCreate(passportPhotos);
+      }
     }
 
     // Get Person by user_id
@@ -255,13 +267,13 @@ export const confirm = async (req, res) => {
       name,
       surname,
       patronymic,
-      job_position_id: jobPosition.id,
+      job_position_id: jobPosition ? jobPosition.id : null,
       inn,
-      passport_id: passport.id,
+      passport_id: passport ? passport.id : null,
       self_employed: employmentType === EmploymentType.SELF_EMPLOYED,
       individual: employmentType === EmploymentType.INDIVIDUAL,
       company: employmentType === EmploymentType.COMPANY,
-      contragent_id: contragent.id,
+      contragent_id: contragent ? contragent.id : null,
       email,
       telegram,
     });

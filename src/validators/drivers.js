@@ -3,39 +3,30 @@ import EmploymentType from "../enums/employmentType.js";
 
 export const confirmDriverValidator = [
   body("userId").isNumeric().withMessage("User ID must be numeric"),
-  body("name").notEmpty().withMessage("Name is required"),
-  body("surname").notEmpty().withMessage("Surname is required"),
+  body("name").optional(),
+  body("surname").optional(),
   body("patronymic")
-    .optional()
-    .isString()
-    .withMessage("Patronymic must be a string"),
-  body("inn").isNumeric().withMessage("INN must be numeric"),
+    .optional(),
+  body("inn").optional(),
   body("employmentType")
-    .isIn(Object.values(EmploymentType))
-    .withMessage("Invalid employment type"),
+    .optional(),
   body("jobPositionId")
-    .isNumeric()
-    .withMessage("Job Position ID must be numeric"),
-  body("email").isEmail().withMessage("Please enter a valid email"),
+    .optional(),
+  body("email").optional(),
   body("telegram")
-    .optional()
-    .isString()
-    .withMessage("Telegram handle must be a string"),
-  body("contragentName").notEmpty().withMessage("Contragent name is required"),
+    .optional(),
+  body("contragentName").optional(),
   body("contragentINN")
-    .isNumeric()
-    .withMessage("Contragent INN must be numeric"),
-  body("kpp").optional().isNumeric().withMessage("KPP must be numeric"),
-  body("companyType").notEmpty().withMessage("Company type is required"),
-  body("passportSeries").notEmpty().withMessage("Passport series is required"),
-  body("passportNumber").notEmpty().withMessage("Passport number is required"),
-  body("passportIssuedBy").notEmpty().withMessage("Issued by is required"),
+    .optional(),
+  body("kpp").optional(),
+  body("companyType").optional(),
+  body("passportSeries").optional(),
+  body("passportNumber").optional(),
+  body("passportIssuedBy").optional(),
   body("passportIssueDate")
-    .isISO8601()
-    .withMessage("Issue date must be a valid date"),
+    .optional(),
   body("passportDepartmentCode")
-    .notEmpty()
-    .withMessage("Department code is required"),
+    .optional(),
 ];
 
 export const updateDriverValidator = [
