@@ -688,66 +688,6 @@ export const takeOrder = async (req, res) => {
       { status: OrderStatus.CONFIRMATION, driver_id: person.id },
       {
         where: { id: orderId, status: OrderStatus.CREATED },
-        include: [
-          {
-            model: models.Truck,
-            as: "truck",
-          },
-          {
-            model: models.LogisticsPoint,
-            as: "departure",
-            include: {
-              model: models.Address,
-              as: "Address",
-              include: [
-                {
-                  model: models.City,
-                  as: "City",
-                },
-                {
-                  model: models.Country,
-                  as: "Country",
-                },
-                {
-                  model: models.Street,
-                  as: "Street",
-                }
-              ]
-            }
-          },
-          {
-            model: models.LogisticsPoint,
-            as: "destination",
-            include: {
-              model: models.Address,
-              as: "Address",
-              include: [
-                {
-                  model: models.City,
-                  as: "City",
-                },
-                {
-                  model: models.Country,
-                  as: "Country",
-                },
-                {
-                  model: models.Street,
-                  as: "Street",
-                }
-              ]
-            }
-          },
-          {
-            model: models.Person,
-            as: "driver",
-            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
-          },
-          {
-            model: models.Person,
-            as: "manager",
-            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
-          },
-        ],
       }
     );
 
@@ -757,11 +697,75 @@ export const takeOrder = async (req, res) => {
         .send({ message: "Order not found or not available for confirmation" });
     }
 
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          }
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          }
+        },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+      ],
+    });
+
     res
       .status(200)
       .send({
         message: "Order marked as waiting for confirmation",
-        result
+        order
       });
   } catch (error) {
     console.error(error);
@@ -1359,6 +1363,99 @@ export const getManagerPhone = async (req, res) => {
   });
 }
 
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+
+    const _status = [OrderStatus.LOADING, OrderStatus.CONFIRMATION];
+
+    const person = await models.Person.findByUserId(req.user.id);
+
+    // Reset the order status to 'created' and clear the driver_id
+    const [updated] = await models.Order.update(
+      { status: OrderStatus.CREATED, driver_id: null, truck_id: null },
+      {
+        where: {
+          id: orderId,
+          status: { [Op.in]: _status },
+          driver_id: person.id
+        },
+      }
+    );
+
+    if (updated === 0) {
+      return res
+        .status(400)
+        .send({ message: "Order not found" });
+    }
+
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+        },
+        { model: models.Person, as: "driver" },
+        { model: models.Person, as: "manager" },
+      ],
+    });
+
+    return res.status(200).send({
+      message:
+        "Driver confirmation request rejected, order status reset to created",
+      order
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send();
+  }
+};
+
 export default {
   getAvailableOrders,
   getCurrentOrder,
@@ -1373,5 +1470,6 @@ export default {
   getDriversOnTrip,
   updateGeo,
   updateOrder,
-  getManagerPhone
+  getManagerPhone,
+  cancelOrder
 };

@@ -121,3 +121,6 @@ paths:
 
   /api/orders/getManagerPhone:
     $ref: 'src/docs/paths/orders/getManagerPhone.yaml'
+
+  /api/orders/cancel:
+    $ref: 'src/docs/paths/orders/cancel.yaml'
