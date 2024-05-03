@@ -57,14 +57,33 @@ export const create = async (req, res) => {
 
 export const update = async (req, res) => {
   const { addressId } = req.params;
-  const dataForUpdate = req.body;
+  const { name, city, street, house, building, floor, postcode } = req.body;
 
   try {
     const address = await models.Address.findByPk(addressId);
     if (address === null) {
       return res.status(404).json({ error: "Address not found" });
     }
-    await address.update(dataForUpdate);
+    await address.update({
+      name,
+      house,
+      building,
+      floor,
+      postcode,
+    });
+
+    const cityObject = await models.City.findOrCreate({
+      where: { name: city },
+    });
+
+    const streetObject = await models.Street.findOrCreate({
+      where: { name: street },
+    });
+
+    await address.setCity(cityObject[0]);
+    await address.setStreet(streetObject[0]);
+
+
     return res.status(200).json(address);
   } catch (error) {
     console.error(error);
