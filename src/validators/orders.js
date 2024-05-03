@@ -3,8 +3,6 @@ import { body } from 'express-validator'
 export const createOrderValidator = [
   body('departureId').notEmpty().withMessage('Departure ID is required.'),
   body('destinationId').notEmpty().withMessage('Destination ID is required.'),
-  body('grossWeight').notEmpty().withMessage('Gross weight is required.').isFloat({ min: 0 }).withMessage('Gross weight must be a positive number.'),
-  body('netWeight').notEmpty().withMessage('Net weight is required.').isFloat({ min: 0 }).withMessage('Net weight must be a positive number.'),
   body('plannedLoadingDate').notEmpty().withMessage('Planned loading date is required.'),
   body('plannedDeliveryDate').notEmpty().withMessage('Planned delivery date is required.'),
   body('costType').optional().notEmpty().isString().withMessage('Cost per route must be a positive number.'),
@@ -16,8 +14,6 @@ export const createOrderValidator = [
 export const updateOrderValidator = [
   body('departure_id').optional().notEmpty().withMessage('Departure ID is required.'),
   body('destination_id').optional().notEmpty().withMessage('Destination ID is required.'),
-  body('gross_weight').optional().notEmpty().withMessage('Gross weight is required.').isFloat({ min: 0 }).withMessage('Gross weight must be a positive number.'),
-  body('net_weight').optional().notEmpty().withMessage('Net weight is required.').isFloat({ min: 0 }).withMessage('Net weight must be a positive number.'),
   body('cost_per_route').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cost per route must be a positive number.'),
   body('cost_per_ton').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cost per ton must be a positive number.'),
   body('price_cash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cash price must be a positive number.'),

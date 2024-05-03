@@ -382,8 +382,6 @@ export const createOrder = async (req, res) => {
     const {
       departureId,
       destinationId,
-      grossWeight,
-      netWeight,
       plannedLoadingDate,
       plannedDeliveryDate,
       nomenclatures,
@@ -422,8 +420,6 @@ export const createOrder = async (req, res) => {
         departure_id: departure.id,
         destination_id: destination.id,
         manager_id: person.id,
-        gross_weight: grossWeight,
-        net_weight: netWeight,
         departure_date_plan: new Date(plannedLoadingDate),
         delivery_date_plan: new Date(plannedDeliveryDate),
         cost_type: req.body?.costType,
@@ -448,7 +444,8 @@ export const createOrder = async (req, res) => {
         {
           order_id: newOrder.id,
           nomenclature_id: nomenclature.id,
-          weight: nomenclature.weight
+          net_weight: nomenclature.netWeight,
+          gross_weight: nomenclature.grossWeight,
         },
         { nomenclatureTransaction }
       );
@@ -549,7 +546,13 @@ export const updateOrder = async (req, res) => {
     return res.status(400).json({ message: errors.array() });
   }
   const { orderId } = req.params;
-  const dataForUpdate = req.body;
+  const {
+    departureId,
+    destinationId,
+    plannedLoadingDate,
+    plannedDeliveryDate,
+    nomenclatures,
+  } = req.body;
 
   try {
     const order = await models.Order.findByPk(
@@ -619,7 +622,26 @@ export const updateOrder = async (req, res) => {
     if (order === null) {
       return res.status(404).json({ error: "Order not found" });
     }
-    await order.update(dataForUpdate);
+    await order.update({
+      departure_id: departureId,
+      destination_id: destinationId,
+      departure_date_plan: new Date(plannedLoadingDate),
+      delivery_date_plan: new Date(plannedDeliveryDate),
+      cost_type: req.body?.costType,
+      price_cash: req.body?.priceCash,
+      price_non_cash: req.body?.priceNonCash,
+    });
+
+    await models.OrderNomenclature.destroy({ where: { order_id: orderId } });
+    await models.OrderNomenclature.bulkCreate(
+      nomenclatures.map((nomenclature) => ({
+        order_id: orderId,
+        nomenclature_id: nomenclature.id,
+        net_weight: nomenclature.netWeight,
+        gross_weight: nomenclature.grossWeight,
+      }))
+    );
+
     return res.status(200).json(order);
   } catch (error) {
     console.error(error);

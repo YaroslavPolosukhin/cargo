@@ -19,14 +19,6 @@ post:
               type: integer
               format: int64
               description: The ID of the destination logistics point
-            grossWeight:
-              type: number
-              format: float
-              description: Gross weight of the cargo
-            netWeight:
-              type: number
-              format: float
-              description: Net weight of the cargo
             priceNonCash:
               type: number
               format: float
@@ -55,10 +47,14 @@ post:
                     type: integer
                     format: int64
                     description: The ID of the nomenclature
-                  weight:
+                  grossWeight:
                     type: number
                     format: float
-                    description: The weight of the nomenclature
+                    description: Gross weight of the cargo
+                  netWeight:
+                    type: number
+                    format: float
+                    description: Net weight of the cargo
               description: List of nomenclature associated with the order
           required:
             - departureId

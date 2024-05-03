@@ -74,14 +74,6 @@ export default (sequelize) => {
           key: "id",
         },
       },
-      gross_weight: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-      },
-      net_weight: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-      },
       cost_type: {
         type: DataTypes.ENUM,
         values: Object.values(costType),

@@ -30,8 +30,13 @@ export default (sequelize) => {
       },
       primaryKey: true
     },
-    weight: {
-      type: DataTypes.FLOAT
+    gross_weight: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    net_weight: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
     },
   }, {
     sequelize,
