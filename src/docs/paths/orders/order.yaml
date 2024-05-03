@@ -43,14 +43,6 @@ put:
               type: integer
               format: int64
               description: The ID of the destination logistics point
-            gross_weight:
-              type: number
-              format: float
-              description: Gross weight of the cargo
-            net_weight:
-              type: number
-              format: float
-              description: Net weight of the cargo
             cost_per_route:
               type: number
               format: float
@@ -75,12 +67,23 @@ put:
               type: string
               format: date-time
               description: The planned delivery date
-            nomenclatureIds:
+            nomenclatures:
               type: array
               items:
-                type: integer
-                format: int64
-              description: List of nomenclature IDs associated with the order
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    description: The ID of the nomenclature
+                  grossWeight:
+                    type: number
+                    format: float
+                    description: Gross weight of the cargo
+                  netWeight:
+                    type: number
+                    format: float
+                    description: Net weight of the cargo
   responses:
     '200':
       description: The updated order
