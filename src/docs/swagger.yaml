@@ -48,7 +48,7 @@ paths:
     $ref: 'src/docs/paths/contacts/all.yaml'
   /api/contacts:
     $ref: 'src/docs/paths/contacts/create.yaml'
-  /api/contacts/:contactId:
+  /api/contacts/{contactId}:
     $ref: 'src/docs/paths/contacts/update.yaml'
 
 
@@ -61,7 +61,7 @@ paths:
     $ref: 'src/docs/paths/address/all.yaml'
   /api/address:
     $ref: 'src/docs/paths/address/create.yaml'
-  /api/address/:addressId:
+  /api/address/{addressId}:
     $ref: 'src/docs/paths/address/update.yaml'
 
   # Logistic points
@@ -69,7 +69,7 @@ paths:
     $ref: 'src/docs/paths/logisticsPoint/all.yaml'
   /api/logisticPoint:
     $ref: 'src/docs/paths/logisticsPoint/create.yaml'
-  /api/logisticPoint/:pointId:
+  /api/logisticPoint/{pointId}:
     $ref: 'src/docs/paths/logisticsPoint/update.yaml'
 
   # Nomenclature
@@ -79,7 +79,7 @@ paths:
     $ref: 'src/docs/paths/nomenclature/search.yaml'
   /api/nomenclature:
     $ref: 'src/docs/paths/nomenclature/create.yaml'
-  /api/nomenclature/:nomenclatureId:
+  /api/nomenclature/{nomenclatureId}:
     $ref: 'src/docs/paths/nomenclature/update.yaml'
 
   # Order
@@ -92,7 +92,7 @@ paths:
   /api/orders/all:
     $ref: 'src/docs/paths/orders/all.yaml'
 
-  /api/orders/:orderId:
+  /api/orders/{orderId}:
     $ref: 'src/docs/paths/orders/order.yaml'
 
   /api/orders/drivers:

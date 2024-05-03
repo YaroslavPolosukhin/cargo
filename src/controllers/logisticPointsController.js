@@ -35,14 +35,18 @@ export const create = async (req, res) => {
 
 export const update = async (req, res) => {
   const { pointId } = req.params;
-  const dataForUpdate = req.body;
+
+  const { name, address_id, contacts, geo } = req.body;
 
   try {
     const logisticPoint = await models.LogisticsPoint.findByPk(pointId);
     if (logisticPoint === null) {
       return res.status(404).json({ error: "Logistic point not found" });
     }
-    await logisticPoint.update(dataForUpdate);
+    await logisticPoint.update({ name, address_id, geo });
+
+    await logisticPoint.setContacts(contacts);
+
     return res.status(200).json(logisticPoint);
   } catch (error) {
     console.error(error);

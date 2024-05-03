@@ -4,11 +4,13 @@ put:
   tags:
     - Logistics Points
   parameters:
-    - name: pointId
-      in: path
+    - in: path
+      name: pointId
       required: true
       schema:
         type: integer
+        format: int64
+      description: Logistics point id
   requestBody:
     required: false
     content:
