@@ -36,7 +36,10 @@ export const create = async (req, res) => {
 export const update = async (req, res) => {
   const { pointId } = req.params;
 
-  const { name, address_id, contacts, geo } = req.body;
+  let { name, address_id, contacts, geo } = req.body;
+
+  if (geo)
+    geo = `POINT (${geo.lat} ${geo.lon})`
 
   try {
     const logisticPoint = await models.LogisticsPoint.findByPk(pointId);
