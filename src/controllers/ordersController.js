@@ -350,6 +350,10 @@ export const getAll = async (req, res) => {
         as: "manager",
         include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
       },
+      {
+        model: models.Nomenclature,
+        as: "nomenclatures",
+      }
     ],
   };
 
