@@ -75,7 +75,16 @@ export const getAvailableOrders = async (req, res) => {
         as: "manager",
         include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
       },
-      { model: models.Nomenclature, as: "nomenclatures" },
+      {
+        model: models.Nomenclature,
+        as: "nomenclatures",
+        include: [
+          {
+            model: models.Measure,
+            as: "Measure"
+          }
+        ]
+      },
     ],
   };
 
@@ -353,6 +362,12 @@ export const getAll = async (req, res) => {
       {
         model: models.Nomenclature,
         as: "nomenclatures",
+        include: [
+          {
+            model: models.Measure,
+            as: "Measure"
+          }
+        ]
       }
     ],
   };
