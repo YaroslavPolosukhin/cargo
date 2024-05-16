@@ -97,3 +97,28 @@ put:
       description: Order not found
     '500':
       description: An error occurred while creating the order
+delete:
+  tags:
+    - Order
+  summary: Delete order
+  description: Delete order
+  operationId: deleteOrder
+  consumes:
+    - application/json
+  produces:
+    - application/json
+  parameters:
+    - name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: successful operation
+    '404':
+      description: Order not found
+    '500':
+      description: An error occurred while deleting the order
+    '403':
+      description: Access denied, insufficient permissions

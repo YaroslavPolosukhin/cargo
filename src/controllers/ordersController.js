@@ -1532,6 +1532,22 @@ export const cancelOrder = async (req, res) => {
   }
 };
 
+export const deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await models.Order.findByPk(orderId)
+    if (!order) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
+    await order.destroy();
+    return res.status(200).send({ message: "Order deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send();
+  }
+}
+
 export default {
   getAvailableOrders,
   getCurrentOrder,
@@ -1547,5 +1563,6 @@ export default {
   updateGeo,
   updateOrder,
   getManagerPhone,
-  cancelOrder
+  cancelOrder,
+  deleteOrder
 };

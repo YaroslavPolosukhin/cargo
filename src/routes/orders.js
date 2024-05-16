@@ -21,4 +21,5 @@ router.post('/depart', checkRole([Roles.DRIVER]), ordersController.markOrderAsDe
 router.post('/complete', checkRole([Roles.DRIVER]), ordersController.markOrderAsCompleted)
 router.post('/updateGeo', checkRole([Roles.DRIVER]), updateGeoValidator, ordersController.updateGeo)
 router.post('/cancel', checkRole([Roles.DRIVER]), ordersController.cancelOrder)
+router.delete('/:orderId', checkRole([Roles.MANAGER]), ordersController.deleteOrder)
 export default router
