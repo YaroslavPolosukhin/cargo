@@ -85,7 +85,7 @@ export const update = async (req, res) => {
   const personId = body.personId;
 
   try {
-    const person = await models.Person.findByPk(personId, {
+    let person = await models.Person.findByPk(personId, {
       include: [
         {
           model: models.User,
@@ -157,6 +157,23 @@ export const update = async (req, res) => {
     }
 
     await models.Person.update(req.body, { where: { id: person.id } });
+
+    person = await models.Person.findByPk(personId, {
+      include: [
+        {
+          model: models.User,
+          as: "user",
+          include: [
+            {
+              model: models.Role,
+              as: "role",
+            },
+          ],
+          attributes: { exclude: ["role_id"] },
+        },
+      ],
+      attributes: { exclude: ["user_id"] },
+    });
 
     return res
       .status(200)
