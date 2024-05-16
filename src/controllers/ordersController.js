@@ -24,46 +24,58 @@ export const getAvailableOrders = async (req, res) => {
       {
         model: models.LogisticsPoint,
         as: "departure",
-        include: {
-          model: models.Address,
-          as: "Address",
-          include: [
-            {
-              model: models.City,
-              as: "City",
-            },
-            {
-              model: models.Country,
-              as: "Country",
-            },
-            {
-              model: models.Street,
-              as: "Street",
-            }
-          ]
-        }
+        include: [
+          {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+          {
+            model: models.Contact,
+            as: "contacts",
+          }
+        ]
       },
       {
         model: models.LogisticsPoint,
         as: "destination",
-        include: {
-          model: models.Address,
-          as: "Address",
-          include: [
-            {
-              model: models.City,
-              as: "City",
-            },
-            {
-              model: models.Country,
-              as: "Country",
-            },
-            {
-              model: models.Street,
-              as: "Street",
-            }
-          ]
-        }
+        include: [
+          {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+          {
+            model: models.Contact,
+            as: "contacts",
+          }
+        ]
       },
       {
         model: models.Person,
@@ -132,46 +144,58 @@ export const getCurrentOrder = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
         { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
@@ -211,46 +235,58 @@ export const getOrderById = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -308,46 +344,58 @@ export const getAll = async (req, res) => {
       {
         model: models.LogisticsPoint,
         as: "departure",
-        include: {
-          model: models.Address,
-          as: "Address",
-          include: [
-            {
-              model: models.City,
-              as: "City",
-            },
-            {
-              model: models.Country,
-              as: "Country",
-            },
-            {
-              model: models.Street,
-              as: "Street",
-            }
-          ]
-        }
+        include: [
+          {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+          {
+            model: models.Contact,
+            as: "contacts",
+          }
+        ]
       },
       {
         model: models.LogisticsPoint,
         as: "destination",
-        include: {
-          model: models.Address,
-          as: "Address",
-          include: [
-            {
-              model: models.City,
-              as: "City",
-            },
-            {
-              model: models.Country,
-              as: "Country",
-            },
-            {
-              model: models.Street,
-              as: "Street",
-            }
-          ]
-        }
+        include: [
+          {
+            model: models.Address,
+            as: "Address",
+            include: [
+              {
+                model: models.City,
+                as: "City",
+              },
+              {
+                model: models.Country,
+                as: "Country",
+              },
+              {
+                model: models.Street,
+                as: "Street",
+              }
+            ]
+          },
+          {
+            model: models.Contact,
+            as: "contacts",
+          }
+        ]
       },
       {
         model: models.Person,
@@ -483,46 +531,58 @@ export const createOrder = async (req, res) => {
           {
             model: models.LogisticsPoint,
             as: "departure",
-            include: {
-              model: models.Address,
-              as: "Address",
-              include: [
-                {
-                  model: models.City,
-                  as: "City",
-                },
-                {
-                  model: models.Country,
-                  as: "Country",
-                },
-                {
-                  model: models.Street,
-                  as: "Street",
-                }
-              ]
-            }
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ]
           },
           {
             model: models.LogisticsPoint,
             as: "destination",
-            include: {
-              model: models.Address,
-              as: "Address",
-              include: [
-                {
-                  model: models.City,
-                  as: "City",
-                },
-                {
-                  model: models.Country,
-                  as: "Country",
-                },
-                {
-                  model: models.Street,
-                  as: "Street",
-                }
-              ]
-            }
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ]
           },
           {
             model: models.Person,
@@ -622,46 +682,58 @@ export const updateOrder = async (req, res) => {
           {
             model: models.LogisticsPoint,
             as: "departure",
-            include: {
-              model: models.Address,
-              as: "Address",
-              include: [
-                {
-                  model: models.City,
-                  as: "City",
-                },
-                {
-                  model: models.Country,
-                  as: "Country",
-                },
-                {
-                  model: models.Street,
-                  as: "Street",
-                }
-              ]
-            }
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ]
           },
           {
             model: models.LogisticsPoint,
             as: "destination",
-            include: {
-              model: models.Address,
-              as: "Address",
-              include: [
-                {
-                  model: models.City,
-                  as: "City",
-                },
-                {
-                  model: models.Country,
-                  as: "Country",
-                },
-                {
-                  model: models.Street,
-                  as: "Street",
-                }
-              ]
-            }
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ]
           },
           {
             model: models.Person,
@@ -714,24 +786,30 @@ export const takeOrder = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          }
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -798,46 +876,58 @@ export const takeOrder = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          }
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ]
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          }
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ]
         },
         {
           model: models.Person,
@@ -913,46 +1003,58 @@ export const confirmOrder = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -1011,46 +1113,58 @@ export const rejectDriver = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -1106,24 +1220,30 @@ export const markOrderAsDeparted = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
@@ -1199,46 +1319,58 @@ export const markOrderAsCompleted = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -1274,46 +1406,58 @@ export const getDriversOnTrip = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -1351,46 +1495,58 @@ export const updateGeo = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
@@ -1490,46 +1646,58 @@ export const cancelOrder = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "departure",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
         },
         { model: models.Person, as: "driver" },
         { model: models.Person, as: "manager" },
