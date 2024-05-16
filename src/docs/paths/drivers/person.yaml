@@ -6,8 +6,6 @@ put:
     Update driver information
     It requires manager or driver role
   operationId: updateDriver
-  requestParams:
-
   requestBody:
     required: true
     content:
@@ -15,27 +13,59 @@ put:
         schema:
           type: object
           required:
-            - job_position_id
-            - passport_id
-            - contragent_id
             - personId
+            - name
+            - surname
+            - patronymic
+            - inn
+            - passportId
+            - jobPositionId
+            - email
+            - company
+            - individual
+            - self_employed
+            - telegram
+            - contragentId
           properties:
-            job_position_id:
-              type: integer
-              description: The job position id of the driver.
-              example: 1
             personId:
               type: integer
-              description: The driver id.
-              example: 1234567890
-            passport_id:
+              description: The ID of the person
+            name:
+              type: string
+              description: The name of the person
+            surname:
+              type: string
+              description: The surname of the person
+            patronymic:
+              type: string
+              description: The patronymic of the person
+            inn:
+              type: string
+              description: The INN of the person
+            passportId:
               type: integer
-              description: The passport id of the driver.
-              example: 1
-            contragent_id:
+              description: The ID of the passport
+            jobPositionId:
               type: integer
-              description: The contragent id of the driver.
-              example: 1
+              description: The ID of the job position
+            email:
+              type: string
+              description: The email of the person
+            company:
+              type: boolean
+              description: Is person a company
+            individual:
+              type: boolean
+              description: The individual of the person
+            self_employed:
+              type: boolean
+              description: The self employed of the person
+            telegram:
+              type: string
+              description: The telegram of the person
+            contragentId:
+              type: integer
+              description: The ID of the contragent
   responses:
     '200':
       description: Driver information updated successfully.
@@ -51,15 +81,15 @@ put:
                 type: object
                 $ref: '../../components/users.yaml#/components/schemas/Person'
     '404':
-        description: Job/Passport/Contragent not found. / Access denied / Person not found / You can only update the personal data of drivers
-        content:
-            application/json:
-            schema:
-                type: object
-                properties:
-                  error:
-                      type: string
-                      description: Job/Passport/Contragent with id ${name_id} not found / Access denied / Person not found / You can only update the personal data of drivers
+      description: Job/Passport/Contragent not found. / Access denied / Person not found / You can only update the personal data of drivers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Job/Passport/Contragent with id ${name_id} not found / Access denied / Person not found / You can only update the personal data of drivers
     '401':
       description: Unauthorized request due to missing or invalid refresh token.
       content:
