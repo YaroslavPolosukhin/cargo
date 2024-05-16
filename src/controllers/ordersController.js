@@ -566,15 +566,52 @@ export const updateOrder = async (req, res) => {
   }
   const { orderId } = req.params;
   const {
-    departureId,
-    destinationId,
+    // departureId,
+    // destinationId,
     plannedLoadingDate,
     plannedDeliveryDate,
     nomenclatures,
+    vin
   } = req.body;
 
   try {
-    const order = await models.Order.findByPk(
+    let order = await models.Order.findByPk(orderId)
+    if (order === null) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    if (plannedLoadingDate){
+      order.departure_date_plan = new Date(plannedLoadingDate);
+    }
+    if (plannedDeliveryDate){
+      order.delivery_date_plan = new Date(plannedDeliveryDate);
+    }
+
+    await order.update({
+      departure_id: req.body?.departureId,
+      destination_id: req.body?.destinationId,
+      cost_type: req.body?.costType,
+      price_cash: req.body?.priceCash,
+      price_non_cash: req.body?.priceNonCash,
+    });
+
+    if (vin) {
+      const truck = await models.Truck.findOrCreate({ where: { vin } });
+      await order.setTruck(truck[0]);
+    }
+
+    if (nomenclatures) {
+      await models.OrderNomenclature.destroy({ where: { order_id: orderId } });
+      await models.OrderNomenclature.bulkCreate(
+        nomenclatures.map((nomenclature) => ({
+          order_id: orderId,
+          nomenclature_id: nomenclature.id,
+          net_weight: nomenclature.netWeight,
+          gross_weight: nomenclature.grossWeight,
+        }))
+      );
+    }
+
+    order = await models.Order.findByPk(
       orderId,
       {
         include: [
@@ -638,28 +675,6 @@ export const updateOrder = async (req, res) => {
           },
         ],
       });
-    if (order === null) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-    await order.update({
-      departure_id: departureId,
-      destination_id: destinationId,
-      departure_date_plan: new Date(plannedLoadingDate),
-      delivery_date_plan: new Date(plannedDeliveryDate),
-      cost_type: req.body?.costType,
-      price_cash: req.body?.priceCash,
-      price_non_cash: req.body?.priceNonCash,
-    });
-
-    await models.OrderNomenclature.destroy({ where: { order_id: orderId } });
-    await models.OrderNomenclature.bulkCreate(
-      nomenclatures.map((nomenclature) => ({
-        order_id: orderId,
-        nomenclature_id: nomenclature.id,
-        net_weight: nomenclature.netWeight,
-        gross_weight: nomenclature.grossWeight,
-      }))
-    );
 
     return res.status(200).json(order);
   } catch (error) {

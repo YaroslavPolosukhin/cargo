@@ -67,6 +67,9 @@ put:
               type: string
               format: date-time
               description: The planned delivery date
+            vin:
+              type: string
+              description: The VIN of the truck
             nomenclatures:
               type: array
               items:

@@ -20,7 +20,8 @@ export const updateOrderValidator = [
   body('price_non_cash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Non-cash price must be a positive number.'),
   body('departure_date_plan').optional().notEmpty().withMessage('Planned loading date is required.'),
   body('delivery_date_plan').optional().notEmpty().withMessage('Planned delivery date is required.'),
-  body('nomenclatureIds').optional().isArray().withMessage('Nomenclatures must be an array.')
+  body('nomenclatureIds').optional().isArray().withMessage('Nomenclatures must be an array.'),
+  body('vin').optional().isString().withMessage('VIN must be a string.')
 ]
 export const updateGeoValidator = [
   body('orderId')
