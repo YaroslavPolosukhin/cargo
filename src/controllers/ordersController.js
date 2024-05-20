@@ -167,7 +167,7 @@ export const getCurrentOrder = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -195,10 +195,28 @@ export const getCurrentOrder = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
-        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        },
       ],
     });
 
@@ -628,8 +646,8 @@ export const updateOrder = async (req, res) => {
   const {
     // departureId,
     // destinationId,
-    plannedLoadingDate,
-    plannedDeliveryDate,
+    departure_date_plan,
+    delivery_date_plan,
     nomenclatures,
     vin
   } = req.body;
@@ -639,11 +657,28 @@ export const updateOrder = async (req, res) => {
     if (order === null) {
       return res.status(404).json({ error: "Order not found" });
     }
-    if (plannedLoadingDate){
-      order.departure_date_plan = new Date(plannedLoadingDate);
+    if (departure_date_plan){
+      const date = new Date(departure_date_plan);
+
+      if (date != 'Invalid date') {
+        await order.update({
+          "departure_date_plan": new Date(departure_date_plan)
+        })
+      } else {
+        return res.status(500).json({ error: "Invalid delivery date" })
+      }
     }
-    if (plannedDeliveryDate){
-      order.delivery_date_plan = new Date(plannedDeliveryDate);
+
+    if (delivery_date_plan){
+      const date = new Date(delivery_date_plan);
+
+      if (date != 'Invalid date') {
+        await order.update({
+          "delivery_date_plan": new Date(delivery_date_plan)
+        })
+      } else {
+        return res.status(500).json({ error: "Invalid delivery date" })
+      }
     }
 
     await order.update({
