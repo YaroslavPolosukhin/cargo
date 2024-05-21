@@ -226,13 +226,6 @@ export const getCurrentOrder = async (req, res) => {
         .send({ message: "No active order found for the driver" });
     }
 
-    const orderNomenclatures = await models.OrderNomenclature.findAll({
-      where: { order_id: activeOrder.id }
-    });
-    activeOrder.dataValues.nomenclatures = await models.Nomenclature.findAll({
-      where: { id: orderNomenclatures.map((item) => item.nomenclature_id) }
-    });
-
     res.json({ order: activeOrder });
   } catch (error) {
     console.error(error);
