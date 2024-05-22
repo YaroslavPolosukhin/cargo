@@ -112,7 +112,7 @@ export default (sequelize) => {
         },
       },
       geo: {
-        type: DataTypes.GEOMETRY('POINT'),
+        type: DataTypes.STRING,
         allowNull: true
       }
     },

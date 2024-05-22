@@ -1585,16 +1585,9 @@ export const updateGeo = async (req, res) => {
       return res.status(404).send({ message: "Order not found" });
     }
 
-    await models.MovingHistory.create({
-      order_id: orderId,
-      time: new Date(),
-      geo: { type: "Point", coordinates: [longitude, latitude] },
-      latitude,
-      longitude,
-    });
-
-    order.geo = { type: "Point", coordinates: [longitude, latitude] };
+    order.geo = `POINT (${latitude} ${longitude})`;
     await order.save();
+
     return res.status(200).send({ message: "Order geo updated successfully", order });
   } catch (error) {
     console.error(error);
