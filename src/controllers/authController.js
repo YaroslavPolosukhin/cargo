@@ -75,15 +75,10 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role_id: 1,
       fcm_token: fcmToken,
-    },
-    {
-      include: [
-        {
-          model: models.Role,
-          as: "role",
-        }
-      ]
     });
+
+    const role = await models.Role.findOne({ where: { id: user.role_id } });
+    user.dataValues.role = role.dataValues;
 
     await models.Person.create(
       {
