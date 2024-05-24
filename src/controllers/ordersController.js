@@ -1513,7 +1513,18 @@ export const getDriversOnTrip = async (req, res) => {
 export const updateGeo = async (req, res) => {
   try {
     const { orderId, latitude, longitude } = req.body;
-    const order = await models.Order.findOne({
+    let order = await models.Order.findOne({
+      where: { id: orderId }
+    });
+
+    if (!order) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
+    order.geo = `POINT (${latitude} ${longitude})`;
+    await order.save();
+
+    order = await models.Order.findOne({
       where: { id: orderId },
       include: [
         {
@@ -1580,13 +1591,6 @@ export const updateGeo = async (req, res) => {
         { model: models.Person, as: "manager" },
       ],
     });
-
-    if (!order) {
-      return res.status(404).send({ message: "Order not found" });
-    }
-
-    order.geo = `POINT (${latitude} ${longitude})`;
-    await order.save();
 
     return res.status(200).send({ message: "Order geo updated successfully", order });
   } catch (error) {
