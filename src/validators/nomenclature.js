@@ -5,5 +5,5 @@ export const createNomenclatureValidator = [
     .trim()
     .notEmpty()
     .withMessage("Name cannot be empty or just whitespace"),
-  body("measureId").isNumeric().withMessage("Measure id is required"),
+  body("measureId").optional(),
 ];

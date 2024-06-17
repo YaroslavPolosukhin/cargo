@@ -42,14 +42,15 @@ export const createNomenclature = async (req, res) => {
   }
 
   try {
-    const { name, measureId } = req.body;
+    let { name, measureId } = req.body;
     if (!name) {
       return res.status(400).send({ message: "Name is required" });
     }
 
     const measureExists = await models.Measure.findByPk(measureId);
     if (!measureExists) {
-      return res.status(404).send({ message: "Measure not found" });
+      const measure = await models.Measure.findOrCreate({ where: { name: "т" } })
+      measureId = measure[0].id
     }
 
     const newNomenclature = await models.Nomenclature.create({
