@@ -7,6 +7,7 @@ export default (sequelize) => {
       this.belongsTo(models.JobPosition, { foreignKey: 'job_position_id', as: 'jobPosition' })
       this.belongsTo(models.Passport, { foreignKey: 'passport_id', as: 'passport' })
       this.belongsTo(models.Contragent, { foreignKey: 'contragent_id', as: 'contragent' })
+      this.belongsTo(models.DrivingLicence, { foreignKey: 'driving_license_id', as: 'driving_license' })
     }
 
     static async findByUserId (userId) {
@@ -78,11 +79,6 @@ export default (sequelize) => {
       allowNull: false,
       defaultValue: false
     },
-    company: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
-    },
     contragent_id: {
       type: DataTypes.INTEGER,
       references: {
@@ -99,6 +95,16 @@ export default (sequelize) => {
     },
     telegram: {
       type: DataTypes.STRING,
+      allowNull: true
+    },
+    driving_license_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'driving_license',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
       allowNull: true
     }
   }, {

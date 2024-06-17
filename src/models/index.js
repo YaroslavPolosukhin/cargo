@@ -20,6 +20,7 @@ import LogisticsPointModel from "./shipping/logisticsPoint.js";
 import logisticsPointContactsModel from "./shipping/logisticsPointContacts.js";
 import OrderNomenclatureModel from "./shipping/orderNomenclature.js";
 import PasswordRecoveryAttemptModel from "./users/passwordRecoveryAttempt.js";
+import DrivingLicenceModel from './users/drivingLicence.js'
 
 import config from "../config/config.js";
 
@@ -53,6 +54,7 @@ const models = {
   OrderNomenclature: OrderNomenclatureModel(sequelize, Sequelize),
   Truck: TruckModel(sequelize, Sequelize),
   PasswordRecoveryAttempt: PasswordRecoveryAttemptModel(sequelize, Sequelize),
+  DrivingLicence: DrivingLicenceModel(sequelize, Sequelize)
 };
 
 Object.keys(models).forEach((modelName) => {

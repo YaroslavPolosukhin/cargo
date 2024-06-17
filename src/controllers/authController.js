@@ -183,6 +183,10 @@ export const getUser = async (req, res) => {
       },
       { model: models.Contragent, as: "contragent" },
       { model: models.JobPosition, as: "jobPosition" },
+      {
+        model: models.DrivingLicence,
+        as: "driving_license",
+      },
     ],
   });
 

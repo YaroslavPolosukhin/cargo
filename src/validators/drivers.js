@@ -1,5 +1,4 @@
 import { body } from "express-validator";
-import EmploymentType from "../enums/employmentType.js";
 
 export const confirmDriverValidator = [
   body("userId").isNumeric().withMessage("User ID must be numeric"),
@@ -19,7 +18,6 @@ export const confirmDriverValidator = [
   body("contragentINN")
     .optional(),
   body("kpp").optional(),
-  body("companyType").optional(),
   body("passportSeries").optional(),
   body("passportNumber").optional(),
   body("passportIssuedBy").optional(),
@@ -39,12 +37,13 @@ export const updateDriverValidator = [
       "passportId",
       "jobPositionId",
       "email",
-      "company",
       "individual",
       "self_employed",
       "telegram",
       "contragentId",
       "personId",
+      "drivingLicenseSerial",
+      "drivingLicenseNumber",
     ];
 
     const bodyFields = Object.keys(req.body);
@@ -82,7 +81,6 @@ export const updateDriverValidator = [
     .isNumeric()
     .withMessage("Job Position ID must be numeric"),
   body("email").optional().isEmail().withMessage("Please enter a valid email"),
-  body("company").optional().isBoolean().withMessage("Company must be boolean"),
   body("individual")
     .optional()
     .isBoolean()
@@ -99,4 +97,12 @@ export const updateDriverValidator = [
     .optional()
     .isNumeric()
     .withMessage("Contragent ID must be numeric"),
+  body('drivingLicenseSerial')
+    .optional()
+    .isNumeric()
+    .withMessage("Driving license serial must be numeric"),
+  body('drivingLicenseNumber')
+    .optional()
+    .isNumeric()
+    .withMessage("Driving license number must be numeric"),
 ];

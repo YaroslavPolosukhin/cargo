@@ -91,9 +91,6 @@ components:
         individual:
           type: boolean
           example: false
-        company:
-          type: boolean
-          example: false
         email:
           type: string
           format: email
@@ -117,6 +114,10 @@ components:
           type: integer
           format: int32
           example: 5
+        driving_license_id:
+          type: integer
+          format: int64
+          example: 6
         user:
           $ref: '#/components/schemas/User'
         jobPosition:
@@ -125,6 +126,8 @@ components:
           $ref: '#/components/schemas/Passport'
         contragent:
           $ref: '#/components/schemas/Contragent'
+        drivingLicence:
+          $ref: '#/components/schemas/DrivingLicence'
       required:
         - id
         - user_id
@@ -146,6 +149,7 @@ components:
         job_position_id: 3
         passport_id: 4
         contragent_id: 5
+        driving_license_id: 6
 
     Contragent:
       type: object
@@ -227,3 +231,19 @@ components:
       required:
         - passport_id
         - photo_url
+
+    DrivingLicence:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        serial:
+          type: integer
+          format: int64
+        number:
+          type: integer
+          format: int64
+      required:
+        - serial
+        - number

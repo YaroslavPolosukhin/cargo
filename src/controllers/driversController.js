@@ -79,9 +79,11 @@ export const update = async (req, res) => {
   }
 
   const body = JSON.parse(JSON.stringify(req.body));
+
   if (!body.hasOwnProperty("personId")) {
     return res.status(400).json({ error: "Person ID is required" });
   }
+
   const personId = body.personId;
 
   try {
@@ -116,7 +118,7 @@ export const update = async (req, res) => {
     const { role, id } = req.user;
 
     //если водитель, но не тот, который auth
-    if (role === Roles.DRIVER && person.id !== id) {
+    if (role === Roles.DRIVER && person.user.id !== id) {
       return res.status(404).json({ error: `Access denied` });
     }
 
@@ -156,7 +158,24 @@ export const update = async (req, res) => {
       }
     }
 
-    await models.Person.update(req.body, { where: { id: person.id } });
+    if (body.hasOwnProperty("drivingLicenseNumber") && body.hasOwnProperty("drivingLicenseSerial")) {
+      const drivingLicenseNumber = body.drivingLicenseNumber
+      const drivingLicenseSerial = body.drivingLicenseSerial
+
+      delete body["drivingLicenseNumber"]
+      delete body["drivingLicenseSerial"]
+
+      const drivingLicense = await models.DrivingLicence.create({
+        serial: drivingLicenseSerial,
+        number: drivingLicenseNumber,
+      })
+
+      body["driving_license_id"] = drivingLicense.id
+
+      console.log(body)
+    }
+
+    await models.Person.update(body, { where: { id: person.id } });
 
     person = await models.Person.findByPk(personId, {
       include: [
@@ -167,12 +186,16 @@ export const update = async (req, res) => {
             {
               model: models.Role,
               as: "role",
-            },
+            }
           ],
           attributes: { exclude: ["role_id"] },
         },
+        {
+          model: models.DrivingLicence,
+          as: "driving_license"
+        }
       ],
-      attributes: { exclude: ["user_id"] },
+      attributes: { exclude: ["user_id", "driving_license_id"] },
     });
 
     return res
