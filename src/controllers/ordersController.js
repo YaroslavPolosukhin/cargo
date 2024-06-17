@@ -345,8 +345,10 @@ export const getAll = async (req, res) => {
       break;
   }
 
+  const person = await models.Person.findByUserId(req.user.id)
+
   const options = {
-    where: { status: { [Op.in]: _status } },
+    where: { status: { [Op.in]: _status }, manager_id: person.id },
     include: [
       {
         model: models.Truck,

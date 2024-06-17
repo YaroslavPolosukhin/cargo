@@ -171,8 +171,6 @@ export const update = async (req, res) => {
       })
 
       body["driving_license_id"] = drivingLicense.id
-
-      console.log(body)
     }
 
     await models.Person.update(body, { where: { id: person.id } });
