@@ -105,6 +105,8 @@ export const getAll = async (req, res) => {
       point.dataValues.contacts = logisticPointContacts;
     }
 
+    logisticPoints.reverse()
+
     const totalPages = Math.ceil(count / limit);
     res.json({ totalPages, count, logisticPoints });
   } catch (error) {
