@@ -79,10 +79,6 @@ put:
                     type: integer
                     format: int64
                     description: The ID of the nomenclature
-                  grossWeight:
-                    type: number
-                    format: float
-                    description: Gross weight of the cargo
                   netWeight:
                     type: number
                     format: float

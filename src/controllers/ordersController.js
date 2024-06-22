@@ -525,7 +525,6 @@ export const createOrder = async (req, res) => {
           order_id: newOrder.id,
           nomenclature_id: nomenclature.id,
           net_weight: nomenclature.netWeight,
-          gross_weight: nomenclature.grossWeight,
         },
         { nomenclatureTransaction }
       );
@@ -696,7 +695,6 @@ export const updateOrder = async (req, res) => {
           order_id: orderId,
           nomenclature_id: nomenclature.id,
           net_weight: nomenclature.netWeight,
-          gross_weight: nomenclature.grossWeight,
         }))
       );
     }
