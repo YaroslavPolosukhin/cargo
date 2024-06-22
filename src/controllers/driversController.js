@@ -20,6 +20,19 @@ export const getUnapproved = async (req, res) => {
           },
           attributes: ["name"],
         },
+        {
+          model: models.Person,
+          as: "Person",
+          include: [
+            { model: models.Contragent, as: "contragent" },
+            { model: models.JobPosition, as: "jobPosition" },
+            { model: models.Passport, as: "passport" },
+            {
+              model: models.DrivingLicence,
+              as: "drivingLicense",
+            }
+          ]
+        },
       ],
     };
 
@@ -58,6 +71,10 @@ export const getApproved = async (req, res) => {
         { model: models.Contragent, as: "contragent" },
         { model: models.JobPosition, as: "jobPosition" },
         { model: models.Passport, as: "passport" },
+        {
+          model: models.DrivingLicence,
+          as: "drivingLicense",
+        }
       ],
     };
 
@@ -190,7 +207,7 @@ export const update = async (req, res) => {
         },
         {
           model: models.DrivingLicence,
-          as: "driving_license"
+          as: "drivingLicense"
         }
       ],
       attributes: { exclude: ["user_id", "driving_license_id"] },

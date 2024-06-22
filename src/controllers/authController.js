@@ -185,7 +185,7 @@ export const getUser = async (req, res) => {
       { model: models.JobPosition, as: "jobPosition" },
       {
         model: models.DrivingLicence,
-        as: "driving_license",
+        as: "drivingLicense",
       },
     ],
   });

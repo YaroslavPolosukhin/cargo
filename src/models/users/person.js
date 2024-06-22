@@ -7,7 +7,7 @@ export default (sequelize) => {
       this.belongsTo(models.JobPosition, { foreignKey: 'job_position_id', as: 'jobPosition' })
       this.belongsTo(models.Passport, { foreignKey: 'passport_id', as: 'passport' })
       this.belongsTo(models.Contragent, { foreignKey: 'contragent_id', as: 'contragent' })
-      this.belongsTo(models.DrivingLicence, { foreignKey: 'driving_license_id', as: 'driving_license' })
+      this.belongsTo(models.DrivingLicence, { foreignKey: 'driving_license_id', as: 'drivingLicense' })
     }
 
     static async findByUserId (userId) {

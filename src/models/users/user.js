@@ -3,7 +3,7 @@ import { Model, DataTypes } from 'sequelize'
 export default (sequelize) => {
   class User extends Model {
     static associate (models) {
-      this.hasMany(models.Person, { foreignKey: 'user_id' })
+      this.hasMany(models.Person, { foreignKey: 'user_id', as: 'Person' })
       this.hasOne(models.PasswordRecoveryAttempt, { foreignKey: 'user_id', onDelete: 'CASCADE' })
       this.belongsTo(models.Role, { foreignKey: 'role_id', as: 'role' })
       this.belongsTo(this, { foreignKey: 'responsible_user' })
