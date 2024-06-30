@@ -42,6 +42,8 @@ paths:
     $ref: 'src/docs/paths/drivers/person.yaml'
   /api/drivers/getManagerPhone:
     $ref: 'src/docs/paths/drivers/getManagerPhone.yaml'
+  /api/drivers/search:
+    $ref: 'src/docs/paths/drivers/search.yaml'
 
   # CONTACTS
   /api/contacts/all:
@@ -50,6 +52,8 @@ paths:
     $ref: 'src/docs/paths/contacts/create.yaml'
   /api/contacts/{contactId}:
     $ref: 'src/docs/paths/contacts/update.yaml'
+  /api/contacts/search:
+    $ref: 'src/docs/paths/contacts/search.yaml'
 
 
   #Measures
@@ -63,6 +67,8 @@ paths:
     $ref: 'src/docs/paths/address/create.yaml'
   /api/address/{addressId}:
     $ref: 'src/docs/paths/address/update.yaml'
+  /api/address/search:
+    $ref: 'src/docs/paths/address/search.yaml'
 
   # Logistic points
   /api/logisticPoint/all:
@@ -71,6 +77,8 @@ paths:
     $ref: 'src/docs/paths/logisticsPoint/create.yaml'
   /api/logisticPoint/{pointId}:
     $ref: 'src/docs/paths/logisticsPoint/update.yaml'
+  /api/logisticPoint/search:
+    $ref: 'src/docs/paths/logisticsPoint/search.yaml'
 
   # Nomenclature
   /api/nomenclature/all:
@@ -124,3 +132,6 @@ paths:
 
   /api/orders/cancel:
     $ref: 'src/docs/paths/orders/cancel.yaml'
+
+  /api/orders/search:
+    $ref: 'src/docs/paths/orders/search.yaml'

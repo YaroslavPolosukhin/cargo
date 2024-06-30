@@ -1,5 +1,7 @@
 import { validationResult } from "express-validator";
 import { models } from "../models/index.js";
+import Sequelize from 'sequelize'
+import Roles from '../enums/roles.js'
 
 export const create = async (req, res) => {
   const errors = validationResult(req);
@@ -62,4 +64,69 @@ export const getAll = async (req, res) => {
   res.json(contacts);
 };
 
-export default { create, getAll, update };
+export const search = async (req, res) => {
+  try {
+    const { limit, offset } = req.pagination;
+    const search = req.search;
+
+    let searchWordsLike = search.split(" ").map(word => {
+      return {
+        [Sequelize.Op.iLike]: `%${word}%`
+      }
+    })
+
+    const attrs = {
+      where: {
+        [Sequelize.Op.or]: [
+          {
+            name: {
+              [Sequelize.Op.or]: [
+                {
+                  [Sequelize.Op.or]: searchWordsLike
+                },
+                {
+                  [Sequelize.Op.in]: search.split(" ")
+                }
+              ]
+            }
+          },
+          {
+            surname: {
+              [Sequelize.Op.or]: [
+                {
+                  [Sequelize.Op.or]: searchWordsLike
+                },
+                {
+                  [Sequelize.Op.in]: search.split(" ")
+                }
+              ]
+            }
+          },
+          {
+            patronymic: {
+              [Sequelize.Op.or]: [
+                {
+                  [Sequelize.Op.or]: searchWordsLike
+                },
+                {
+                  [Sequelize.Op.in]: search.split(" ")
+                }
+              ]
+            }
+          },
+        ]
+      },
+    };
+
+    const count = await models.Contact.count(attrs);
+    const users = await models.Contact.findAll({ ...attrs, limit, offset });
+
+    const totalPages = Math.ceil(count / limit);
+    return res.status(200).json({ totalPages, count, users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export default { create, getAll, update, search };

@@ -1,4 +1,4 @@
-import { Op } from 'sequelize'
+import Sequelize, { Op, or } from 'sequelize'
 import { validationResult } from 'express-validator'
 import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
@@ -1736,7 +1736,7 @@ export const cancelOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).send();
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -1752,7 +1752,260 @@ export const deleteOrder = async (req, res) => {
     return res.status(200).send({ message: "Order deleted successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(500).send();
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const search = async (req, res) => {
+  try {
+    const { limit, offset } = req.pagination;
+    const search = req.search;
+
+    const searchVal = { [Sequelize.Op.or]: [] }
+
+    // by Logistic point name
+    searchVal[Sequelize.Op.or].push({
+      [Sequelize.Op.or]: [
+        {
+          "$departure.name$" : {
+            [Sequelize.Op.iLike]: `%${search}%`
+          }
+        },
+        {
+          "$destination.name$" : {
+            [Sequelize.Op.iLike]: `%${search}%`
+          }
+        }
+      ]
+    })
+
+    // by address name
+    searchVal[Sequelize.Op.or].push({
+      [Sequelize.Op.or]: [
+        {
+          "$departure.Address.name$" : {
+            [Sequelize.Op.iLike]: `%${search}%`
+          }
+        },
+        {
+          "$destination.Address.name$" : {
+            [Sequelize.Op.iLike]: `%${search}%`
+          }
+        }
+      ]
+    })
+
+    // by order adress
+    searchVal[Sequelize.Op.or].push({
+      [Sequelize.Op.or]: []
+    })
+
+    const types = ["departure", "destination"]
+    const words = search.split(" ")
+
+    for (const type of types) {
+      const findTabs = [`$${type}.Address.Country.name$`, `$${type}.Address.City.name$`, `$${type}.Address.Street.name$`, `$${type}.Address.house$`]
+      const sch = {
+        [Sequelize.Op.or]: []
+      }
+
+      if (words.length === 1) {
+        for (let i = 0; i < 3; i++) {
+          sch[Sequelize.Op.or].push({
+            [findTabs[i]]: {
+              [Sequelize.Op.iLike]: `%${search}%`
+            }
+          })
+        }
+      }
+      else if (words.length === 2) {
+        for (const word of words) {
+          for (const tab of findTabs) {
+            sch[Sequelize.Op.or].push({
+              [tab]: {
+                [Sequelize.Op.iLike]: `%${word}%`
+              }
+            })
+          }
+        }
+      }
+      else {
+        const perms = [[0, 2], [1, 2], [2, 3]]
+
+        for (const perm of perms) {
+          for (const word1 of words) {
+            for (const word2 of words) {
+              sch[Sequelize.Op.or].push({
+                [Sequelize.Op.and]: [
+                  {
+                    [findTabs[perm[0]]]: {
+                      [Sequelize.Op.iLike]: `%${word1}%`
+                    }
+                  },
+                  {
+                    [findTabs[perm[1]]]: {
+                      [Sequelize.Op.iLike]: `%${word2}%`
+                    }
+                  }
+                ]
+              })
+            }
+          }
+        }
+      }
+
+      searchVal[Sequelize.Op.or][2][Sequelize.Op.or].push(sch)
+    }
+
+    const attrs = {
+      where: searchVal,
+      attributes: [
+        "id",
+      ],
+      separate: true,
+      include: [
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          attributes: ["name"],
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ],
+              attributes: ["house", "name"]
+            }
+          ]
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          attributes: ["name"],
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ],
+              attributes: ["house", "name"]
+            },
+          ]
+        },
+      ],
+      limit,
+      offset
+    }
+
+    // const count = await models.Order.count(attrs);
+    const ordersIdsModel = await models.Order.findAll(attrs);
+
+    const count = ordersIdsModel.length;
+    const totalPages = Math.ceil(count / limit);
+
+    const orders = []
+    for (let i = 0; i < count; i++) {
+      const orderId = ordersIdsModel[i].id
+
+      const order = await models.Order.findOne({
+        where: { id: orderId },
+        include: [
+          {
+            model: models.Truck,
+            as: "truck",
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "departure",
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ],
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "destination",
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ],
+          },
+          { model: models.Person, as: "driver" },
+          { model: models.Person, as: "manager" },
+        ],
+      });
+
+      orders.push(order)
+    }
+
+    return res.status(200).json({ totalPages, count, orders });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -1772,5 +2025,6 @@ export default {
   updateOrder,
   getManagerPhone,
   cancelOrder,
-  deleteOrder
+  deleteOrder,
+  search
 };

@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import EmploymentType from "../enums/employmentType.js";
 import { models } from "../models/index.js";
 import Roles from "../enums/roles.js";
+import Sequelize from 'sequelize'
 
 export const getUnapproved = async (req, res) => {
   try {
@@ -423,5 +424,95 @@ export const getManagerPhone = async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).send()
+  }
+};
+
+export const search = async (req, res) => {
+  try {
+    const { limit, offset } = req.pagination;
+    const search = req.search;
+
+    let searchWordsLike = search.split(" ").map(word => {
+      return {
+        [Sequelize.Op.iLike]: `%${word}%`
+      }
+    })
+
+    const attrs = {
+      where: {
+        [Sequelize.Op.or]: [
+          {
+            name: {
+              [Sequelize.Op.or]: [
+                {
+                  [Sequelize.Op.or]: searchWordsLike
+                },
+                {
+                  [Sequelize.Op.in]: search.split(" ")
+                }
+              ]
+            }
+          },
+          {
+            surname: {
+              [Sequelize.Op.or]: [
+                {
+                  [Sequelize.Op.or]: searchWordsLike
+                },
+                {
+                  [Sequelize.Op.in]: search.split(" ")
+                }
+              ]
+            }
+          },
+          {
+            patronymic: {
+              [Sequelize.Op.or]: [
+                {
+                  [Sequelize.Op.or]: searchWordsLike
+                },
+                {
+                  [Sequelize.Op.in]: search.split(" ")
+                }
+              ]
+            }
+          },
+        ]
+      },
+      include: [
+        {
+          model: models.User,
+          as: "user",
+          include: [
+            {
+              model: models.Role,
+              as: "role",
+              where: {
+                name: Roles.DRIVER,
+              },
+            },
+          ],
+          where: {
+            approved: true,
+          },
+        },
+        { model: models.Contragent, as: "contragent" },
+        { model: models.JobPosition, as: "jobPosition" },
+        { model: models.Passport, as: "passport" },
+        {
+          model: models.DrivingLicence,
+          as: "drivingLicense",
+        }
+      ],
+    };
+
+    const count = await models.Person.count(attrs);
+    const users = await models.Person.findAll({ ...attrs, limit, offset });
+
+    const totalPages = Math.ceil(count / limit);
+    return res.status(200).json({ totalPages, count, users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

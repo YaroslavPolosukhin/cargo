@@ -1,5 +1,6 @@
 import { models } from "../models/index.js";
 import { validationResult } from "express-validator";
+import Sequelize from 'sequelize'
 
 export const create = async (req, res) => {
   const errors = validationResult(req);
@@ -99,8 +100,89 @@ export const getAll = async (req, res) => {
     res.json(addresses);
   } catch (error) {
     console.error(error);
-    res.status(500).send();
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
-export default { create, getAll, update };
+export const search = async (req, res) => {
+  try {
+    const { limit, offset } = req.pagination;
+    const search = req.search;
+
+    const words = search.split(" ")
+    const searchVal = { [Sequelize.Op.or]: [] }
+    const findTabs = ["$Country.name$", "$City.name$", "$Street.name$", "house"]
+
+    if (words.length === 1) {
+      for (let i = 0; i < 3; i++) {
+        searchVal[Sequelize.Op.or].push({
+          [findTabs[i]]: {
+            [Sequelize.Op.iLike]: `%${search}%`
+          }
+        })
+      }
+    } else if (words.length === 2) {
+      for (const word of words) {
+        for (const tab of findTabs) {
+          searchVal[Sequelize.Op.or].push({
+            [tab]: {
+              [Sequelize.Op.iLike]: `%${word}%`
+            }
+          })
+        }
+      }
+    } else {
+      const perms = [[0, 2], [1, 2], [2, 3]]
+
+      for (const perm of perms) {
+        for (const word1 of words) {
+          for (const word2 of words) {
+            searchVal[Sequelize.Op.or].push({
+              [Sequelize.Op.and]: [
+                {
+                  [findTabs[perm[0]]]: {
+                    [Sequelize.Op.iLike]: `%${word1}%`
+                  }
+                },
+                {
+                  [findTabs[perm[1]]]: {
+                    [Sequelize.Op.iLike]: `%${word2}%`
+                  }
+                },
+              ]
+            })
+          }
+        }
+      }
+    }
+
+    const attrs = {
+      where: {
+        [Sequelize.Op.or]: [
+          {
+            name: {
+              [Sequelize.Op.iLike]: `%${search}%`,
+            },
+          },
+          searchVal
+        ]
+      },
+      include: [models.Country, models.City, models.Street],
+      attributes: ["id", "name", "house", "building", "floor", "postcode", "description", "apartment"],
+      limit,
+      offset,
+    };
+
+    // const count = await models.Address.count(attrs);
+    const addresses = await models.Address.findAll(attrs);
+    const count = addresses.length;
+
+    const totalPages = Math.ceil(count / limit);
+    return res.status(200).json({ totalPages, count, addresses });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export default { create, getAll, update, search };

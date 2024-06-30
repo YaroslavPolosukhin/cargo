@@ -4,12 +4,14 @@ import checkRole from '../middlewares/checkRole.js'
 import Roles from '../enums/roles.js'
 import paginationMiddleware from '../middlewares/paginationMiddleware.js'
 import { createOrderValidator, updateGeoValidator, updateOrderValidator } from '../validators/orders.js'
+import searchMiddleware from '../middlewares/searchMiddleware.js'
 const router = express.Router()
 
 router.get('/available', paginationMiddleware, ordersController.getAvailableOrders)
 router.get('/current', ordersController.getCurrentOrder)
 router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, ordersController.getAll)
 router.get('/getManagerPhone', checkRole([Roles.DRIVER]), ordersController.getManagerPhone)
+router.get('/search', checkRole([Roles.MANAGER, Roles.DRIVER]), paginationMiddleware, searchMiddleware, ordersController.search)
 router.get('/:orderId', checkRole([Roles.MANAGER]), ordersController.getOrderById)
 router.get('/drivers', checkRole([Roles.MANAGER]), ordersController.getDriversOnTrip)
 router.post('/create', checkRole([Roles.MANAGER]), createOrderValidator, ordersController.createOrder)
@@ -22,4 +24,5 @@ router.post('/complete', checkRole([Roles.DRIVER]), ordersController.markOrderAs
 router.post('/updateGeo', checkRole([Roles.DRIVER]), updateGeoValidator, ordersController.updateGeo)
 router.post('/cancel', checkRole([Roles.DRIVER]), ordersController.cancelOrder)
 router.delete('/:orderId', checkRole([Roles.MANAGER]), ordersController.deleteOrder)
+
 export default router

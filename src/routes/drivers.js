@@ -8,6 +8,7 @@ import {
 } from "../validators/drivers.js";
 import { passportUpload } from "../config/multer.js";
 import * as driversController from '../controllers/driversController.js'
+import searchMiddleware from '../middlewares/searchMiddleware.js'
 
 const router = express.Router();
 
@@ -47,6 +48,14 @@ router.get(
   '/getManagerPhone',
   checkRole([Roles.DRIVER]),
   driversController.getManagerPhone
+)
+
+router.get(
+  '/search',
+  checkRole([Roles.MANAGER]),
+  paginationMiddleware,
+  searchMiddleware,
+  driversController.search
 )
 
 export default router;

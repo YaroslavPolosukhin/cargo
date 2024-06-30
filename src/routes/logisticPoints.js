@@ -3,10 +3,11 @@ import logisticPointsController from "../controllers/logisticPointsController.js
 import {
   createLogisticsPointValidator,
   updateLogisticsPointValidator,
-} from "../validators/logisticsPoint.js";
+} from '../validators/logisticsPoint.js'
 import checkRole from "../middlewares/checkRole.js";
 import paginationMiddleware from "../middlewares/paginationMiddleware.js";
 import Roles from "../enums/roles.js";
+import searchMiddleware from '../middlewares/searchMiddleware.js'
 
 const router = express.Router();
 
@@ -16,6 +17,13 @@ router.get(
   paginationMiddleware,
   logisticPointsController.getAll
 );
+router.get(
+  "/search",
+  checkRole([Roles.MANAGER]),
+  paginationMiddleware,
+  searchMiddleware,
+  logisticPointsController.search
+)
 router.post(
   "/",
   checkRole([Roles.MANAGER]),

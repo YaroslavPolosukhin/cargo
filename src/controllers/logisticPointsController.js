@@ -1,5 +1,6 @@
-import { validationResult } from "express-validator";
-import { models, sequelize } from "../models/index.js";
+import { validationResult } from 'express-validator'
+import { models, sequelize } from '../models/index.js'
+import Sequelize from 'sequelize'
 
 export const create = async (req, res) => {
   const errors = validationResult(req);
@@ -83,6 +84,9 @@ export const getAll = async (req, res) => {
           ]
         }
       ],
+      order: [
+        [ "name", "ASC" ]
+      ],
       limit,
       offset,
     });
@@ -104,8 +108,6 @@ export const getAll = async (req, res) => {
       });
       point.dataValues.contacts = logisticPointContacts;
     }
-
-    logisticPoints.reverse()
 
     const totalPages = Math.ceil(count / limit);
     res.json({ totalPages, count, logisticPoints });
@@ -133,4 +135,74 @@ export const deleteLogisticsPoint = async (req, res) => {
   }
 };
 
-export default { create, getAll, update, deleteLogisticsPoint };
+export const search = async (req, res) => {
+  const { limit, offset } = req.pagination;
+  const search = req.search;
+
+  try {
+    const count = await models.LogisticsPoint.count({
+      where: {
+        name: {
+          [Sequelize.Op.iLike]: `%${search}%`
+        }
+      }
+    });
+    const logisticPoints = await models.LogisticsPoint.findAll({
+      where: {
+        name: {
+          [Sequelize.Op.iLike]: `%${search}%`
+        }
+      },
+      include: [
+        {
+          model: models.Address,
+          as: "Address",
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+          ]
+        }
+      ],
+      order: [
+        [ "name", "ASC" ]
+      ],
+      limit,
+      offset,
+    });
+
+    for (const point of logisticPoints) {
+      point.dataValues.contacts = await models.LogisticsPointContacts.findAll({
+        where: {
+          logistics_point_id: point.id
+        },
+        include: [
+          {
+            model: models.Contact,
+            as: "contact",
+          }
+        ],
+        attributes: [
+          "contact_id",
+        ]
+      });
+    }
+
+    const totalPages = Math.ceil(count / limit);
+    res.json({ totalPages, count, logisticPoints });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export default { create, getAll, update, deleteLogisticsPoint, search };
