@@ -25,6 +25,14 @@ export const confirmDriverValidator = [
     .optional(),
   body("passportDepartmentCode")
     .optional(),
+  body('drivingLicenseSerial')
+    .optional()
+    .isNumeric()
+    .withMessage("Driving license serial must be numeric"),
+  body('drivingLicenseNumber')
+    .optional()
+    .isNumeric()
+    .withMessage("Driving license number must be numeric"),
 ];
 
 export const updateDriverValidator = [

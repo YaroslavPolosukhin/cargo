@@ -95,6 +95,12 @@ post:
               description: Passport photos of the driver
               maxItems: 6
               nullable: true
+            drivingLicenseSerial:
+              type: integer
+              description: Serial of driver's license
+            drivingLicenseNumber:
+              type: integer
+              description: Number of driver's license
   responses:
     '200':
       description: Driver registration confirmed successfully

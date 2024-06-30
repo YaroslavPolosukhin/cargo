@@ -251,6 +251,8 @@ export const confirm = async (req, res) => {
     passportIssuedBy,
     passportIssueDate,
     passportDepartmentCode,
+    drivingLicenseNumber,
+    drivingLicenseSerial
   } = req.body;
 
   try {
@@ -307,6 +309,16 @@ export const confirm = async (req, res) => {
       }
     }
 
+    let drivingLicenseId = null;
+    if (drivingLicenseSerial && drivingLicenseNumber) {
+      const drivingLicense = await models.DrivingLicence.create({
+        serial: drivingLicenseSerial,
+        number: drivingLicenseNumber,
+      })
+
+      drivingLicenseId = drivingLicense.id
+    }
+
     // Get Person by user_id
     const person = await models.Person.findByUserId(userId);
     if (!person) {
@@ -328,10 +340,10 @@ export const confirm = async (req, res) => {
       passport_id: passport ? passport.id : null,
       self_employed: employmentType === EmploymentType.SELF_EMPLOYED,
       individual: employmentType === EmploymentType.INDIVIDUAL,
-      company: employmentType === EmploymentType.COMPANY,
       contragent_id: contragent ? contragent.id : null,
       email,
       telegram,
+      driving_license_id: drivingLicenseId
     });
 
     res
