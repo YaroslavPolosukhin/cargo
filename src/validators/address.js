@@ -2,24 +2,29 @@ import { body } from "express-validator";
 
 export const createAddressValidator = [
   body("name")
-    .optional()
     .notEmpty()
     .withMessage("Name is required.")
     .isString()
     .withMessage("Name must be a string."),
   body("city")
-    .optional()
     .notEmpty()
     .withMessage("City is required.")
     .isString()
     .withMessage("City must be a string."),
   body("street")
-    .optional()
     .notEmpty()
     .withMessage("Street is required.")
     .isString()
     .withMessage("Street must be a string."),
-  body("house").optional().isString().withMessage("House must be a string."),
+  body("region")
+    .optional()
+    .isString()
+    .withMessage("City must be a string."),
+  body("house")
+    .notEmpty()
+    .withMessage("House is required.")
+    .isString()
+    .withMessage("House must be a string."),
   body("apartment")
     .optional()
     .isString()
@@ -32,10 +37,12 @@ export const createAddressValidator = [
     .optional()
     .isString()
     .withMessage("Building must be a string."),
-  body("floor").optional().isInt().withMessage("Floor must be an integer."),
+  body("floor")
+    .optional()
+    .isInt()
+    .withMessage("Floor must be an integer."),
   body("postcode")
     .optional()
-    .notEmpty()
     .isPostalCode("any")
     .withMessage("Please enter a valid postcode."),
 ];
@@ -43,20 +50,14 @@ export const createAddressValidator = [
 export const updateAddressValidator = [
   body("name")
     .optional()
-    .notEmpty()
-    .withMessage("Name is required.")
     .isString()
     .withMessage("Name must be a string."),
   body("city")
     .optional()
-    .notEmpty()
-    .withMessage("City is required.")
     .isString()
     .withMessage("City must be a string."),
   body("street")
     .optional()
-    .notEmpty()
-    .withMessage("Street is required.")
     .isString()
     .withMessage("Street must be a string."),
   body("house").optional().isString().withMessage("House must be a string."),
@@ -75,7 +76,6 @@ export const updateAddressValidator = [
   body("floor").optional().isInt().withMessage("Floor must be an integer."),
   body("postcode")
     .optional()
-    .notEmpty()
     .isPostalCode("any")
     .withMessage("Please enter a valid postcode."),
 ];

@@ -40,6 +40,10 @@ export const getAvailableOrders = async (req, res) => {
               {
                 model: models.Street,
                 as: "Street",
+              },
+              {
+                model: models.Region,
+                as: "Region",
               }
             ]
           },
@@ -68,6 +72,10 @@ export const getAvailableOrders = async (req, res) => {
               {
                 model: models.Street,
                 as: "Street",
+              },
+              {
+                model: models.Region,
+                as: "Region",
               }
             ]
           },
@@ -373,6 +381,10 @@ export const getAll = async (req, res) => {
               {
                 model: models.Street,
                 as: "Street",
+              },
+              {
+                model: models.Region,
+                as: "Region",
               }
             ]
           },
@@ -401,6 +413,10 @@ export const getAll = async (req, res) => {
               {
                 model: models.Street,
                 as: "Street",
+              },
+              {
+                model: models.Region,
+                as: "Region",
               }
             ]
           },
@@ -857,6 +873,10 @@ export const takeOrder = async (req, res) => {
               {
                 model: models.Street,
                 as: "Street",
+              },
+              {
+                model: models.Region,
+                as: "Region",
               }
             ]
           }
@@ -1291,6 +1311,10 @@ export const markOrderAsDeparted = async (req, res) => {
               {
                 model: models.Street,
                 as: "Street",
+              },
+              {
+                model: models.Region,
+                as: "Region",
               }
             ]
           },

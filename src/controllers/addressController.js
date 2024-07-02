@@ -18,6 +18,7 @@ export const create = async (req, res) => {
     postcode,
     description,
     apartment,
+    region
   } = req.body;
 
   const body = JSON.parse(JSON.stringify(req.body));
@@ -29,6 +30,13 @@ export const create = async (req, res) => {
     const [streetObject] = await models.Street.findOrCreate({
       where: { name: street },
     });
+
+    let region = null;
+    if (body.hasOwnProperty("region")) {
+      region = await models.Region.findOrCreate({
+        where: { name: body.region },
+      });
+    }
 
     const address = await models.Address.create(
       {
@@ -46,8 +54,11 @@ export const create = async (req, res) => {
         ...(body.hasOwnProperty("apartment") && {
           apartment,
         }),
+        ...(region && {
+          region_id: region[0].id,
+        }),
       },
-      { include: [models.Country, models.City, models.Street] }
+      { include: [models.Country, models.City, models.Street, models.Region] }
     );
     res.status(201).json({ address });
   } catch (error) {
@@ -65,13 +76,22 @@ export const update = async (req, res) => {
     if (address === null) {
       return res.status(404).json({ error: "Address not found" });
     }
-    await address.update({
-      name,
-      house,
-      building,
-      floor,
-      postcode,
-    });
+    await address.update(
+      {
+        name,
+        house,
+        building,
+        floor,
+        postcode,
+      },
+      {
+        include: [
+          models.Country,
+          models.City,
+          models.Street,
+        ]
+      }
+    );
 
     const cityObject = await models.City.findOrCreate({
       where: { name: city },
@@ -95,12 +115,12 @@ export const update = async (req, res) => {
 export const getAll = async (req, res) => {
   try {
     const addresses = await models.Address.findAll({
-      include: [models.Country, models.City, models.Street],
+      include: [models.Country, models.City, models.Street, models.Region],
     });
     res.json(addresses);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal serveaddressr error" });
   }
 };
 

@@ -14,7 +14,38 @@ put:
     content:
       application/json:
         schema:
-          $ref: '../../components/shipping.yaml#/components/schemas/Address'
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the address
+            city:
+              type: string
+              description: The city of the address
+            street:
+              type: string
+              description: The street of the address
+            region:
+              type: string
+              description: The region of the address
+            house:
+              type: string
+              description: The house of the address
+            apartment:
+              type: string
+              description: The apartment of the address
+            description:
+              type: string
+              description: The description of the address
+            building:
+              type: string
+              description: The building of the address
+            floor:
+              type: integer
+              description: The floor of the address
+            postcode:
+              type: string
+              description: The postcode of the address
   responses:
     '200':
       description: Address updated successfully

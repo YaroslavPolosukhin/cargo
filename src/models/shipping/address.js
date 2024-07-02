@@ -7,6 +7,7 @@ export default (sequelize) => {
       this.belongsTo(models.Country, { foreignKey: "country_id" });
       this.belongsTo(models.City, { foreignKey: "city_id" });
       this.belongsTo(models.Street, { foreignKey: "street_id" });
+      this.belongsTo(models.Region, { foreignKey: "region_id" });
     }
   }
 
@@ -48,6 +49,14 @@ export default (sequelize) => {
         allowNull: true,
         references: {
           model: "streets",
+          key: "id",
+        },
+      },
+      region_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "regions",
           key: "id",
         },
       },

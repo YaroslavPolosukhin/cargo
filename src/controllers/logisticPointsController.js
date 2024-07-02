@@ -81,6 +81,10 @@ export const getAll = async (req, res) => {
               model: models.Country,
               as: "Country",
             },
+            {
+              model: models.Region,
+              as: "Region",
+            }
           ]
         }
       ],
@@ -170,6 +174,10 @@ export const search = async (req, res) => {
               model: models.Country,
               as: "Country",
             },
+            {
+              model: models.Region,
+              as: "Region",
+            }
           ]
         }
       ],
