@@ -24,6 +24,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
+
 const swaggerDocument = YAML.load(path.join(__dirname, "docs", "swagger.yaml"));
 
 app.get("/", (req, res) => {

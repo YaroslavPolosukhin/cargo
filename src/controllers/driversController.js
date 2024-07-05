@@ -27,10 +27,19 @@ export const getUnapproved = async (req, res) => {
           include: [
             { model: models.Contragent, as: "contragent" },
             { model: models.JobPosition, as: "jobPosition" },
-            { model: models.Passport, as: "passport" },
             {
               model: models.DrivingLicence,
               as: "drivingLicense",
+            },
+            {
+              model: models.Passport,
+              as: "passport",
+              include: [
+                {
+                  model: models.PassportPhoto,
+                  as: "photos"
+                }
+              ]
             }
           ]
         },
@@ -71,10 +80,19 @@ export const getApproved = async (req, res) => {
         },
         { model: models.Contragent, as: "contragent" },
         { model: models.JobPosition, as: "jobPosition" },
-        { model: models.Passport, as: "passport" },
         {
           model: models.DrivingLicence,
           as: "drivingLicense",
+        },
+        {
+          model: models.Passport,
+          as: "passport",
+          include: [
+            {
+              model: models.PassportPhoto,
+              as: "photos"
+            }
+          ]
         }
       ],
     };

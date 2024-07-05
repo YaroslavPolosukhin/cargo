@@ -22,7 +22,10 @@ export const createContactValidator = [
   body("phone")
     .isMobilePhone()
     .withMessage("Please enter a valid phone number."),
-  body("email").isEmail().withMessage("Please enter a valid email."),
+  body("email")
+    .optional()
+    .isString()
+    .withMessage("Email must be a string."),
   body("telegram")
     .optional()
     .isString()

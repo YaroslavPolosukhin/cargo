@@ -43,8 +43,8 @@ export const createAddressValidator = [
     .withMessage("Floor must be an integer."),
   body("postcode")
     .optional()
-    .isPostalCode("any")
-    .withMessage("Please enter a valid postcode."),
+    .isString()
+    .withMessage("Postcode must be a string."),
 ];
 
 export const updateAddressValidator = [

@@ -29,7 +29,9 @@ export const create = async (req, res) => {
       patronymic,
       jobTitle,
       phone,
-      email,
+      ...((body.hasOwnProperty("email") && email && email !== "") && {
+        email
+      }),
       telegram,
       ...(body.hasOwnProperty("description") && {
         description,

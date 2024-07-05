@@ -187,6 +187,16 @@ export const getUser = async (req, res) => {
         model: models.DrivingLicence,
         as: "drivingLicense",
       },
+      {
+        model: models.Passport,
+        as: "passport",
+        include: [
+          {
+            model: models.PassportPhoto,
+            as: "photos"
+          }
+        ]
+      }
     ],
   });
 
