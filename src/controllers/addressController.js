@@ -114,9 +114,21 @@ export const update = async (req, res) => {
 
 export const getAll = async (req, res) => {
   try {
+    const {
+      limit,
+      offset
+    } = req.pagination;
+
+    if (req.query.hasOwnProperty("search")) {
+      return search(req, res);
+    }
+
     const addresses = await models.Address.findAll({
       include: [models.Country, models.City, models.Street, models.Region],
+      limit,
+      offset,
     });
+
     res.json(addresses);
   } catch (error) {
     console.error(error);
@@ -127,7 +139,7 @@ export const getAll = async (req, res) => {
 export const search = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
-    const search = req.search;
+    const search = req.query.search;
 
     const words = search.split(" ")
     const searchVal = { [Sequelize.Op.or]: [] }

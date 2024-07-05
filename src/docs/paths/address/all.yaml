@@ -3,6 +3,15 @@ get:
   operationId: getAllAddresses
   tags:
     - Addresses
+  parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+    - name: search
+      in: query
+      description: Search for addresses by name
+      required: false
+      schema:
+        type: string
   responses:
     '200':
       description: An array of addresses

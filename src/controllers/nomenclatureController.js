@@ -3,6 +3,10 @@ import { validationResult } from "express-validator";
 
 export const getNomenclatures = async (req, res) => {
   try {
+    if (req.query.hasOwnProperty("name")) {
+      return getNomenclaturesByName(req, res);
+    }
+
     const nomenclatures = await models.Nomenclature.findAll();
 
     const updatedNomenclatures = await Promise.all(
@@ -28,7 +32,17 @@ export const getNomenclaturesByName = async (req, res) => {
   }
   try {
     const nomenclatures = await models.Nomenclature.searchByName(name);
-    return res.status(200).json(nomenclatures);
+
+    const updatedNomenclatures = await Promise.all(
+      nomenclatures.map(async (nomenclature) => {
+        const measure = await models.Measure.findByPk(nomenclature.measure_id);
+        nomenclature.dataValues.measure = measure.dataValues;
+        delete nomenclature.dataValues.measure_id;
+        return nomenclature;
+      })
+    );
+
+    return res.status(200).json(updatedNomenclatures);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error." });

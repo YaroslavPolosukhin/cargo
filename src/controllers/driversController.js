@@ -8,6 +8,10 @@ export const getUnapproved = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
 
+    if (req.query.hasOwnProperty("search")) {
+      return search(req, res);
+    }
+
     const attrs = {
       where: {
         approved: false,
@@ -60,6 +64,11 @@ export const getUnapproved = async (req, res) => {
 export const getApproved = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
+
+    if (req.query.hasOwnProperty("search")) {
+      return search(req, res);
+    }
+
     const attrs = {
       include: [
         {
@@ -460,9 +469,9 @@ export const getManagerPhone = async (req, res) => {
 export const search = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
-    const search = req.search;
+    const search = req.query.search;
 
-    let searchWordsLike = search.split(" ").map(word => {
+    const searchWordsLike = search.split(" ").map(word => {
       return {
         [Sequelize.Op.iLike]: `%${word}%`
       }

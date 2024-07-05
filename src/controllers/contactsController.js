@@ -62,16 +62,34 @@ export const update = async (req, res) => {
 };
 
 export const getAll = async (req, res) => {
-  const contacts = await models.Contact.findAll();
-  res.json(contacts);
+  try {
+    const {
+      limit,
+      offset
+    } = req.pagination;
+
+    if (req.query.hasOwnProperty("search")) {
+      return search(req, res);
+    }
+
+    const contacts = await models.Contact.findAll({
+      limit,
+      offset
+    });
+
+    res.status(200).json(contacts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 export const search = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
-    const search = req.search;
+    const search = req.query.search;
 
-    let searchWordsLike = search.split(" ").map(word => {
+    const searchWordsLike = search.split(" ").map(word => {
       return {
         [Sequelize.Op.iLike]: `%${word}%`
       }

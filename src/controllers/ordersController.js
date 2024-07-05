@@ -334,6 +334,10 @@ export const getAll = async (req, res) => {
   const { limit, offset } = req.pagination;
   const { status = "all" } = req.query;
 
+  if (req.query.hasOwnProperty("search")) {
+    return search(req, res);
+  }
+
   let _status = [OrderStatus.LOADING, OrderStatus.DEPARTED, OrderStatus.CREATED, OrderStatus.CONFIRMATION, OrderStatus.COMPLETED, OrderStatus.CANCELLED];
   switch (status.toLowerCase()) {
     case "confirmation":
@@ -1783,7 +1787,7 @@ export const deleteOrder = async (req, res) => {
 export const search = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
-    const search = req.search;
+    const search = req.query.search;
 
     const searchVal = { [Sequelize.Op.or]: [] }
 

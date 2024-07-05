@@ -10,7 +10,7 @@ const router = express.Router()
 
 router.post('/', checkRole([Roles.MANAGER]), createAddressValidator, addressController.create)
 router.put('/:addressId', checkRole([Roles.MANAGER]), updateAddressValidator, addressController.update)
-router.get('/all', checkRole([Roles.MANAGER]), addressController.getAll)
+router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, addressController.getAll)
 router.get('/search', checkRole([Roles.MANAGER]), paginationMiddleware, searchMiddleware, addressController.search)
 
 export default router

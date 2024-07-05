@@ -3,6 +3,13 @@ get:
   operationId: getNomenclatures
   tags:
     - Nomenclature
+  parameters:
+    - name: name
+      in: query
+      description: Search for nomenclatures by name
+      required: false
+      schema:
+        type: string
   responses:
     '200':
       description: An array of nomenclatures

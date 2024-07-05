@@ -7,6 +7,12 @@ get:
     - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
     - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
     - $ref: '../../common-parameters.yaml#/parameters/StatusQueryParam'
+    - name: search
+      in: query
+      description: Search for drivers by name
+      required: false
+      schema:
+        type: string
   responses:
     '200':
       description: An array of orders

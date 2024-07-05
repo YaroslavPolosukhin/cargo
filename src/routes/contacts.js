@@ -8,7 +8,7 @@ import searchMiddleware from '../middlewares/searchMiddleware.js'
 
 const router = express.Router()
 
-router.get('/all', checkRole([Roles.MANAGER]), contactsController.getAll)
+router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, contactsController.getAll)
 router.post('/', checkRole([Roles.MANAGER]), createContactValidator, contactsController.create)
 router.put('/:contactId', checkRole([Roles.MANAGER]), updateContactValidator, contactsController.update)
 router.get(

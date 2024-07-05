@@ -62,6 +62,10 @@ export const getAll = async (req, res) => {
   const { limit, offset } = req.pagination;
 
   try {
+    if (req.query.hasOwnProperty("search")) {
+      return search(req, res);
+    }
+
     const count = await models.LogisticsPoint.count({});
     const logisticPoints = await models.LogisticsPoint.findAll({
       include: [
@@ -141,7 +145,7 @@ export const deleteLogisticsPoint = async (req, res) => {
 
 export const search = async (req, res) => {
   const { limit, offset } = req.pagination;
-  const search = req.search;
+  const search = req.query.search;
 
   try {
     const count = await models.LogisticsPoint.count({

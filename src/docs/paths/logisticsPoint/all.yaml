@@ -6,6 +6,12 @@ get:
   parameters:
     - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
     - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+    - name: search
+      in: query
+      description: Search for logistic point by name
+      required: false
+      schema:
+        type: string
   responses:
     '200':
       description: A list of logistics points
