@@ -70,7 +70,7 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password.trim(), 8);
-    const user = await models.User.create({
+    let user = await models.User.create({
       phone,
       password: hashedPassword,
       role_id: 1,
@@ -87,6 +87,21 @@ export const register = async (req, res) => {
 
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
+
+    await models.User.update(
+      {
+        accessToken: accessToken,
+        refresh_token: refreshToken,
+      },
+      {
+        where: { id: user.id }
+      }
+    );
+
+    user = await models.User.scope("withTokens").findOne({
+      where: { id: user.id },
+      include: [{ model: models.Role, as: "role" }]
+    })
 
     res.status(201).send({
       accessToken,
@@ -109,7 +124,7 @@ export const login = async (req, res) => {
   try {
     const fcmToken = req.body.fcmToken || null;
     const phone = req.body.phone.toString();
-    const user = await models.User.scope("withPassword").findOne({
+    let user = await models.User.scope("withPassword").findOne({
       where: { phone },
       include: [{ model: models.Role, as: "role" }],
     });
@@ -124,6 +139,11 @@ export const login = async (req, res) => {
       { refresh_token: refreshToken, fcm_token: fcmToken },
       { where: { id: user.id } }
     );
+
+    user = await models.User.scope("withTokens").findOne({
+      where: { id: user.id },
+      include: [{ model: models.Role, as: "role" }]
+    });
 
     res.status(200).send({
       accessToken,
