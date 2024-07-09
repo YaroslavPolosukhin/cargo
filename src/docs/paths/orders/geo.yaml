@@ -1,0 +1,27 @@
+get:
+  summary: get geolocation of order
+  operationId: geoOrder
+  tags:
+    - Order
+  parameters:
+    - name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: Successfully retrieved the geolocation of the order
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              latitude:
+                type: number
+                example: 55.7558
+              longitude:
+                type: number
+                example: 37.6176
+    '500':
+      description: An error occurred while deleting the order

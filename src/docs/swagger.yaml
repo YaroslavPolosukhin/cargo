@@ -135,3 +135,6 @@ paths:
 
   /api/orders/search:
     $ref: 'src/docs/paths/orders/search.yaml'
+
+  /api/orders/{orderId}/geo:
+    $ref: 'src/docs/paths/orders/geo.yaml'

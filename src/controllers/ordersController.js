@@ -2037,6 +2037,25 @@ export const search = async (req, res) => {
   }
 }
 
+export const getGeo = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await models.Order.findByPk(orderId);
+
+    if (!order) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
+    return res.status(200).send({
+      latitude: order.geo.coordinates[0],
+      longitude: order.geo.coordinates[1],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export default {
   getAvailableOrders,
   getCurrentOrder,
@@ -2054,5 +2073,6 @@ export default {
   getManagerPhone,
   cancelOrder,
   deleteOrder,
-  search
+  search,
+  getGeo
 };
