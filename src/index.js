@@ -15,8 +15,16 @@ import contactsRoutes from "./routes/contacts.js";
 import measureRoutes from "./routes/measure.js";
 import generalRoutes from "./routes/general.js";
 import logisticPointsRoutes from "./routes/logisticPoints.js";
+import admin from "firebase-admin";
+import { createRequire } from 'node:module';
 
+const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const serviceAccount = require(path.join(__dirname, "..", "serviceAccountKey.json"));
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const app = express();
 app.use(bodyParser.json());

@@ -3,6 +3,7 @@ import { validationResult } from 'express-validator'
 import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
 import costType from '../enums/costType.js'
+import admin from 'firebase-admin'
 
 /**
  * Retrieves the list of available orders.
@@ -994,6 +995,57 @@ export const takeOrder = async (req, res) => {
       ],
     });
 
+    try {
+      const manager = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } })
+      const driver = await models.User.findByPk(person.user_id);
+
+      let fio = null;
+      if (person.surname) {
+        fio = person.surname
+      };
+      if (person.name){
+        if (fio) {
+          fio += ' ' + person.name;
+        } else {
+          fio = person.name
+        }
+      }
+      if (person.patronymic) {
+        if (fio) {
+          fio += ' ' + person.patronymic;
+        } else {
+          fio = person.patronymic
+        }
+      }
+
+      let body = 'Водитель';
+      if (fio) {
+        body += ' ' + fio;
+      }
+      body += ` ${driver.phone} взял заказ`
+
+      const message = {
+        notification: {
+          title: 'Статус рейса изменен',
+          body: body,
+        },
+        token: manager.fcm_token,
+      };
+
+      console.log(message)
+
+      await admin.messaging().send(message)
+        .then((response) => {
+          console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending message:', error);
+        });
+    } catch (e) {
+      console.log("something wrong with sending notification")
+      console.error(e)
+    }
+
     res
       .status(200)
       .send({
@@ -1328,6 +1380,56 @@ export const markOrderAsDeparted = async (req, res) => {
       ],
     });
 
+    try {
+      const person = await models.Person.findByUserId(req.user.id);
+      const manager = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } })
+      const driver = await models.User.findByPk(person.user_id);
+
+      let fio = null;
+      if (person.surname) {
+        fio = person.surname
+      };
+      if (person.name){
+        if (fio) {
+          fio += ' ' + person.name;
+        } else {
+          fio = person.name
+        }
+      }
+      if (person.patronymic) {
+        if (fio) {
+          fio += ' ' + person.patronymic;
+        } else {
+          fio = person.patronymic
+        }
+      }
+
+      let body = `Водитель`;
+      if (fio) {
+        body += ' ' + fio;
+      }
+      body += ` ${driver.phone} погрузился`
+
+      const message = {
+        notification: {
+          title: 'Статус рейса изменен',
+          body: body,
+        },
+        token: manager.fcm_token,
+      };
+
+      await admin.messaging().send(message)
+        .then((response) => {
+          console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending message:', error);
+        });
+    } catch (e) {
+      console.log("something wrong with sending notification")
+      console.error(e)
+    }
+
     return res
       .status(200)
       .send({ message: "Driver has departed and order status updated", order });
@@ -1432,6 +1534,56 @@ export const markOrderAsCompleted = async (req, res) => {
         { model: models.Person, as: "manager" },
       ],
     });
+
+    try {
+      const person = await models.Person.findByUserId(req.user.id);
+      const manager = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } })
+      const driver = await models.User.findByPk(person.user_id);
+
+      let fio = null;
+      if (person.surname) {
+        fio = person.surname
+      };
+      if (person.name){
+        if (fio) {
+          fio += ' ' + person.name;
+        } else {
+          fio = person.name
+        }
+      }
+      if (person.patronymic) {
+        if (fio) {
+          fio += ' ' + person.patronymic;
+        } else {
+          fio = person.patronymic
+        }
+      }
+
+      let body = `Водитель`;
+      if (fio) {
+        body += ' ' + fio;
+      }
+      body += ` ${driver.phone} завершил рейс`
+
+      const message = {
+        notification: {
+          title: 'Статус рейса изменен',
+          body: body,
+        },
+        token: manager.fcm_token,
+      };
+
+      await admin.messaging().send(message)
+        .then((response) => {
+          console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending message:', error);
+        });
+    } catch (e) {
+      console.log("something wrong with sending notification")
+      console.error(e)
+    }
 
     return res
       .status(200)
@@ -2044,6 +2196,10 @@ export const getGeo = async (req, res) => {
 
     if (!order) {
       return res.status(404).send({ message: "Order not found" });
+    }
+
+    if (!order.geo) {
+      return res.status(404).send({ message: "Order doen't have geolocation" });
     }
 
     return res.status(200).send({
