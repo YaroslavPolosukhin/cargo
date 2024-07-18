@@ -3,7 +3,7 @@ import { validationResult } from 'express-validator'
 import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
 import costType from '../enums/costType.js'
-import admin from 'firebase-admin'
+import { getMessaging } from 'firebase-admin/messaging'
 
 /**
  * Retrieves the list of available orders.
@@ -1025,16 +1025,24 @@ export const takeOrder = async (req, res) => {
       body += ` ${driver.phone} взял заказ`
 
       const message = {
+        data: {
+          title: 'Статус рейса изменен',
+          body,
+        },
         notification: {
           title: 'Статус рейса изменен',
-          body: body,
+          body,
+        },
+        android: {
+          notification: {
+            title: 'Статус рейса изменен',
+            body,
+          },
         },
         token: manager.fcm_token,
       };
 
-      console.log(message)
-
-      await admin.messaging().send(message)
+      await getMessaging().send(message)
         .then((response) => {
           console.log('Successfully sent message:', response);
         })
@@ -1418,7 +1426,7 @@ export const markOrderAsDeparted = async (req, res) => {
         token: manager.fcm_token,
       };
 
-      await admin.messaging().send(message)
+      await getMessaging().send(message)
         .then((response) => {
           console.log('Successfully sent message:', response);
         })
@@ -1573,7 +1581,7 @@ export const markOrderAsCompleted = async (req, res) => {
         token: manager.fcm_token,
       };
 
-      await admin.messaging().send(message)
+      await getMessaging().send(message)
         .then((response) => {
           console.log('Successfully sent message:', response);
         })
