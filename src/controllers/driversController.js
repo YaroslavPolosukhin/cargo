@@ -3,6 +3,7 @@ import EmploymentType from "../enums/employmentType.js";
 import { models } from "../models/index.js";
 import Roles from "../enums/roles.js";
 import Sequelize from 'sequelize'
+import { getMessaging } from 'firebase-admin/messaging'
 
 export const getUnapproved = async (req, res) => {
   try {
@@ -352,7 +353,7 @@ export const confirm = async (req, res) => {
       return res.status(400).json({ message: "Driver not found" });
     }
 
-    const user = await models.User.findByPk(userId);
+    const user = await models.User.scope("withTokens").findByPk(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -372,6 +373,39 @@ export const confirm = async (req, res) => {
       telegram,
       driving_license_id: drivingLicenseId
     });
+
+    try {
+      const body = 'Регистрация подтверждена менеджером'
+
+      const message = {
+        data: {
+          title: 'Ваш статус обновлен',
+          body,
+        },
+        notification: {
+          title: 'Ваш статус обновлен',
+          body,
+        },
+        android: {
+          notification: {
+            title: 'Ваш статус обновлен',
+            body,
+          },
+        },
+        token: user.fcm_token,
+      };
+
+      await getMessaging().send(message)
+        .then((response) => {
+          console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending message:', error);
+        });
+    } catch (e) {
+      console.log("something wrong with sending notification")
+      console.error(e)
+    }
 
     res
       .status(200)
