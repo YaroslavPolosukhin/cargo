@@ -20,15 +20,22 @@ export const responseLogger = (req, res, next) => {
   res.on('finish', () => {
     console.log(`Response status for ${req.method} ${req.originalUrl}: ${res.statusCode}`);
 
-    const goodStatuses = [200, 201, 204];
-    if (!goodStatuses.includes(res.statusCode)) {
-      if (!fs.existsSync(path.join(__dirname, '..', '..', 'error_responses'))){
-        fs.mkdirSync(path.join(__dirname, '..', '..', 'error_responses'), (err) => console.error(`Error creating directory: ${err}`));
+    const goodStatuses = [200, 201, 204, 304, 404];
+    const excludedUrls = ['/api/docs', '/'];
+
+    if (!goodStatuses.includes(res.statusCode) && !excludedUrls.includes(req.originalUrl)) {
+      try {
+        if (!fs.existsSync(path.join(__dirname, '..', '..', 'error_responses'))) {
+          fs.mkdirSync(path.join(__dirname, '..', '..', 'error_responses'), (err) => console.error(`Error creating directory: ${err}`));
+        }
+
+        const data = `${req.method} ${req.originalUrl} ${res.statusCode}\n\nreq body:\n${JSON.stringify(req.body)}\n\nres.body:\n${JSON.stringify(JSON.parse(res.body))}`
+
+        fs.appendFileSync(path.join(__dirname, '..', '..', 'error_responses', `${Date.now()}.txt`), data, (err) => console.error(`Error writing response to file: ${err}`));
       }
-
-      const data = `${req.method} ${req.originalUrl} ${res.statusCode}\n\nreq body:\n${JSON.stringify(req.body)}\n\nres.body:\n${JSON.stringify(JSON.parse(res.body))}`
-
-      fs.appendFileSync(path.join(__dirname, '..', '..', 'error_responses', `${Date.now()}.txt`), data, (err) => console.error(`Error writing response to file: ${err}`));
+      catch (err) {
+        console.error(`Error writing response to file: ${err}`);
+      }
     }
   });
 
