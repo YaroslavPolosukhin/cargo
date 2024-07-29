@@ -1,11 +1,11 @@
 import { body } from "express-validator";
 
 export const createAddressValidator = [
-  body("name")
-    .notEmpty()
-    .withMessage("Name is required.")
-    .isString()
-    .withMessage("Name must be a string."),
+  // body("name")
+  //   .notEmpty()
+  //   .withMessage("Name is required.")
+  //   .isString()
+  //   .withMessage("Name must be a string."),
   body("city")
     .notEmpty()
     .withMessage("City is required.")

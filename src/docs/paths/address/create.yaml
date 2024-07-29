@@ -15,9 +15,6 @@ post:
             - street
             - house
           properties:
-            name:
-              type: string
-              description: The name of the address
             city:
               type: string
               description: The city of the address
