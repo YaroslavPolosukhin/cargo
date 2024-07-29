@@ -17,6 +17,7 @@ import generalRoutes from "./routes/general.js";
 import logisticPointsRoutes from "./routes/logisticPoints.js";
 import admin from "firebase-admin";
 import { createRequire } from 'node:module';
+import { responseLogger } from './middlewares/logger.js'
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,6 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(responseLogger);
 
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
 

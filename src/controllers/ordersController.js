@@ -1313,10 +1313,45 @@ export const rejectDriver = async (req, res) => {
             }
           ],
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
       ],
     });
+
+    try {
+      const driver = await models.User.findByPk(order.driver.user_id);
+
+      const body = 'Менеджер отклонил рейс';
+
+      const message = {
+        data: {
+          title: 'Статус рейса изменен',
+          body,
+        },
+        notification: {
+          title: 'Статус рейса изменен',
+          body,
+        },
+        android: {
+          notification: {
+            title: 'Статус рейса изменен',
+            body,
+          },
+        },
+        token: driver.fcm_token,
+      };
+
+      await getMessaging().send(message)
+        .then((response) => {
+          console.log('Successfully sent message:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending message:', error);
+        });
+    } catch (e) {
+      console.log("something wrong with sending notification")
+      console.error(e)
+    }
 
     return res.status(200).send({
       message:

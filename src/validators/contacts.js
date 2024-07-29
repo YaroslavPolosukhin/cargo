@@ -1,7 +1,11 @@
 import { body } from "express-validator";
 
 export const createContactValidator = [
-  body("name").notEmpty().withMessage("Name is required."),
+  body("name")
+    .notEmpty()
+    .withMessage("Name is required.")
+    .isString()
+    .withMessage("Name must be a string."),
   body("surname")
     .optional()
     .isString()
