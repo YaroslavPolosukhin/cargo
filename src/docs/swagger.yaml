@@ -44,6 +44,8 @@ paths:
     $ref: 'src/docs/paths/drivers/getManagerPhone.yaml'
   /api/drivers/search:
     $ref: 'src/docs/paths/drivers/search.yaml'
+  /api/drivers/updates (ws):
+    $ref: 'src/docs/paths/drivers/updates.yaml'
 
   # CONTACTS
   /api/contacts/all:
@@ -138,3 +140,9 @@ paths:
 
   /api/orders/{orderId}/geo:
     $ref: 'src/docs/paths/orders/geo.yaml'
+
+  /api/orders/updates (ws):
+    $ref: 'src/docs/paths/orders/updates.yaml'
+
+  /api/orders/location/{orderId} (ws):
+    $ref: 'src/docs/paths/orders/location.yaml'

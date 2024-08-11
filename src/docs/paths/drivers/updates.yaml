@@ -1,0 +1,6 @@
+post:
+  tags:
+    - Drivers
+  summary: driver's sockets
+  description: 'Работает только для водителей. Если водитель не подтверждён, ждёт подтверждения. При подтверждении или если уже подтверждён, выводит json: {"status": "approved"}'
+  operationId: driverSocket

@@ -1,0 +1,6 @@
+post:
+  tags:
+    - Order
+  summary: order's socket
+  description: 'Работает с менеджером и водителем. Для водителя ждёт подтверждения. При подтверждении или если уже подтверждён, выводит json: {"status": "Confirmed"}. Для менеджера выводит json с полями id, status, при изменении его заказов'
+  operationId: orderSocket
