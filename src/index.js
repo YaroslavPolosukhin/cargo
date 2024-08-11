@@ -1,4 +1,4 @@
-import express from "express";
+import { WebSocketExpress } from 'websocket-express'
 import bodyParser from "body-parser";
 import swaggerUi from "swagger-ui-express";
 import { fileURLToPath } from "url";
@@ -27,14 +27,16 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-const app = express();
+let app = new WebSocketExpress();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(WebSocketExpress.json());
+app.use(WebSocketExpress.urlencoded({ extended: true }));
 app.use(responseLogger);
+app.set('shutdown timeout', 1000);
 
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
+app.use("/uploads", WebSocketExpress.static(path.join(__dirname, "..", "uploads")))
 
 const swaggerDocument = YAML.load(path.join(__dirname, "docs", "swagger.yaml"));
 
@@ -63,7 +65,8 @@ app.use("/api/logisticPoint", authMiddleware, logisticPointsRoutes);
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => {
+const server = app.createServer()
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
 

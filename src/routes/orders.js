@@ -1,12 +1,14 @@
-import express from 'express'
+import { Router } from 'websocket-express'
 import ordersController from '../controllers/ordersController.js'
 import checkRole from '../middlewares/checkRole.js'
 import Roles from '../enums/roles.js'
 import paginationMiddleware from '../middlewares/paginationMiddleware.js'
 import { createOrderValidator, updateGeoValidator, updateOrderValidator } from '../validators/orders.js'
 import searchMiddleware from '../middlewares/searchMiddleware.js'
-const router = express.Router()
+const router = new Router()
 
+router.ws('/updates', ordersController.updates)
+router.ws('/location/:orderId', ordersController.location)
 router.get('/available', paginationMiddleware, ordersController.getAvailableOrders)
 router.get('/current', ordersController.getCurrentOrder)
 router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, ordersController.getAll)

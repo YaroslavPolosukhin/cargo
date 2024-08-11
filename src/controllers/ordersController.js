@@ -4,6 +4,7 @@ import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
 import costType from '../enums/costType.js'
 import { getMessaging } from 'firebase-admin/messaging'
+import Roles from '../enums/roles.js'
 
 /**
  * Retrieves the list of available orders.
@@ -2290,6 +2291,261 @@ export const getGeo = async (req, res) => {
   }
 }
 
+export const updates = async (req, res) => {
+  const ws = await res.accept();
+  const person = await models.Person.findByUserId(req.user.id);
+  let interval = null;
+
+  switch (req.user.role) {
+    case Roles.DRIVER:
+      let order = await models.Order.findOne({ where: { driver_id: person.id} });
+      if (order == null) {
+        ws.send(JSON.stringify({ status: "You don't have active order" }));
+        ws.close()
+      }
+
+      const orderStatus = order.status;
+
+      if (orderStatus !== OrderStatus.CONFIRMATION) {
+        ws.send(JSON.stringify({ status: "Confirmed" }));
+        ws.close();
+      } else {
+        interval = setInterval(async () => {
+          order = await models.Order.findOne({ where: { driver_id: person.id} });
+          if (order.status !== orderStatus) {
+            ws.send(JSON.stringify({ status: "Confirmed" }));
+            ws.close();
+            clearInterval(interval);
+          }
+        }, 5000);
+      }
+      break;
+
+    case Roles.MANAGER:
+      let orders = await models.Order.findAll({ where: { manager_id: person.id} });
+      if (orders.length === 0) {
+        ws.send("You don't have active orders");
+      }
+
+      let orderStatuses = []
+      orders.forEach(order => orderStatuses.push({
+        id: order.id,
+        status: order.status
+      }));
+
+      interval = setInterval(async () => {
+        const newOrderStatuses = []
+
+        for (const order of orders) {
+          const updatedOrder = await models.Order.findOne({ where: { id: order.id } });
+          if (updatedOrder == null) {
+            ws.send(JSON.stringify({ id: order.id, status: "deleted" }));
+          } else {
+            if (updatedOrder.status !== order.status) {
+              ws.send(JSON.stringify({ id: updatedOrder.id, status: updatedOrder.status }));
+            }
+
+            newOrderStatuses.push({
+              id: updatedOrder.id,
+              status: updatedOrder.status
+            });
+          }
+        }
+        orderStatuses = newOrderStatuses;
+      }, 5000);
+
+      break;
+
+    default:
+      ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
+      ws.close();
+      break;
+  }
+
+  ws.on("close", function close() {
+    if (interval) {
+      clearInterval(interval);
+    }
+  });
+};
+
+export const location = async(req, res) => {
+  const ws = await res.accept();
+  const { orderId } = req.params;
+
+  if (isNaN(orderId) || isNaN(parseFloat(orderId))) {
+    ws.send(JSON.stringify({ status: "Order id should be a number" }));
+    ws.close();
+  }
+
+  const person = await models.Person.findByUserId(req.user.id);
+  let order = await models.Order.findOne({ where: { id: orderId } });
+
+  if (!order) {
+    ws.send(JSON.stringify({ status: "Order not found" }));
+    ws.close();
+  }
+
+  switch (req.user.role) {
+    case Roles.DRIVER:
+      ws.on("message", async (msg) => {
+        try {
+          const message = JSON.parse(msg);
+          let managerProfile = null;
+          let managerUser = null;
+          let fio = null;
+          let title = null;
+          let body = null;
+          let notification = null;
+
+          switch (message.status) {
+            case "update":
+              const point = `POINT (${message.latitude} ${message.longitude})`;
+              await models.Order.update({ geo: point }, { where: { id: order.id } });
+              break;
+            case "off":
+              managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
+              managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
+
+              fio = null;
+              if (person.surname) {
+                fio = person.surname
+              };
+              if (person.name){
+                if (fio) {
+                  fio += ' ' + person.name;
+                } else {
+                  fio = person.name
+                }
+              }
+              if (person.patronymic) {
+                if (fio) {
+                  fio += ' ' + person.patronymic;
+                } else {
+                  fio = person.patronymic
+                }
+              }
+
+              title = `Геолокация выключена`;
+              body = `Водитель `;
+              if (fio) {
+                body += fio + ` `;
+              }
+              body += `${person.phone} выключил геолокацию`;
+
+              notification = {
+                data: {
+                  title,
+                  body,
+                },
+                notification: {
+                  title,
+                  body,
+                },
+                android: {
+                  notification: {
+                    title,
+                    body,
+                  },
+                },
+                token: managerUser.fcm_token,
+              };
+
+              await getMessaging().send(notification)
+                .then((response) => {
+                  console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                  console.log('Error sending message:', error);
+                });
+
+              break;
+
+            case "on":
+              managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
+              managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
+
+              fio = null;
+              if (person.surname) {
+                fio = person.surname
+              };
+              if (person.name){
+                if (fio) {
+                  fio += ' ' + person.name;
+                } else {
+                  fio = person.name
+                }
+              }
+              if (person.patronymic) {
+                if (fio) {
+                  fio += ' ' + person.patronymic;
+                } else {
+                  fio = person.patronymic
+                }
+              }
+
+              title = `Геолокация включена`;
+              body = `Водитель `;
+              if (fio) {
+                body += fio + ` `;
+              }
+              body += `${person.phone} включил геолокацию`;
+
+              notification = {
+                data: {
+                  title,
+                  body,
+                },
+                notification: {
+                  title,
+                  body,
+                },
+                android: {
+                  notification: {
+                    title,
+                    body,
+                  },
+                },
+                token: managerUser.fcm_token,
+              };
+
+              await getMessaging().send(notification)
+                .then((response) => {
+                  console.log('Successfully sent message:', response);
+                })
+                .catch((error) => {
+                  console.log('Error sending message:', error);
+                });
+
+              break;
+          }
+        } catch (e) {
+          console.error(e)
+          ws.send(JSON.stringify({ status: "Something went wrong" }))
+        }
+      })
+
+      break;
+
+    case Roles.MANAGER:
+      const interval = setInterval(async () => {
+        order = await models.Order.findOne({ where: { id: orderId } });
+        ws.send(JSON.stringify({ latitude: order.geo.coordinates[0], longitude: order.geo.coordinates[1] }));
+      }, 5000);
+
+      ws.on("close", function close() {
+        clearInterval(interval);
+      });
+
+      break;
+
+    default:
+      ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
+      ws.close();
+      break;
+  }
+}
+
 export default {
   getAvailableOrders,
   getCurrentOrder,
@@ -2308,5 +2564,7 @@ export default {
   cancelOrder,
   deleteOrder,
   search,
-  getGeo
+  getGeo,
+  updates,
+  location
 };

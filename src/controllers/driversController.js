@@ -589,3 +589,40 @@ export const search = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const updates = async (req, res) => {
+  const ws = await res.accept();
+  const person = await models.Person.findByUserId(req.user.id);
+  let interval = null;
+
+  switch (req.user.role) {
+    case Roles.DRIVER:
+      const user = await models.User.findByPk(req.user.id);
+      if (user.approved){
+        ws.send(JSON.stringify({ status: "approved" }));
+        ws.close();
+      }
+
+      interval = setInterval(async () => {
+        const user = await models.User.findByPk(req.user.id);
+        const approved = user.approved;
+
+        if (approved) {
+          ws.send(JSON.stringify({ status: "approved" }));
+          clearInterval(interval);
+          ws.close();
+        }
+      }, 5000);
+
+      break;
+
+    default:
+      ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
+      ws.close();
+      break;
+  }
+
+  ws.on('close', () => {
+    clearInterval(interval);
+  });
+}

@@ -1,4 +1,4 @@
-import express from "express";
+import { Router } from 'websocket-express'
 import checkRole from "../middlewares/checkRole.js";
 import paginationMiddleware from "../middlewares/paginationMiddleware.js";
 import Roles from "../enums/roles.js";
@@ -10,8 +10,9 @@ import { passportUpload } from "../config/multer.js";
 import * as driversController from '../controllers/driversController.js'
 import searchMiddleware from '../middlewares/searchMiddleware.js'
 
-const router = express.Router();
+const router = new Router();
 
+router.ws("/updates", driversController.updates);
 router.get(
   "/approved",
   checkRole([Roles.MANAGER]),
