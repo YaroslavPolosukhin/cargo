@@ -2424,12 +2424,6 @@ export const location = async(req, res) => {
       ws.on("message", async (msg) => {
         try {
           const message = JSON.parse(msg);
-          let managerProfile = null;
-          let managerUser = null;
-          let fio = null;
-          let title = null;
-          let body = null;
-          let notification = null;
 
           switch (message.status) {
             case "update":
@@ -2437,68 +2431,20 @@ export const location = async(req, res) => {
               await models.Order.update({ geo: point }, { where: { id: order.id } });
               break;
             case "off":
-              managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
-              managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
-
-              fio = null;
-              if (person.surname) {
-                fio = person.surname
-              };
-              if (person.name){
-                if (fio) {
-                  fio += ' ' + person.name;
-                } else {
-                  fio = person.name
-                }
-              }
-              if (person.patronymic) {
-                if (fio) {
-                  fio += ' ' + person.patronymic;
-                } else {
-                  fio = person.patronymic
-                }
-              }
-
-              title = `Геолокация выключена`;
-              body = `Водитель `;
-              if (fio) {
-                body += fio + ` `;
-              }
-              body += `${person.phone} выключил геолокацию`;
-
-              notification = {
-                data: {
-                  title,
-                  body,
-                },
-                notification: {
-                  title,
-                  body,
-                },
-                android: {
-                  notification: {
-                    title,
-                    body,
-                  },
-                },
-                token: managerUser.fcm_token,
-              };
-
-              await getMessaging().send(notification)
-                .then((response) => {
-                  console.log('Successfully sent message:', response);
-                })
-                .catch((error) => {
-                  console.log('Error sending message:', error);
-                });
+              await models.DisabledLocation.create({
+                person_id: person.id,
+                last_connection: new Date(),
+              });
 
               break;
 
             case "on":
-              managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
-              managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
+              await models.DisabledLocation.destroy({ where: { person_id: person.id } });
 
-              fio = null;
+              const managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
+              const managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
+
+              let fio = null;
               if (person.surname) {
                 fio = person.surname
               };
@@ -2517,14 +2463,14 @@ export const location = async(req, res) => {
                 }
               }
 
-              title = `Геолокация включена`;
-              body = `Водитель `;
+              const title = `Геолокация включена`;
+              let body = `Водитель `;
               if (fio) {
                 body += fio + ` `;
               }
               body += `${person.phone} включил геолокацию`;
 
-              notification = {
+              const notification = {
                 data: {
                   title,
                   body,
@@ -2564,7 +2510,7 @@ export const location = async(req, res) => {
       const interval = setInterval(async () => {
         order = await models.Order.findOne({ where: { id: orderId } });
         ws.send(JSON.stringify({ latitude: order.geo.coordinates[0], longitude: order.geo.coordinates[1] }));
-      }, 10000);
+      }, 15 * 60 * 1000);
 
       ws.on("close", function close() {
         clearInterval(interval);
@@ -2578,6 +2524,93 @@ export const location = async(req, res) => {
       break;
   }
 }
+
+async function checkLocationDisabled () {
+  const disabledLocations = await models.DisabledLocation.findAll({
+    where: {
+      last_connection: {
+        [Sequelize.Op.lt]: new Date(new Date() - 60 * 60 * 1000)
+      }
+    }
+  });
+
+  for (const disabledLocation of disabledLocations) {
+    const order = await models.Order.findOne({
+      where: { driver_id: disabledLocation.person_id},
+      include: [
+        {
+          model: models.Person,
+          as: "manager"
+        },
+        {
+          model: models.Person,
+          as: "driver",
+          include : {
+            model: models.User,
+            as: "user"
+          }
+        }
+      ]
+    });
+
+    const managerUser = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } });
+
+    let fio = null;
+    if (order.driver.surname) {
+      fio = order.driver.surname
+    }
+    ;
+    if (order.driver.name) {
+      if (fio) {
+        fio += ' ' + order.driver.name;
+      } else {
+        fio = order.driver.name
+      }
+    }
+    if (order.driver.patronymic) {
+      if (fio) {
+        fio += ' ' + order.driver.patronymic;
+      } else {
+        fio = order.driver.patronymic
+      }
+    }
+
+    const title = 'Геолокация выключена';
+    let body = 'Водитель ';
+    if (fio) {
+      body += fio + ' ';
+    }
+    body += `${order.driver.user.phone} выключил геолокацию`;
+
+    const notification = {
+      data: {
+        title,
+        body,
+      },
+      notification: {
+        title,
+        body,
+      },
+      android: {
+        notification: {
+          title,
+          body,
+        },
+      },
+      token: managerUser.fcm_token,
+    };
+
+    await getMessaging().send(notification)
+      .then((response) => {
+        console.log('Successfully sent message:', response);
+      })
+      .catch((error) => {
+        console.log('Error sending message:', error);
+      });
+  }
+}
+
+setInterval(checkLocationDisabled, 30 * 60 * 1000)
 
 export default {
   getAvailableOrders,

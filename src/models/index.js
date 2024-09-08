@@ -22,6 +22,7 @@ import OrderNomenclatureModel from "./shipping/orderNomenclature.js";
 import PasswordRecoveryAttemptModel from "./users/passwordRecoveryAttempt.js";
 import DrivingLicenceModel from './users/drivingLicence.js'
 import RegionModel from "./shipping/region.js";
+import DisabledLocationModel from "./users/disabledLocation.js";
 
 import config from "../config/config.js";
 
@@ -56,7 +57,8 @@ const models = {
   Truck: TruckModel(sequelize, Sequelize),
   PasswordRecoveryAttempt: PasswordRecoveryAttemptModel(sequelize, Sequelize),
   DrivingLicence: DrivingLicenceModel(sequelize, Sequelize),
-  Region: RegionModel(sequelize, Sequelize)
+  Region: RegionModel(sequelize, Sequelize),
+  DisabledLocation: DisabledLocationModel(sequelize, Sequelize)
 };
 
 Object.keys(models).forEach((modelName) => {
