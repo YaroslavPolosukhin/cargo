@@ -8,3 +8,4 @@ docker-compose-*.yml
 test.js
 package-lock.json
 serviceAccountKey.json
+error_responses

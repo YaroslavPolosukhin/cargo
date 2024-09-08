@@ -5,6 +5,8 @@ import Roles from "../enums/roles.js";
 import Sequelize from 'sequelize'
 import { getMessaging } from 'firebase-admin/messaging'
 
+const driversSockets = {};
+
 export const getUnapproved = async (req, res) => {
   try {
     const { limit, offset } = req.pagination;
@@ -374,6 +376,11 @@ export const confirm = async (req, res) => {
       driving_license_id: drivingLicenseId
     });
 
+    if (person.id in driversSockets){
+      driversSockets[person.id].send(JSON.stringify({ status: "approved" }));
+      driversSockets[person.id].close();
+    }
+
     try {
       const body = 'Регистрация подтверждена менеджером'
 
@@ -592,27 +599,14 @@ export const search = async (req, res) => {
 
 export const updates = async (req, res) => {
   const ws = await res.accept();
-  const person = await models.Person.findByUserId(req.user.id);
-  let interval = null;
 
   switch (req.user.role) {
     case Roles.DRIVER:
-      const user = await models.User.findByPk(req.user.id);
-      if (user.approved){
-        ws.send(JSON.stringify({ status: "approved" }));
-        ws.close();
-      }
+      driversSockets[req.user.id] = ws;
 
-      interval = setInterval(async () => {
-        const user = await models.User.findByPk(req.user.id);
-        const approved = user.approved;
-
-        if (approved) {
-          ws.send(JSON.stringify({ status: "approved" }));
-          clearInterval(interval);
-          ws.close();
-        }
-      }, 5000);
+      ws.on('close', () => {
+        delete driversSockets[req.user.id];
+      });
 
       break;
 
@@ -621,8 +615,4 @@ export const updates = async (req, res) => {
       ws.close();
       break;
   }
-
-  ws.on('close', () => {
-    clearInterval(interval);
-  });
 }

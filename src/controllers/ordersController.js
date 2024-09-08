@@ -1,10 +1,12 @@
-import Sequelize, { Op, or } from 'sequelize'
+import Sequelize, { Op } from 'sequelize'
 import { validationResult } from 'express-validator'
 import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
 import costType from '../enums/costType.js'
 import { getMessaging } from 'firebase-admin/messaging'
 import Roles from '../enums/roles.js'
+
+const ordersSockets = {};
 
 /**
  * Retrieves the list of available orders.
@@ -1003,8 +1005,9 @@ export const takeOrder = async (req, res) => {
       let fio = null;
       if (person.surname) {
         fio = person.surname
-      };
-      if (person.name){
+      }
+      ;
+      if (person.name) {
         if (fio) {
           fio += ' ' + person.name;
         } else {
@@ -1055,6 +1058,10 @@ export const takeOrder = async (req, res) => {
       console.error(e)
     }
 
+    if (order.manager.user.id in ordersSockets) {
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }));;
+    }
+
     res
       .status(200)
       .send({
@@ -1085,13 +1092,20 @@ export const confirmOrder = async (req, res) => {
       defaults: { vin: formattedVinCode },
     });
 
+    const data = {
+      status: OrderStatus.LOADING,
+      truck_id: truck.id,
+    }
+
+    if (plannedArrivalDate) {
+      data["delivery_date_plan"] = new Date(plannedArrivalDate);
+    }
+    if (plannedLoadingDate) {
+      data["departure_date_plan"] = new Date(plannedLoadingDate);
+    }
+
     const [updated] = await models.Order.update(
-      {
-        status: OrderStatus.LOADING,
-        departure_date_plan: new Date(plannedLoadingDate),
-        delivery_date_plan: new Date(plannedArrivalDate),
-        truck_id: truck.id,
-      },
+      data,
       {
         where: {
           id: orderId,
@@ -1209,6 +1223,10 @@ export const confirmOrder = async (req, res) => {
       console.error(e)
     }
 
+    if (order.driver.user.id in ordersSockets) {
+      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: "Confirmed" }));;
+    }
+
     return res
       .status(200)
       .send({
@@ -1234,24 +1252,7 @@ export const rejectDriver = async (req, res) => {
 
     const _status = [OrderStatus.CONFIRMATION, OrderStatus.LOADING, OrderStatus.CREATED];
 
-    // Reset the order status to 'created' and clear the driver_id
-    const [updated] = await models.Order.update(
-      { status: OrderStatus.CREATED, driver_id: null, truck_id: null },
-      {
-        where: {
-          id: orderId,
-          status: { [Op.in]: _status }
-        },
-      }
-    );
-
-    if (updated === 0) {
-      return res
-        .status(400)
-        .send({ message: "Order not found" });
-    }
-
-    const order = await models.Order.findOne({
+    let order = await models.Order.findOne({
       where: { id: orderId },
       include: [
         {
@@ -1319,8 +1320,14 @@ export const rejectDriver = async (req, res) => {
       ],
     });
 
+    if (!order) {
+      return res
+        .status(400)
+        .send({ message: "Order not found" });
+    }
+
     try {
-      const driver = await models.User.findByPk(order.driver.user_id);
+      const driver = await models.User.findByPk(order.driver.user.id);
 
       const body = 'Менеджер отклонил рейс';
 
@@ -1353,6 +1360,89 @@ export const rejectDriver = async (req, res) => {
       console.log("something wrong with sending notification")
       console.error(e)
     }
+
+    if (order.driver.user.id in ordersSockets) {
+      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: "Rejected" }));;
+    }
+
+    // Reset the order status to 'created' and clear the driver_id
+    const [updated] = await models.Order.update(
+      { status: OrderStatus.CREATED, driver_id: null, truck_id: null },
+      {
+        where: {
+          id: orderId,
+          status: { [Op.in]: _status }
+        },
+      }
+    );
+
+    order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: models.Truck,
+          as: "truck",
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "departure",
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
+        },
+        {
+          model: models.LogisticsPoint,
+          as: "destination",
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ],
+        },
+        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+      ],
+    });
 
     return res.status(200).send({
       message:
@@ -1455,7 +1545,7 @@ export const markOrderAsDeparted = async (req, res) => {
           },
         },
         { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "manager", include: {model: models.User, as: "user"} },
       ],
     });
 
@@ -1507,6 +1597,10 @@ export const markOrderAsDeparted = async (req, res) => {
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
+    }
+
+    if (order.manager.user.id in ordersSockets) {
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }));;
     }
 
     return res
@@ -1610,7 +1704,7 @@ export const markOrderAsCompleted = async (req, res) => {
           ],
         },
         { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "manager", include: {model: models.User, as: "user"} },
       ],
     });
 
@@ -1662,6 +1756,10 @@ export const markOrderAsCompleted = async (req, res) => {
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
+    }
+
+    if (order.manager.user.id in ordersSockets) {
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }));;
     }
 
     return res
@@ -1984,9 +2082,13 @@ export const cancelOrder = async (req, res) => {
           ],
         },
         { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        { model: models.Person, as: "manager", include: {model: models.User, as: "user"} },
       ],
     });
+
+    if (order.manager.user.id in ordersSockets) {
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }));;
+    }
 
     return res.status(200).send({
       message:
@@ -2293,79 +2395,10 @@ export const getGeo = async (req, res) => {
 
 export const updates = async (req, res) => {
   const ws = await res.accept();
-  const person = await models.Person.findByUserId(req.user.id);
-  let interval = null;
+  ordersSockets[req.user.id] = ws;
 
-  switch (req.user.role) {
-    case Roles.DRIVER:
-      let order = await models.Order.findOne({ where: { driver_id: person.id} });
-      if (order == null) {
-        ws.send(JSON.stringify({ status: "You don't have active order" }));
-        ws.close()
-      }
-
-      const orderStatus = order.status;
-
-      if (orderStatus !== OrderStatus.CONFIRMATION) {
-        ws.send(JSON.stringify({ status: "Confirmed" }));
-        ws.close();
-      } else {
-        interval = setInterval(async () => {
-          order = await models.Order.findOne({ where: { driver_id: person.id} });
-          if (order.status !== orderStatus) {
-            ws.send(JSON.stringify({ status: "Confirmed" }));
-            ws.close();
-            clearInterval(interval);
-          }
-        }, 5000);
-      }
-      break;
-
-    case Roles.MANAGER:
-      let orders = await models.Order.findAll({ where: { manager_id: person.id} });
-      if (orders.length === 0) {
-        ws.send("You don't have active orders");
-      }
-
-      let orderStatuses = []
-      orders.forEach(order => orderStatuses.push({
-        id: order.id,
-        status: order.status
-      }));
-
-      interval = setInterval(async () => {
-        const newOrderStatuses = []
-
-        for (const order of orders) {
-          const updatedOrder = await models.Order.findOne({ where: { id: order.id } });
-          if (updatedOrder == null) {
-            ws.send(JSON.stringify({ id: order.id, status: "deleted" }));
-          } else {
-            if (updatedOrder.status !== order.status) {
-              ws.send(JSON.stringify({ id: updatedOrder.id, status: updatedOrder.status }));
-            }
-
-            newOrderStatuses.push({
-              id: updatedOrder.id,
-              status: updatedOrder.status
-            });
-          }
-        }
-        orderStatuses = newOrderStatuses;
-      }, 5000);
-
-      break;
-
-    default:
-      ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
-      ws.close();
-      break;
-  }
-
-  ws.on("close", function close() {
-    if (interval) {
-      clearInterval(interval);
-    }
+  ws.on('close', () => {
+    delete ordersSockets[req.user.id];
   });
 };
 
@@ -2531,7 +2564,7 @@ export const location = async(req, res) => {
       const interval = setInterval(async () => {
         order = await models.Order.findOne({ where: { id: orderId } });
         ws.send(JSON.stringify({ latitude: order.geo.coordinates[0], longitude: order.geo.coordinates[1] }));
-      }, 5000);
+      }, 10000);
 
       ws.on("close", function close() {
         clearInterval(interval);
