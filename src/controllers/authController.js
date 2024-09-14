@@ -4,10 +4,13 @@ import { randomInt } from "crypto";
 import { validationResult } from "express-validator";
 import { models } from "../models/index.js";
 import { SMSService } from "../services/SMSService.js";
+import Roles from '../enums/roles.js'
 
 const MAX_SMS_CODE_LIFETIME_IN_MINUTES = 15;
 const MIN_TIME_IN_MINUTES_BEFORE_CODE_RESEND = 1;
 const MAX_INCORRECT_SMS_CODE_ATTEMPTS = 3;
+
+const authSockets = {}
 
 const generateRefreshToken = async (user) => {
   const refreshToken = jwt.sign(
@@ -102,6 +105,10 @@ export const register = async (req, res) => {
       where: { id: user.id },
       include: [{ model: models.Role, as: "role" }]
     })
+
+    for (const key in authSockets) {
+      authSockets[key].send(JSON.stringify({ status: 'new_user', user_id: user.id }))
+    }
 
     res.status(201).send({
       accessToken,
@@ -357,6 +364,27 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+export const newUsers = async (req, res) => {
+  try {
+    const ws = await res.accept();
+
+    if (req.user.role !== Roles.MANAGER) {
+      ws.send(JSON.stringify({ status: 'You are not allowed to access this resource' }));
+      ws.close();
+    } else {
+
+      authSockets[req.user.id] = ws;
+
+      ws.on('close', () => {
+        delete authSockets[req.user.id];
+      })
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+}
+
 export default {
   register,
   login,
@@ -365,4 +393,5 @@ export default {
   logout,
   recoverPassword,
   resetPassword,
+  newUsers,
 };

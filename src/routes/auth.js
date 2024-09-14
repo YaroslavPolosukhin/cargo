@@ -1,4 +1,3 @@
-import express from 'express'
 import * as authController from '../controllers/authController.js'
 import {
   registerValidator,
@@ -9,9 +8,11 @@ import {
   passwordResetValidator
 } from '../validators/auth.js'
 import authMiddleware from '../middlewares/checkAuth.js'
+import { Router } from 'websocket-express'
 
-const router = express.Router()
+const router = new Router();
 
+router.ws('/new', authMiddleware, authController.newUsers)
 router.post('/signUp', registerValidator, authController.register)
 router.post('/signIn', loginValidator, authController.login)
 router.post('/password/recover', passwordRecoverValidator, authController.recoverPassword)

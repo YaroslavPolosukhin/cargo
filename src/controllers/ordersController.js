@@ -1043,6 +1043,14 @@ export const takeOrder = async (req, res) => {
             body,
           },
         },
+        context: {
+          data: {
+            type: "manager",
+            orderId: order.id,
+            driverId: null,
+            url: `cargodelivery://order/${order.id}`
+          }
+        },
         token: manager.fcm_token,
       };
 
@@ -1208,6 +1216,14 @@ export const confirmOrder = async (req, res) => {
             body,
           },
         },
+        context: {
+          data: {
+            type: "driver",
+            orderId: null,
+            driverId: driver.id,
+            url: 'cargodelivery://orderlist'
+          }
+        },
         token: driver.fcm_token,
       };
 
@@ -1345,6 +1361,14 @@ export const rejectDriver = async (req, res) => {
             title: 'Статус рейса изменен',
             body,
           },
+        },
+        context: {
+          data: {
+            type: "driver",
+            orderId: null,
+            driverId: driver.id,
+            url: 'cargodelivery://orderlist'
+          }
         },
         token: driver.fcm_token,
       };
@@ -1584,6 +1608,14 @@ export const markOrderAsDeparted = async (req, res) => {
           title: 'Статус рейса изменен',
           body: body,
         },
+        context: {
+          data: {
+            type: "manager",
+            orderId: order.id,
+            driverId: null,
+            url: `cargodelivery://order/${order.id}`
+          }
+        },
         token: manager.fcm_token,
       };
 
@@ -1742,6 +1774,14 @@ export const markOrderAsCompleted = async (req, res) => {
         notification: {
           title: 'Статус рейса изменен',
           body: body,
+        },
+        context: {
+          data: {
+            type: "manager",
+            orderId: order.id,
+            driverId: null,
+            url: `cargodelivery://order/${order.id}`
+          }
         },
         token: manager.fcm_token,
       };
@@ -2394,134 +2434,162 @@ export const getGeo = async (req, res) => {
 }
 
 export const updates = async (req, res) => {
-  const ws = await res.accept();
-  ordersSockets[req.user.id] = ws;
+  try {
+    const ws = await res.accept();
+    ordersSockets[req.user.id] = ws;
 
-  ws.on('close', () => {
-    delete ordersSockets[req.user.id];
-  });
+    ws.on('close', () => {
+      delete ordersSockets[req.user.id];
+    });
+  } catch (e) {
+    console.log(e)
+    res.status(500).send({ message: "Internal server error" });
+  }
 };
 
 export const location = async(req, res) => {
-  const ws = await res.accept();
-  const { orderId } = req.params;
+  try {
+    const ws = await res.accept();
+    const { orderId } = req.params;
 
-  if (isNaN(orderId) || isNaN(parseFloat(orderId))) {
-    ws.send(JSON.stringify({ status: "Order id should be a number" }));
-    ws.close();
-  }
+    if (isNaN(orderId) || isNaN(parseFloat(orderId))) {
+      ws.send(JSON.stringify({ status: "Order id should be a number" }));
+      ws.close();
 
-  const person = await models.Person.findByUserId(req.user.id);
-  let order = await models.Order.findOne({ where: { id: orderId } });
+      return;
+    }
 
-  if (!order) {
-    ws.send(JSON.stringify({ status: "Order not found" }));
-    ws.close();
-  }
+    const person = await models.Person.findByUserId(req.user.id);
+    let order = await models.Order.findOne({ where: { id: orderId } });
 
-  switch (req.user.role) {
-    case Roles.DRIVER:
-      ws.on("message", async (msg) => {
-        try {
-          const message = JSON.parse(msg);
+    if (!order) {
+      ws.send(JSON.stringify({ status: "Order not found" }));
+      ws.close();
 
-          switch (message.status) {
-            case "update":
-              const point = `POINT (${message.latitude} ${message.longitude})`;
-              await models.Order.update({ geo: point }, { where: { id: order.id } });
-              break;
-            case "off":
-              await models.DisabledLocation.create({
-                person_id: person.id,
-                last_connection: new Date(),
-              });
+      return;
+    }
 
-              break;
+    switch (req.user.role) {
+      case Roles.DRIVER:
+        ws.on("message", async (msg) => {
+          try {
+            const message = JSON.parse(msg);
 
-            case "on":
-              await models.DisabledLocation.destroy({ where: { person_id: person.id } });
+            switch (message.status) {
+              case "update":
+                const point = `POINT (${message.latitude} ${message.longitude})`;
+                await models.Order.update({ geo: point }, { where: { id: order.id } });
+                break;
+              case "off":
+                await models.DisabledLocation.create({
+                  person_id: person.id,
+                  last_connection: new Date(),
+                });
 
-              const managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
-              const managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
+                break;
 
-              let fio = null;
-              if (person.surname) {
-                fio = person.surname
-              };
-              if (person.name){
-                if (fio) {
-                  fio += ' ' + person.name;
-                } else {
-                  fio = person.name
+              case "on":
+                await models.DisabledLocation.destroy({ where: { person_id: person.id } });
+
+                const managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
+                const managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
+
+                let fio = null;
+                if (person.surname) {
+                  fio = person.surname
                 }
-              }
-              if (person.patronymic) {
-                if (fio) {
-                  fio += ' ' + person.patronymic;
-                } else {
-                  fio = person.patronymic
+                ;
+                if (person.name) {
+                  if (fio) {
+                    fio += ' ' + person.name;
+                  } else {
+                    fio = person.name
+                  }
                 }
-              }
+                if (person.patronymic) {
+                  if (fio) {
+                    fio += ' ' + person.patronymic;
+                  } else {
+                    fio = person.patronymic
+                  }
+                }
 
-              const title = `Геолокация включена`;
-              let body = `Водитель `;
-              if (fio) {
-                body += fio + ` `;
-              }
-              body += `${person.phone} включил геолокацию`;
+                const title = `Геолокация включена`;
+                let body = `Водитель `;
+                if (fio) {
+                  body += fio + ` `;
+                }
+                body += `${person.phone} включил геолокацию`;
 
-              const notification = {
-                data: {
-                  title,
-                  body,
-                },
-                notification: {
-                  title,
-                  body,
-                },
-                android: {
+                const notification = {
+                  data: {
+                    title,
+                    body,
+                  },
                   notification: {
                     title,
                     body,
                   },
-                },
-                token: managerUser.fcm_token,
-              };
+                  android: {
+                    notification: {
+                      title,
+                      body,
+                    },
+                  },
+                  token: managerUser.fcm_token,
+                };
 
-              await getMessaging().send(notification)
-                .then((response) => {
-                  console.log('Successfully sent message:', response);
-                })
-                .catch((error) => {
-                  console.log('Error sending message:', error);
-                });
+                await getMessaging().send(notification)
+                  .then((response) => {
+                    console.log('Successfully sent message:', response);
+                  })
+                  .catch((error) => {
+                    console.log('Error sending message:', error);
+                  });
 
-              break;
+                break;
+            }
+          } catch (e) {
+            console.error(e)
+            ws.send(JSON.stringify({ status: "Something went wrong" }))
           }
-        } catch (e) {
-          console.error(e)
-          ws.send(JSON.stringify({ status: "Something went wrong" }))
-        }
-      })
+        })
 
-      break;
+        break;
 
-    case Roles.MANAGER:
-      const interval = setInterval(async () => {
+      case Roles.MANAGER:
+        const interval = setInterval(async () => {
+          order = await models.Order.findOne({ where: { id: orderId } });
+
+          if (order.geo) {
+            ws.send(JSON.stringify({
+              latitude: order.geo.coordinates[0],
+              longitude: order.geo.coordinates[1]
+            }));
+          }
+        }, 15 * 60 * 1000);
+
         order = await models.Order.findOne({ where: { id: orderId } });
-        ws.send(JSON.stringify({ latitude: order.geo.coordinates[0], longitude: order.geo.coordinates[1] }));
-      }, 15 * 60 * 1000);
+        ws.send(JSON.stringify({
+          latitude: order.geo.coordinates[0],
+          longitude: order.geo.coordinates[1]
+        }));
 
-      ws.on("close", function close() {
-        clearInterval(interval);
-      });
+        ws.on("close", function close () {
+          clearInterval(interval);
+        });
 
-      break;
+        break;
 
-    default:
-      ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
-      ws.close();
-      break;
+      default:
+        ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
+        ws.close();
+
+        break;
+    }
+  } catch (e) {
+    console.log(e)
+    res.status(500).send({ message: "Internal server error" });
   }
 }
 
