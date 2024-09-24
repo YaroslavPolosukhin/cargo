@@ -25,6 +25,11 @@ post:
               description: Firebase Cloud Messaging token for the device.
               required: false
               example: "test"
+            deviceType:
+              type: string
+              description: Type of device used for authentication.
+              required: false
+              example: "android"
   responses:
     '200':
       description: Authentication successful.

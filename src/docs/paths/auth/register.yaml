@@ -26,6 +26,10 @@ post:
               type: string
               description: Firebase Cloud Messaging token for push notifications (optional).
               example: "your_fcm_token"
+            deviceType:
+                type: string
+                description: The type of device used for registration (optional).
+                example: "android"
   responses:
     '201':
       description: User registered successfully.

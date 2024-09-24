@@ -3,8 +3,8 @@ import { validationResult } from 'express-validator'
 import OrderStatus from '../enums/orderStatus.js'
 import { models, sequelize } from '../models/index.js'
 import costType from '../enums/costType.js'
-import { getMessaging } from 'firebase-admin/messaging'
 import Roles from '../enums/roles.js'
+import { sendNotification } from '../utils/send_notification.js'
 
 const ordersSockets = {};
 
@@ -108,7 +108,7 @@ export const getAvailableOrders = async (req, res) => {
             as: "Measure"
           }
         ]
-      },
+      }
     ],
   };
 
@@ -172,6 +172,10 @@ export const getCurrentOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -200,6 +204,10 @@ export const getCurrentOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -228,7 +236,7 @@ export const getCurrentOrder = async (req, res) => {
               as: "Measure"
             }
           ]
-        },
+        }
       ],
     });
 
@@ -274,6 +282,10 @@ export const getOrderById = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -281,7 +293,7 @@ export const getOrderById = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -302,6 +314,10 @@ export const getOrderById = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -309,23 +325,34 @@ export const getOrderById = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
     if (!order) {
       return res.status(404).send({ message: "Order not found" });
     }
-
-    const orderNomenclatures = await models.OrderNomenclature.findAll({
-      where: { order_id: activeOrder.id }
-    });
-    activeOrder.dataValues.nomenclatures = await models.Nomenclature.findAll({
-      where: { id: orderNomenclatures.map((item) => item.nomenclature_id) }
-    });
 
     res.json(order);
   } catch (error) {
@@ -583,6 +610,10 @@ export const createOrder = async (req, res) => {
                   {
                     model: models.Street,
                     as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
                   }
                 ]
               },
@@ -611,6 +642,10 @@ export const createOrder = async (req, res) => {
                   {
                     model: models.Street,
                     as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
                   }
                 ]
               },
@@ -630,21 +665,19 @@ export const createOrder = async (req, res) => {
             as: "manager",
             include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
           },
+          {
+            model: models.Nomenclature,
+            as: "nomenclatures",
+            include: [
+              {
+                model: models.Measure,
+                as: "Measure"
+              }
+            ]
+          }
         ],
       }
     );
-
-    orderWithNomenclatures.dataValues.nomenclatures = await models.OrderNomenclature.findAll({
-      where: { order_id: orderWithNomenclatures.id },
-      include: {
-        model: models.Nomenclature,
-        as: "nomenclature",
-        include: {
-          model: models.Measure,
-          as: "Measure"
-        }
-      }
-    });
 
     return res.status(201).json({ order: orderWithNomenclatures });
   } catch (error) {
@@ -750,6 +783,10 @@ export const updateOrder = async (req, res) => {
                   {
                     model: models.Street,
                     as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
                   }
                 ]
               },
@@ -778,6 +815,10 @@ export const updateOrder = async (req, res) => {
                   {
                     model: models.Street,
                     as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
                   }
                 ]
               },
@@ -797,6 +838,16 @@ export const updateOrder = async (req, res) => {
             as: "manager",
             include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
           },
+          {
+            model: models.Nomenclature,
+            as: "nomenclatures",
+            include: [
+              {
+                model: models.Measure,
+                as: "Measure"
+              }
+            ]
+          }
         ],
       });
 
@@ -854,6 +905,10 @@ export const takeOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -866,28 +921,34 @@ export const takeOrder = async (req, res) => {
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              },
-              {
-                model: models.Region,
-                as: "Region",
-              }
-            ]
-          }
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ]
         },
         {
           model: models.Person,
@@ -899,6 +960,16 @@ export const takeOrder = async (req, res) => {
           as: "manager",
           include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
         },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -948,6 +1019,10 @@ export const takeOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -976,6 +1051,10 @@ export const takeOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -995,6 +1074,16 @@ export const takeOrder = async (req, res) => {
           as: "manager",
           include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
         },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -1028,39 +1117,17 @@ export const takeOrder = async (req, res) => {
       }
       body += ` ${driver.phone} взял заказ`
 
-      const message = {
-        data: {
+      await sendNotification(
+        'Статус рейса изменен',
+        body,
+        {
           title: 'Статус рейса изменен',
           body,
+          url: `cargodelivery://order/${order.id}`
         },
-        notification: {
-          title: 'Статус рейса изменен',
-          body,
-        },
-        android: {
-          notification: {
-            title: 'Статус рейса изменен',
-            body,
-          },
-        },
-        context: {
-          data: {
-            type: "manager",
-            orderId: order.id,
-            driverId: null,
-            url: `cargodelivery://order/${order.id}`
-          }
-        },
-        token: manager.fcm_token,
-      };
-
-      await getMessaging().send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending message:', error);
-        });
+        manager.fcm_token,
+        manager.device_type
+      )
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
@@ -1154,6 +1221,10 @@ export const confirmOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1161,7 +1232,7 @@ export const confirmOrder = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -1182,6 +1253,10 @@ export const confirmOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1189,51 +1264,47 @@ export const confirmOrder = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
-        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
     try {
-      const driver = await models.User.findByPk(order.driver.user_id);
+      const driver = await models.User.scope("withTokens").findByPk(order.driver.user_id);
 
       const body = 'Менеджер подтвердил рейс';
 
-      const message = {
-        data: {
+      await sendNotification(
+        'Статус рейса изменен',
+        body,
+        {
           title: 'Статус рейса изменен',
           body,
+          url: `cargodelivery://order/${order.id}`
         },
-        notification: {
-          title: 'Статус рейса изменен',
-          body,
-        },
-        android: {
-          notification: {
-            title: 'Статус рейса изменен',
-            body,
-          },
-        },
-        context: {
-          data: {
-            type: "driver",
-            orderId: null,
-            driverId: driver.id,
-            url: 'cargodelivery://orderlist'
-          }
-        },
-        token: driver.fcm_token,
-      };
-
-      await getMessaging().send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending message:', error);
-        });
+        driver.fcm_token,
+        driver.device_type
+      );
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
@@ -1294,6 +1365,10 @@ export const rejectDriver = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1301,7 +1376,7 @@ export const rejectDriver = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -1322,6 +1397,10 @@ export const rejectDriver = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1329,10 +1408,28 @@ export const rejectDriver = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
-        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -1343,43 +1440,21 @@ export const rejectDriver = async (req, res) => {
     }
 
     try {
-      const driver = await models.User.findByPk(order.driver.user.id);
+      const driver = await models.User.scope("withTokens").findByPk(order.driver.user.id);
 
       const body = 'Менеджер отклонил рейс';
 
-      const message = {
-        data: {
+      await sendNotification(
+        'Статус рейса изменен',
+        body,
+        {
           title: 'Статус рейса изменен',
           body,
+          url: `cargodelivery://order/${order.id}`
         },
-        notification: {
-          title: 'Статус рейса изменен',
-          body,
-        },
-        android: {
-          notification: {
-            title: 'Статус рейса изменен',
-            body,
-          },
-        },
-        context: {
-          data: {
-            type: "driver",
-            orderId: null,
-            driverId: driver.id,
-            url: 'cargodelivery://orderlist'
-          }
-        },
-        token: driver.fcm_token,
-      };
-
-      await getMessaging().send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending message:', error);
-        });
+        driver.fcm_token,
+        driver.device_type
+      )
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
@@ -1426,6 +1501,10 @@ export const rejectDriver = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1433,7 +1512,7 @@ export const rejectDriver = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -1454,6 +1533,10 @@ export const rejectDriver = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1461,10 +1544,42 @@ export const rejectDriver = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
-        { model: models.Person, as: "manager", include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } } },
+        {
+          model: models.Person,
+          as: "driver",
+          include: {
+            model: models.User,
+            as: "user",
+            include: {
+              model: models.Role,
+              as: "role"
+            }
+          }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: {
+            model: models.User,
+            as: "user",
+            include: {
+              model: models.Role,
+              as: "role"
+            }
+          }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -1533,6 +1648,10 @@ export const markOrderAsDeparted = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1540,36 +1659,60 @@ export const markOrderAsDeparted = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
           as: "destination",
-          include: {
-            model: models.Address,
-            as: "Address",
-            include: [
-              {
-                model: models.City,
-                as: "City",
-              },
-              {
-                model: models.Country,
-                as: "Country",
-              },
-              {
-                model: models.Street,
-                as: "Street",
-              },
-              {
-                model: models.Region,
-                as: "Region",
-              }
-            ]
-          },
+          include: [
+            {
+              model: models.Address,
+              as: "Address",
+              include: [
+                {
+                  model: models.City,
+                  as: "City",
+                },
+                {
+                  model: models.Country,
+                  as: "Country",
+                },
+                {
+                  model: models.Street,
+                  as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: "contacts",
+            }
+          ]
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager", include: {model: models.User, as: "user"} },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -1603,29 +1746,17 @@ export const markOrderAsDeparted = async (req, res) => {
       }
       body += ` ${driver.phone} погрузился`
 
-      const message = {
-        notification: {
+      await sendNotification(
+        'Статус рейса изменен',
+        body,
+        {
           title: 'Статус рейса изменен',
-          body: body,
+          body,
+          url: `cargodelivery://order/${order.id}`
         },
-        context: {
-          data: {
-            type: "manager",
-            orderId: order.id,
-            driverId: null,
-            url: `cargodelivery://order/${order.id}`
-          }
-        },
-        token: manager.fcm_token,
-      };
-
-      await getMessaging().send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending message:', error);
-        });
+        manager.fcm_token,
+        manager.device_type
+      )
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
@@ -1698,6 +1829,10 @@ export const markOrderAsCompleted = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1705,7 +1840,7 @@ export const markOrderAsCompleted = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -1726,6 +1861,10 @@ export const markOrderAsCompleted = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1733,10 +1872,28 @@ export const markOrderAsCompleted = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager", include: {model: models.User, as: "user"} },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -1770,29 +1927,17 @@ export const markOrderAsCompleted = async (req, res) => {
       }
       body += ` ${driver.phone} завершил рейс`
 
-      const message = {
-        notification: {
+      await sendNotification(
+        'Статус рейса изменен',
+        body,
+        {
           title: 'Статус рейса изменен',
-          body: body,
+          body,
+          url: `cargodelivery://order/${order.id}`
         },
-        context: {
-          data: {
-            type: "manager",
-            orderId: order.id,
-            driverId: null,
-            url: `cargodelivery://order/${order.id}`
-          }
-        },
-        token: manager.fcm_token,
-      };
-
-      await getMessaging().send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending message:', error);
-        });
+        manager.fcm_token,
+        manager.device_type
+      )
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)
@@ -1847,6 +1992,10 @@ export const getDriversOnTrip = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1854,7 +2003,7 @@ export const getDriversOnTrip = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -1875,6 +2024,10 @@ export const getDriversOnTrip = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1882,10 +2035,28 @@ export const getDriversOnTrip = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -1947,6 +2118,10 @@ export const updateGeo = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1954,7 +2129,7 @@ export const updateGeo = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -1975,6 +2150,10 @@ export const updateGeo = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -1982,10 +2161,28 @@ export const updateGeo = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager" },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -2084,6 +2281,10 @@ export const cancelOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -2091,7 +2292,7 @@ export const cancelOrder = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
         {
           model: models.LogisticsPoint,
@@ -2112,6 +2313,10 @@ export const cancelOrder = async (req, res) => {
                 {
                   model: models.Street,
                   as: "Street",
+                },
+                {
+                  model: models.Region,
+                  as: "Region",
                 }
               ]
             },
@@ -2119,10 +2324,28 @@ export const cancelOrder = async (req, res) => {
               model: models.Contact,
               as: "contacts",
             }
-          ],
+          ]
         },
-        { model: models.Person, as: "driver" },
-        { model: models.Person, as: "manager", include: {model: models.User, as: "user"} },
+        {
+          model: models.Person,
+          as: "driver",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Person,
+          as: "manager",
+          include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+        },
+        {
+          model: models.Nomenclature,
+          as: "nomenclatures",
+          include: [
+            {
+              model: models.Measure,
+              as: "Measure"
+            }
+          ]
+        }
       ],
     });
 
@@ -2358,6 +2581,10 @@ export const search = async (req, res) => {
                   {
                     model: models.Street,
                     as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
                   }
                 ]
               },
@@ -2365,7 +2592,7 @@ export const search = async (req, res) => {
                 model: models.Contact,
                 as: "contacts",
               }
-            ],
+            ]
           },
           {
             model: models.LogisticsPoint,
@@ -2386,6 +2613,10 @@ export const search = async (req, res) => {
                   {
                     model: models.Street,
                     as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
                   }
                 ]
               },
@@ -2393,10 +2624,28 @@ export const search = async (req, res) => {
                 model: models.Contact,
                 as: "contacts",
               }
-            ],
+            ]
           },
-          { model: models.Person, as: "driver" },
-          { model: models.Person, as: "manager" },
+          {
+            model: models.Person,
+            as: "driver",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Person,
+            as: "manager",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Nomenclature,
+            as: "nomenclatures",
+            include: [
+              {
+                model: models.Measure,
+                as: "Measure"
+              }
+            ]
+          }
         ],
       });
 
@@ -2419,7 +2668,7 @@ export const getGeo = async (req, res) => {
       return res.status(404).send({ message: "Order not found" });
     }
 
-    if (!order.geo) {
+    if (!order.hasOwnProperty("geo") || !order.geo) {
       return res.status(404).send({ message: "Order doen't have geolocation" });
     }
 
@@ -2521,31 +2770,16 @@ export const location = async(req, res) => {
                 }
                 body += `${person.phone} включил геолокацию`;
 
-                const notification = {
-                  data: {
+                await sendNotification(
+                  title,
+                  body,
+                  {
                     title,
                     body,
                   },
-                  notification: {
-                    title,
-                    body,
-                  },
-                  android: {
-                    notification: {
-                      title,
-                      body,
-                    },
-                  },
-                  token: managerUser.fcm_token,
-                };
-
-                await getMessaging().send(notification)
-                  .then((response) => {
-                    console.log('Successfully sent message:', response);
-                  })
-                  .catch((error) => {
-                    console.log('Error sending message:', error);
-                  });
+                  managerUser.fcm_token,
+                  managerUser.device_type
+                )
 
                 break;
             }
@@ -2561,7 +2795,7 @@ export const location = async(req, res) => {
         const interval = setInterval(async () => {
           order = await models.Order.findOne({ where: { id: orderId } });
 
-          if (order.geo) {
+          if (order.hasOwnProperty("geo") && order.geo) {
             ws.send(JSON.stringify({
               latitude: order.geo.coordinates[0],
               longitude: order.geo.coordinates[1]
@@ -2570,10 +2804,13 @@ export const location = async(req, res) => {
         }, 15 * 60 * 1000);
 
         order = await models.Order.findOne({ where: { id: orderId } });
-        ws.send(JSON.stringify({
-          latitude: order.geo.coordinates[0],
-          longitude: order.geo.coordinates[1]
-        }));
+
+        if (order.hasOwnProperty("geo") && order.geo) {
+          ws.send(JSON.stringify({
+            latitude: order.geo.coordinates[0],
+            longitude: order.geo.coordinates[1]
+          }));
+        }
 
         ws.on("close", function close () {
           clearInterval(interval);
@@ -2650,31 +2887,16 @@ async function checkLocationDisabled () {
     }
     body += `${order.driver.user.phone} выключил геолокацию`;
 
-    const notification = {
-      data: {
+    await sendNotification(
+      title,
+      body,
+      {
         title,
-        body,
+        body
       },
-      notification: {
-        title,
-        body,
-      },
-      android: {
-        notification: {
-          title,
-          body,
-        },
-      },
-      token: managerUser.fcm_token,
-    };
-
-    await getMessaging().send(notification)
-      .then((response) => {
-        console.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        console.log('Error sending message:', error);
-      });
+      managerUser.fcm_token,
+      managerUser.device_type
+    )
   }
 }
 

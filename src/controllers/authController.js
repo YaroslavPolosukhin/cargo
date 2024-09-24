@@ -66,6 +66,8 @@ export const register = async (req, res) => {
 
   try {
     const fcmToken = req.body.fcmToken || null;
+    const deviceType = req.body.deviceType || null;
+
     const phone = req.body.phone.toString();
     const existingUser = await models.User.findOne({ where: { phone } });
     if (existingUser) {
@@ -78,6 +80,7 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role_id: 1,
       fcm_token: fcmToken,
+      device_type: deviceType,
     });
 
     const role = await models.Role.findOne({ where: { id: user.role_id } });
@@ -130,6 +133,8 @@ export const login = async (req, res) => {
 
   try {
     const fcmToken = req.body.fcmToken || null;
+    const deviceType = req.body.deviceType || null;
+
     const phone = req.body.phone.toString();
     let user = await models.User.scope("withPassword").findOne({
       where: { phone },
@@ -143,7 +148,7 @@ export const login = async (req, res) => {
     const refreshToken = await generateRefreshToken(user);
 
     await models.User.update(
-      { refresh_token: refreshToken, fcm_token: fcmToken },
+      { refresh_token: refreshToken, fcm_token: fcmToken, device_type: deviceType },
       { where: { id: user.id } }
     );
 

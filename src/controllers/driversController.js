@@ -3,7 +3,7 @@ import EmploymentType from "../enums/employmentType.js";
 import { models } from "../models/index.js";
 import Roles from "../enums/roles.js";
 import Sequelize from 'sequelize'
-import { getMessaging } from 'firebase-admin/messaging'
+import { sendNotification } from '../utils/send_notification.js'
 
 const driversSockets = {};
 
@@ -384,31 +384,7 @@ export const confirm = async (req, res) => {
     try {
       const body = 'Регистрация подтверждена менеджером'
 
-      const message = {
-        data: {
-          title: 'Ваш статус обновлен',
-          body,
-        },
-        notification: {
-          title: 'Ваш статус обновлен',
-          body,
-        },
-        android: {
-          notification: {
-            title: 'Ваш статус обновлен',
-            body,
-          },
-        },
-        token: user.fcm_token,
-      };
-
-      await getMessaging().send(message)
-        .then((response) => {
-          console.log('Successfully sent message:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending message:', error);
-        });
+      await sendNotification('Ваш статус обновлен', body, { title: 'Ваш статус обновлен', body }, user.fcm_token, user.device_type)
     } catch (e) {
       console.log("something wrong with sending notification")
       console.error(e)

@@ -20,6 +20,11 @@ const config = {
         bigNumberStrings: true
       },
       logging: false
+    },
+    apn: {
+      key_id: process.env.APN_KEY_ID,
+      team_id: process.env.APN_TEAM_ID,
+      topic: process.env.APN_TOPIC
     }
   }
   // production: {

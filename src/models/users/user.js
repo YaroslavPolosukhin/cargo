@@ -56,21 +56,25 @@ export default (sequelize) => {
     fcm_token: {
       type: DataTypes.STRING,
       allowNull: true
-    }
+    },
+    device_type: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
   }, {
     sequelize,
     modelName: 'User',
     tableName: 'users',
     timestamps: true,
     defaultScope: {
-      attributes: { exclude: ['password', 'refresh_token', 'fcm_token'] }
+      attributes: { exclude: ['password', 'refresh_token', 'fcm_token', 'device_type'] }
     },
     scopes: {
       withPassword: {
-        attributes: { include: ['password', 'refresh_token', 'fcm_token'] }
+        attributes: { include: ['password', 'refresh_token', 'fcm_token', 'device_type'] }
       },
       withTokens: {
-        attributes: { include: ['refresh_token', 'fcm_token'] }
+        attributes: { include: ['refresh_token', 'fcm_token', 'device_type'] }
       }
     }
   })
