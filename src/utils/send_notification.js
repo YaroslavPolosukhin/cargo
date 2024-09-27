@@ -2,7 +2,7 @@ import { getMessaging } from 'firebase-admin/messaging'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import config from '../config/config.js'
-import { Provider, Notification } from 'apn'
+import { Provider, Notification } from '@parse/node-apn'
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function sendNotification (title, body, data, token, deviceType) {
@@ -37,7 +37,7 @@ export async function sendNotification (title, body, data, token, deviceType) {
           keyId: config.apn.key_id,
           teamId: config.apn.team_id
         },
-        production: false
+        production: true
       };
 
       const apnProvider = new Provider(options);
