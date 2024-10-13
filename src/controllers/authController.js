@@ -287,6 +287,7 @@ export const recoverPassword = async (req, res) => {
       phone
     );
     if (result.status !== 200) {
+      console.log(result.text)
       return res.status(500).json({ error: "Internal SMS API error" });
     }
     return res.status(200).json({
