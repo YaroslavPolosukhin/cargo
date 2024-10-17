@@ -513,8 +513,6 @@ export const createOrder = async (req, res) => {
     const {
       departureId,
       destinationId,
-      plannedLoadingDate,
-      plannedDeliveryDate,
       nomenclatures,
     } = req.body;
 
@@ -543,7 +541,15 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: `Invalid cost type. Must be one of ${Object.values(costType).join(", ")}` });
     }
 
-    // console.log("dgyjhdsgjhdjhg");
+    let plannedLoadingDate = req.body?.plannedLoadingDate;
+    if (plannedLoadingDate) {
+      plannedLoadingDate = new Date(plannedLoadingDate);
+    }
+
+    let plannedDeliveryDate = req.body?.plannedDeliveryDate;
+    if (plannedDeliveryDate) {
+      plannedDeliveryDate = new Date(plannedDeliveryDate);
+    }
 
     // Create new order with the associated departure and destination
     const newOrder = await models.Order.create(
@@ -551,8 +557,8 @@ export const createOrder = async (req, res) => {
         departure_id: departure.id,
         destination_id: destination.id,
         manager_id: person.id,
-        departure_date_plan: new Date(plannedLoadingDate),
-        delivery_date_plan: new Date(plannedDeliveryDate),
+        departure_date_plan: plannedLoadingDate,
+        delivery_date_plan: plannedDeliveryDate,
         cost_type: req.body?.costType,
         price_cash: req.body?.priceCash,
         price_non_cash: req.body?.priceNonCash,
