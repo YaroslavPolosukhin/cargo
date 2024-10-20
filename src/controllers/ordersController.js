@@ -2795,6 +2795,13 @@ export const location = async(req, res) => {
           }
         })
 
+        ws.on("close", async () => {
+          await models.DisabledLocation.create({
+            person_id: person.id,
+            last_connection: new Date(),
+          });
+        });
+
         break;
 
       case Roles.MANAGER:
