@@ -3,8 +3,8 @@ import { body } from 'express-validator'
 export const createOrderValidator = [
   body('departureId').notEmpty().withMessage('Departure ID is required.'),
   body('destinationId').notEmpty().withMessage('Destination ID is required.'),
-  body('plannedLoadingDate').optional().isDate().withMessage('Planned loading date must be a valid date.'),
-  body('plannedDeliveryDate').optional().isDate().withMessage('Planned delivery date must be a valid date.'),
+  body('plannedLoadingDate').optional().notEmpty().isDate().withMessage('Planned loading date must be a valid date.'),
+  body('plannedDeliveryDate').optional().notEmpty().isDate().withMessage('Planned delivery date must be a valid date.'),
   body('costType').optional().notEmpty().isString().withMessage('Cost per route must be a positive number.'),
   body('priceCash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Cash price must be a positive number.'),
   body('priceNonCash').optional().notEmpty().isFloat({ min: 0 }).withMessage('Non-cash price must be a positive number.'),
