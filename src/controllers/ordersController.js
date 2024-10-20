@@ -2840,7 +2840,7 @@ async function checkLocationDisabled () {
   const disabledLocations = await models.DisabledLocation.findAll({
     where: {
       last_connection: {
-        [Sequelize.Op.lt]: new Date(new Date() - 60 * 60 * 1000)
+        [Sequelize.Op.lt]: new Date(new Date() - 10 * 60 * 1000)
       }
     }
   });
