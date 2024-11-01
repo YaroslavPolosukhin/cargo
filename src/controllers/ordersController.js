@@ -542,7 +542,6 @@ export const createOrder = async (req, res) => {
     }
 
     let plannedLoadingDate = req.body?.plannedLoadingDate;
-    console.log(plannedLoadingDate)
     if (plannedLoadingDate == null) {
       if (plannedLoadingDate == '') {
         plannedLoadingDate = null;
@@ -555,7 +554,6 @@ export const createOrder = async (req, res) => {
     }
 
     let plannedDeliveryDate = req.body?.plannedDeliveryDate;
-    console.log(plannedDeliveryDate)
     if (plannedDeliveryDate == null) {
       if (plannedDeliveryDate == '') {
         plannedDeliveryDate = null;
@@ -567,150 +565,150 @@ export const createOrder = async (req, res) => {
       }
     }
 
-    return res.status(200).json({
-      plannedDeliveryDate,
-      plannedLoadingDate,
-      "is_null_delivery": plannedDeliveryDate == null,
-      "is_null_loading": plannedLoadingDate == null,
-      "is_empty_delivery": plannedDeliveryDate == '',
-      "is_empty_loading": plannedLoadingDate == '',
-    });
+    // return res.status(200).json({
+    //   plannedDeliveryDate,
+    //   plannedLoadingDate,
+    //   "is_null_delivery": plannedDeliveryDate == null,
+    //   "is_null_loading": plannedLoadingDate == null,
+    //   "is_empty_delivery": plannedDeliveryDate == '',
+    //   "is_empty_loading": plannedLoadingDate == '',
+    // });
 
-    // // Create new order with the associated departure and destination
-    // const newOrder = await models.Order.create(
-    //   {
-    //     departure_id: departure.id,
-    //     destination_id: destination.id,
-    //     manager_id: person.id,
-    //     departure_date_plan: plannedLoadingDate,
-    //     delivery_date_plan: plannedDeliveryDate,
-    //     cost_type: req.body?.costType,
-    //     price_cash: req.body?.priceCash,
-    //     price_non_cash: req.body?.priceNonCash,
-    //   },
-    //   { transaction }
-    // );
-    //
-    // await transaction.commit();
-    //
-    // // Associate the order with the nomenclatures
-    // for (const nomenclature of nomenclatures){
-    //   const nomenclatureInstance = await models.Nomenclature.findByPk(nomenclature.id);
-    //   if (!nomenclatureInstance) {
-    //     return res.status(404).json({ message: `Nomenclature with ID ${nomenclature.id} not found` });
-    //   }
-    //
-    //   const nomenclatureTransaction = await sequelize.transaction();
-    //
-    //   await models.OrderNomenclature.create(
-    //     {
-    //       order_id: newOrder.id,
-    //       nomenclature_id: nomenclature.id,
-    //       net_weight: nomenclature.netWeight,
-    //     },
-    //     { nomenclatureTransaction }
-    //   );
-    //
-    //   await nomenclatureTransaction.commit();
-    // }
-    //
-    // const orderWithNomenclatures = await models.Order.findOne(
-    //   {
-    //     where: { id: newOrder.id },
-    //     include: [
-    //       {
-    //         model: models.Truck,
-    //         as: "truck",
-    //       },
-    //       {
-    //         model: models.LogisticsPoint,
-    //         as: "departure",
-    //         include: [
-    //           {
-    //             model: models.Address,
-    //             as: "Address",
-    //             include: [
-    //               {
-    //                 model: models.City,
-    //                 as: "City",
-    //               },
-    //               {
-    //                 model: models.Country,
-    //                 as: "Country",
-    //               },
-    //               {
-    //                 model: models.Street,
-    //                 as: "Street",
-    //               },
-    //               {
-    //                 model: models.Region,
-    //                 as: "Region",
-    //               }
-    //             ]
-    //           },
-    //           {
-    //             model: models.Contact,
-    //             as: "contacts",
-    //           }
-    //         ]
-    //       },
-    //       {
-    //         model: models.LogisticsPoint,
-    //         as: "destination",
-    //         include: [
-    //           {
-    //             model: models.Address,
-    //             as: "Address",
-    //             include: [
-    //               {
-    //                 model: models.City,
-    //                 as: "City",
-    //               },
-    //               {
-    //                 model: models.Country,
-    //                 as: "Country",
-    //               },
-    //               {
-    //                 model: models.Street,
-    //                 as: "Street",
-    //               },
-    //               {
-    //                 model: models.Region,
-    //                 as: "Region",
-    //               }
-    //             ]
-    //           },
-    //           {
-    //             model: models.Contact,
-    //             as: "contacts",
-    //           }
-    //         ]
-    //       },
-    //       {
-    //         model: models.Person,
-    //         as: "driver",
-    //         include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
-    //       },
-    //       {
-    //         model: models.Person,
-    //         as: "manager",
-    //         include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
-    //       },
-    //       {
-    //         model: models.Nomenclature,
-    //         as: "nomenclatures",
-    //         include: [
-    //           {
-    //             model: models.Measure,
-    //             as: "Measure"
-    //           }
-    //         ]
-    //       }
-    //     ],
-    //   }
-    // );
-    //
-    // return res.status(201).json({ order: orderWithNomenclatures });
+    // Create new order with the associated departure and destination
+    const newOrder = await models.Order.create(
+      {
+        departure_id: departure.id,
+        destination_id: destination.id,
+        manager_id: person.id,
+        departure_date_plan: plannedLoadingDate,
+        delivery_date_plan: plannedDeliveryDate,
+        cost_type: req.body?.costType,
+        price_cash: req.body?.priceCash,
+        price_non_cash: req.body?.priceNonCash,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    // Associate the order with the nomenclatures
+    for (const nomenclature of nomenclatures){
+      const nomenclatureInstance = await models.Nomenclature.findByPk(nomenclature.id);
+      if (!nomenclatureInstance) {
+        return res.status(404).json({ message: `Nomenclature with ID ${nomenclature.id} not found` });
+      }
+
+      const nomenclatureTransaction = await sequelize.transaction();
+
+      await models.OrderNomenclature.create(
+        {
+          order_id: newOrder.id,
+          nomenclature_id: nomenclature.id,
+          net_weight: nomenclature.netWeight,
+        },
+        { nomenclatureTransaction }
+      );
+
+      await nomenclatureTransaction.commit();
+    }
+
+    const orderWithNomenclatures = await models.Order.findOne(
+      {
+        where: { id: newOrder.id },
+        include: [
+          {
+            model: models.Truck,
+            as: "truck",
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "departure",
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ]
+          },
+          {
+            model: models.LogisticsPoint,
+            as: "destination",
+            include: [
+              {
+                model: models.Address,
+                as: "Address",
+                include: [
+                  {
+                    model: models.City,
+                    as: "City",
+                  },
+                  {
+                    model: models.Country,
+                    as: "Country",
+                  },
+                  {
+                    model: models.Street,
+                    as: "Street",
+                  },
+                  {
+                    model: models.Region,
+                    as: "Region",
+                  }
+                ]
+              },
+              {
+                model: models.Contact,
+                as: "contacts",
+              }
+            ]
+          },
+          {
+            model: models.Person,
+            as: "driver",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Person,
+            as: "manager",
+            include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+          },
+          {
+            model: models.Nomenclature,
+            as: "nomenclatures",
+            include: [
+              {
+                model: models.Measure,
+                as: "Measure"
+              }
+            ]
+          }
+        ],
+      }
+    );
+
+    return res.status(201).json({ order: orderWithNomenclatures });
   } catch (error) {
     console.error(error);
     return res
