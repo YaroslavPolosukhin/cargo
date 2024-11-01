@@ -567,7 +567,14 @@ export const createOrder = async (req, res) => {
       }
     }
 
-    return res.status(200).json({ plannedDeliveryDate, plannedLoadingDate });
+    return res.status(200).json({
+      plannedDeliveryDate,
+      plannedLoadingDate,
+      "is_null_delivery": plannedDeliveryDate,
+      "is_null_loading": plannedLoadingDate,
+      "is_empty_delivery": plannedDeliveryDate == '',
+      "is_empty_loading": plannedLoadingDate == '',
+    });
 
     // // Create new order with the associated departure and destination
     // const newOrder = await models.Order.create(
