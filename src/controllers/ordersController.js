@@ -542,24 +542,26 @@ export const createOrder = async (req, res) => {
     }
 
     let plannedLoadingDate = req.body?.plannedLoadingDate;
+    console.log(plannedLoadingDate)
     if (plannedLoadingDate) {
       if (plannedLoadingDate === '') {
         plannedLoadingDate = null;
       } else {
         plannedLoadingDate = new Date(plannedLoadingDate);
-        if (isNaN(plannedLoadingDate)) {
+        if (isNaN(plannedLoadingDate) || plannedLoadingDate == 'Invalid Date') {
           return res.status(400).json({ message: "Invalid planned loading date." });
         }
       }
     }
 
     let plannedDeliveryDate = req.body?.plannedDeliveryDate;
+    console.log(plannedDeliveryDate)
     if (plannedDeliveryDate) {
       if (plannedDeliveryDate === '') {
         plannedDeliveryDate = null;
       } else {
         plannedDeliveryDate = new Date(plannedDeliveryDate);
-        if (isNaN(plannedDeliveryDate)) {
+        if (isNaN(plannedDeliveryDate) || plannedDeliveryDate == 'Invalid Date') {
           return res.status(400).json({ message: "Invalid planned delivery date." });
         }
       }
