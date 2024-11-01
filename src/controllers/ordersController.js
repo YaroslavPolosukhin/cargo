@@ -567,6 +567,8 @@ export const createOrder = async (req, res) => {
       }
     }
 
+    return res.status(200).json({ plannedDeliveryDate, plannedLoadingDate });
+
     // // Create new order with the associated departure and destination
     // const newOrder = await models.Order.create(
     //   {
@@ -702,8 +704,6 @@ export const createOrder = async (req, res) => {
     // );
     //
     // return res.status(201).json({ order: orderWithNomenclatures });
-
-    return res.status(500).json({ message: "This endpoint is not implemented yet." });
   } catch (error) {
     console.error(error);
     return res
