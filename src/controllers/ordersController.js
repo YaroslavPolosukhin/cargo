@@ -542,7 +542,7 @@ export const createOrder = async (req, res) => {
     }
 
     let plannedLoadingDate = req.body?.plannedLoadingDate;
-    if (plannedLoadingDate == null) {
+    if (plannedLoadingDate != null) {
       if (plannedLoadingDate == '') {
         plannedLoadingDate = null;
       } else {
@@ -554,7 +554,7 @@ export const createOrder = async (req, res) => {
     }
 
     let plannedDeliveryDate = req.body?.plannedDeliveryDate;
-    if (plannedDeliveryDate == null) {
+    if (plannedDeliveryDate != null) {
       if (plannedDeliveryDate == '') {
         plannedDeliveryDate = null;
       } else {
