@@ -548,7 +548,7 @@ export const createOrder = async (req, res) => {
         plannedLoadingDate = null;
       } else {
         plannedLoadingDate = new Date(plannedLoadingDate);
-        if (isNaN(plannedLoadingDate) || plannedLoadingDate == 'Invalid Date') {
+        if (isNaN(plannedLoadingDate) || plannedLoadingDate == 'Invalid Date' || typeof plannedLoadingDate === 'string') {
           return res.status(400).json({ message: "Invalid planned loading date." });
         }
       }
@@ -561,7 +561,7 @@ export const createOrder = async (req, res) => {
         plannedDeliveryDate = null;
       } else {
         plannedDeliveryDate = new Date(plannedDeliveryDate);
-        if (isNaN(plannedDeliveryDate) || plannedDeliveryDate == 'Invalid Date') {
+        if (isNaN(plannedDeliveryDate) || plannedDeliveryDate == 'Invalid Date' || typeof plannedDeliveryDate === 'string') {
           return res.status(400).json({ message: "Invalid planned delivery date." });
         }
       }
