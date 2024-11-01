@@ -555,13 +555,14 @@ export const createOrder = async (req, res) => {
 
     let plannedDeliveryDate = req.body?.plannedDeliveryDate;
     if (plannedDeliveryDate) {
-        if (plannedDeliveryDate === '') {
-          plannedDeliveryDate = null;
-        } else {
-          plannedDeliveryDate = new Date(plannedDeliveryDate);
-          if (isNaN(plannedDeliveryDate)) {
+      if (plannedDeliveryDate === '') {
+        plannedDeliveryDate = null;
+      } else {
+        plannedDeliveryDate = new Date(plannedDeliveryDate);
+        if (isNaN(plannedDeliveryDate)) {
           return res.status(400).json({ message: "Invalid planned delivery date." });
         }
+      }
     }
 
     // Create new order with the associated departure and destination
