@@ -89,19 +89,19 @@ export default (sequelize) => {
       },
       delivery_date_plan: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       delivery_date_fact: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       departure_date_plan: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       departure_date_fact: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       truck_id: {
         type: DataTypes.INTEGER,
