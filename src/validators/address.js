@@ -21,7 +21,6 @@ export const createAddressValidator = [
     .withMessage("Region must be a string."),
   body("house")
     .optional()
-    .withMessage("House is required.")
     .isString()
     .withMessage("House must be a string."),
   body("apartment")
