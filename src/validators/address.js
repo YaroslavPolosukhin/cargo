@@ -12,16 +12,16 @@ export const createAddressValidator = [
     .isString()
     .withMessage("City must be a string."),
   body("street")
-    .notEmpty()
+    .optional()
     .withMessage("Street is required.")
     .isString()
     .withMessage("Street must be a string."),
   body("region")
     .optional()
     .isString()
-    .withMessage("City must be a string."),
+    .withMessage("Region must be a string."),
   body("house")
-    .notEmpty()
+    .optional()
     .withMessage("House is required.")
     .isString()
     .withMessage("House must be a string."),

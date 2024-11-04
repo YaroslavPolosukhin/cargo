@@ -27,9 +27,14 @@ export const create = async (req, res) => {
     const [cityObject] = await models.City.findOrCreate({
       where: { name: city },
     });
-    const [streetObject] = await models.Street.findOrCreate({
-      where: { name: street },
-    });
+
+    let streetId = null
+    if (body.hasOwnProperty("street")) {
+      const [streetObject] = await models.Street.findOrCreate({
+        where: { name: street },
+      });
+      streetId = streetObject.id
+    }
 
     let region = null;
     if (body.hasOwnProperty("region")) {
@@ -43,7 +48,7 @@ export const create = async (req, res) => {
         name,
         country_id: 1,
         city_id: cityObject.id,
-        street_id: streetObject.id,
+        street_id: streetId,
         house,
         building,
         floor,
