@@ -2811,6 +2811,12 @@ async function checkLocationDisabled () {
     ]
   })
 
+  console.log(orders)
+
+  if (!orders) {
+    return
+  }
+
   for (const order of orders) {
     const manager = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } })
     const driver = await models.User.findByPk(order.driver.user_id);
