@@ -25,7 +25,8 @@ const config = {
       key_id: process.env.APN_KEY_ID,
       team_id: process.env.APN_TEAM_ID,
       topic: process.env.APN_TOPIC
-    }
+    },
+    order_geo_update_interval: process.env.ORDER_GEO_UPDATE_INTERVAL || 3600000
   }
   // production: {
   //   username: process.env.PROD_DB_USERNAME,

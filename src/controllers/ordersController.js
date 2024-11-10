@@ -5,6 +5,7 @@ import { models, sequelize } from '../models/index.js'
 import costType from '../enums/costType.js'
 import Roles from '../enums/roles.js'
 import { sendNotification } from '../utils/send_notification.js'
+import config from "../config/config.js";
 
 const ordersSockets = {};
 
@@ -1199,6 +1200,7 @@ export const confirmOrder = async (req, res) => {
     const data = {
       status: OrderStatus.LOADING,
       truck_id: truck.id,
+      last_geo_update: new Date()
     }
 
     if (plannedArrivalDate) {
@@ -2119,6 +2121,7 @@ export const updateGeo = async (req, res) => {
     }
 
     order.geo = `POINT (${latitude} ${longitude})`;
+    order.last_geo_update = new Date();
     await order.save();
 
     order = await models.Order.findOne({
@@ -2737,7 +2740,6 @@ export const location = async(req, res) => {
       return;
     }
 
-    const person = await models.Person.findByUserId(req.user.id);
     let order = await models.Order.findOne({ where: { id: orderId } });
 
     if (!order) {
@@ -2748,85 +2750,6 @@ export const location = async(req, res) => {
     }
 
     switch (req.user.role) {
-      case Roles.DRIVER:
-        ws.on("message", async (msg) => {
-          try {
-            const message = JSON.parse(msg);
-
-            switch (message.status) {
-              case "update":
-                const point = `POINT (${message.latitude} ${message.longitude})`;
-                await models.Order.update({ geo: point }, { where: { id: order.id } });
-                break;
-              case "off":
-                await models.DisabledLocation.create({
-                  person_id: person.id,
-                  last_connection: new Date(),
-                });
-
-                break;
-
-              case "on":
-                await models.DisabledLocation.destroy({ where: { person_id: person.id } });
-
-                const managerProfile = await models.Person.findOne({ where: { id: order.manager_id } });
-                const managerUser = await models.User.scope("withTokens").findOne({ where: { id: managerProfile.user_id } });
-
-                let fio = null;
-                if (person.surname) {
-                  fio = person.surname
-                }
-                ;
-                if (person.name) {
-                  if (fio) {
-                    fio += ' ' + person.name;
-                  } else {
-                    fio = person.name
-                  }
-                }
-                if (person.patronymic) {
-                  if (fio) {
-                    fio += ' ' + person.patronymic;
-                  } else {
-                    fio = person.patronymic
-                  }
-                }
-
-                const title = `Геолокация включена`;
-                let body = `Водитель `;
-                if (fio) {
-                  body += fio + ` `;
-                }
-                body += `${person.phone} включил геолокацию`;
-
-                await sendNotification(
-                  title,
-                  body,
-                  {
-                    title,
-                    body,
-                  },
-                  managerUser.fcm_token,
-                  managerUser.device_type
-                )
-
-                break;
-            }
-          } catch (e) {
-            console.error(e)
-            ws.send(JSON.stringify({ status: "Something went wrong" }))
-          }
-        })
-
-        ws.on("close", async () => {
-          await models.DisabledLocation.create({
-            person_id: person.id,
-            last_connection: new Date(),
-          });
-        });
-
-        break;
-
       case Roles.MANAGER:
         const interval = setInterval(async () => {
           order = await models.Order.findOne({ where: { id: orderId } });
@@ -2867,71 +2790,43 @@ export const location = async(req, res) => {
 }
 
 async function checkLocationDisabled () {
-  const disabledLocations = await models.DisabledLocation.findAll({
+  const orders = models.Order.findAll({
     where: {
-      last_connection: {
-        [Sequelize.Op.lt]: new Date(new Date() - 10 * 60 * 1000)
+      status: OrderStatus.DEPARTED,
+      last_geo_update: {
+        [Op.lt]: new Date(new Date() - config.order_geo_update_interval)
       }
-    }
-  });
-
-  for (const disabledLocation of disabledLocations) {
-    const order = await models.Order.findOne({
-      where: { driver_id: disabledLocation.person_id},
-      include: [
-        {
-          model: models.Person,
-          as: "manager"
-        },
-        {
-          model: models.Person,
-          as: "driver",
-          include : {
-            model: models.User,
-            as: "user"
-          }
-        }
-      ]
-    });
-
-    const managerUser = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } });
-
-    let fio = null;
-    if (order.driver.surname) {
-      fio = order.driver.surname
-    }
-    ;
-    if (order.driver.name) {
-      if (fio) {
-        fio += ' ' + order.driver.name;
-      } else {
-        fio = order.driver.name
+    },
+    include: [
+      {
+        model: models.Person,
+        as: "driver",
+        include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
+      },
+      {
+        model: models.Person,
+        as: "manager",
+        include: { model: models.User, as: "user", include: { model: models.Role, as: "role" } }
       }
-    }
-    if (order.driver.patronymic) {
-      if (fio) {
-        fio += ' ' + order.driver.patronymic;
-      } else {
-        fio = order.driver.patronymic
-      }
-    }
+    ]
+  })
 
-    const title = 'Геолокация выключена';
-    let body = 'Водитель ';
-    if (fio) {
-      body += fio + ' ';
-    }
-    body += `${order.driver.user.phone} выключил геолокацию`;
+  for (const order of orders) {
+    const manager = await models.User.scope("withTokens").findOne({ where: { id: order.manager.user_id } })
+    const driver = await models.User.findByPk(order.driver.user_id);
+
+    let body = `Водитель ${driver.phone} не обновлял геолокацию в течение ${config.order_geo_update_interval / (1000 * 60)} минут`
 
     await sendNotification(
-      title,
+      'Геолокация отключена',
       body,
       {
-        title,
-        body
+        title: 'Геолокация отключена',
+        body,
+        url: `cargodelivery://order/${order.id}`
       },
-      managerUser.fcm_token,
-      managerUser.device_type
+      manager.fcm_token,
+      manager.device_type
     )
   }
 }

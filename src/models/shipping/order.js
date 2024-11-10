@@ -114,6 +114,10 @@ export default (sequelize) => {
       geo: {
         type: DataTypes.STRING,
         allowNull: true
+      },
+      last_geo_update: {
+        type: DataTypes.DATE,
+        allowNull: true
       }
     },
     {
