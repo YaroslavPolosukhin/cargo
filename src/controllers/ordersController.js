@@ -2790,7 +2790,7 @@ export const location = async(req, res) => {
 }
 
 async function checkLocationDisabled () {
-  const orders = models.Order.findAll({
+  const orders = await models.Order.findAll({
     where: {
       status: OrderStatus.DEPARTED,
       last_geo_update: {
