@@ -2837,7 +2837,7 @@ async function checkLocationDisabled () {
   }
 }
 
-setInterval(checkLocationDisabled, 30 * 60 * 1000)
+setInterval(checkLocationDisabled, config.order_geo_update_interval / 2)
 
 export default {
   getAvailableOrders,
