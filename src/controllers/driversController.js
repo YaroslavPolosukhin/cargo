@@ -114,7 +114,7 @@ export const getApproved = async (req, res) => {
     const users = await models.Person.findAll({ ...attrs, limit, offset });
 
     users.forEach(user => {
-      if (user.hasOwnProperty("passport")) {
+      if (user.hasOwnProperty("passport") && user.passport !== null) {
         const photos = []
 
         if (user.passport.hasOwnProperty('photos') && user.passport.photos.length !== 0) {
