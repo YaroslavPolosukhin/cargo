@@ -129,8 +129,6 @@ export const getApproved = async (req, res) => {
         user.passport.photos = photos
       }
 
-      console.log(user)
-
       userList.push(user)
     });
 
