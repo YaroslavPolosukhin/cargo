@@ -4,6 +4,7 @@ import { models } from "../models/index.js";
 import Roles from "../enums/roles.js";
 import Sequelize from 'sequelize'
 import { sendNotification } from '../utils/send_notification.js'
+import {getFullUrl} from "../utils/utils.js";
 
 const driversSockets = {};
 
@@ -111,6 +112,16 @@ export const getApproved = async (req, res) => {
 
     const count = await models.Person.count(attrs);
     const users = await models.Person.findAll({ ...attrs, limit, offset });
+
+    users.forEach(user => {
+      const photos = []
+
+      user.passport.photos.forEach(photo => {
+        photos.push(getFullUrl(req, photo.photo_url))
+      });
+
+      user.passport.photos = photos
+    });
 
     const totalPages = Math.ceil(count / limit);
     return res.status(200).json({ totalPages, count, users });
