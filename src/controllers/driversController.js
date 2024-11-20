@@ -114,15 +114,17 @@ export const getApproved = async (req, res) => {
     const users = await models.Person.findAll({ ...attrs, limit, offset });
 
     users.forEach(user => {
-      const photos = []
+      if (user.hasOwnProperty("passport")) {
+        const photos = []
 
-      if (user.passport.hasOwnProperty('photos') && user.passport.photos.length !== 0) {
-        user.passport.photos.forEach(photo => {
-          photos.push(getFullUrl(req, photo.photo_url))
-        });
+        if (user.passport.hasOwnProperty('photos') && user.passport.photos.length !== 0) {
+          user.passport.photos.forEach(photo => {
+            photos.push(getFullUrl(req, photo.photo_url))
+          });
+        }
+
+        user.passport.photos = photos
       }
-
-      user.passport.photos = photos
     });
 
     const totalPages = Math.ceil(count / limit);
