@@ -113,8 +113,9 @@ export const getApproved = async (req, res) => {
     const count = await models.Person.count(attrs);
     const users = await models.Person.findAll({ ...attrs, limit, offset });
 
+    const userList = []
     users.forEach(user => {
-      if (user.hasOwnProperty("passport") && user.passport !== null) {
+      if (user.hasOwnProperty('passport') && user.passport !== null) {
         const photos = []
 
         if (user.passport.hasOwnProperty('photos') && user.passport.photos.length !== 0) {
@@ -125,10 +126,12 @@ export const getApproved = async (req, res) => {
 
         user.passport.photos = photos
       }
+
+      userList.push(user)
     });
 
     const totalPages = Math.ceil(count / limit);
-    return res.status(200).json({ totalPages, count, users });
+    return res.status(200).json({ totalPages, count, userList });
   } catch (error) {
     console.error(error);
     res.status(500).send();
