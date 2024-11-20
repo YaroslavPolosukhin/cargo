@@ -115,21 +115,25 @@ export const getApproved = async (req, res) => {
 
     const userList = []
     users.forEach(user => {
-      if (user.hasOwnProperty('passport') && user.passport !== null) {
+      const userObj = user.toJSON()
+
+      if (userObj.hasOwnProperty('passport') && userObj.passport !== null) {
         const photos = []
 
-        if (user.passport.hasOwnProperty('photos') && user.passport.photos !== null) {
-          user.passport.photos.forEach(photo => {
-            photos.push(getFullUrl(req, photo.photo_url))
+        if (userObj.passport.hasOwnProperty('photos') && userObj.passport.photos !== null) {
+          userObj.passport.photos.forEach(photo => {
+            if (photo.photo_url !== "no_url") {
+              photos.push(getFullUrl(req, photo.photo_url))
+            }
           });
+
+          console.log(photos)
         }
 
-        console.log(photos)
-
-        user.passport.photos = photos
+        userObj.passport.photos = photos
       }
 
-      userList.push(user)
+      userList.push(userObj)
     });
 
     const totalPages = Math.ceil(count / limit);
