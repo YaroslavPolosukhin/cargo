@@ -116,7 +116,7 @@ export const getApproved = async (req, res) => {
     users.forEach(user => {
       const photos = []
 
-      if (user.passport.photos && user.passport.photos.length !== 0) {
+      if (user.passport.hasOwnProperty('photos') && user.passport.photos.length !== 0) {
         user.passport.photos.forEach(photo => {
           photos.push(getFullUrl(req, photo.photo_url))
         });
