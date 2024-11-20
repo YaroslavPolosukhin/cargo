@@ -118,14 +118,18 @@ export const getApproved = async (req, res) => {
       if (user.hasOwnProperty('passport') && user.passport !== null) {
         const photos = []
 
-        if (user.passport.hasOwnProperty('photos') && user.passport.photos.length !== 0) {
+        if (user.passport.hasOwnProperty('photos') && user.passport.photos !== null) {
           user.passport.photos.forEach(photo => {
             photos.push(getFullUrl(req, photo.photo_url))
           });
         }
 
+        console.log(photos)
+
         user.passport.photos = photos
       }
+
+      console.log(user)
 
       userList.push(user)
     });
