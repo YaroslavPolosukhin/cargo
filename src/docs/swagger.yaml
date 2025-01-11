@@ -34,6 +34,8 @@ paths:
     $ref: 'src/docs/paths/drivers/approved.yaml'
   /api/drivers/unapproved:
     $ref: 'src/docs/paths/drivers/unapproved.yaml'
+  /api/drivers/{driverId}:
+    $ref: 'src/docs/paths/drivers/one.yaml'
   /api/drivers/confirm:
     $ref: 'src/docs/paths/drivers/confirm.yaml'
   /api/drivers/jobs:
@@ -78,6 +80,8 @@ paths:
   /api/logisticPoint:
     $ref: 'src/docs/paths/logisticsPoint/create.yaml'
   /api/logisticPoint/{pointId}:
+    $ref: 'src/docs/paths/logisticsPoint/one.yaml'
+  /api/logisticPoint/{pointId}:
     $ref: 'src/docs/paths/logisticsPoint/update.yaml'
   /api/logisticPoint/search:
     $ref: 'src/docs/paths/logisticsPoint/search.yaml'
@@ -87,6 +91,8 @@ paths:
     $ref: 'src/docs/paths/nomenclature/all.yaml'
   /api/nomenclature/search:
     $ref: 'src/docs/paths/nomenclature/search.yaml'
+  /api/nomenclature/{nomenclatureId}:
+    $ref: 'src/docs/paths/nomenclature/one.yaml'
   /api/nomenclature:
     $ref: 'src/docs/paths/nomenclature/create.yaml'
   /api/nomenclature/{nomenclatureId}:
