@@ -1,9 +1,8 @@
 get:
   tags:
     - Drivers
-  summary: Get a list of approved drivers
-  description: Retrieve all drivers that have been approved.
-  operationId: getApproved
+  summary: Get driver by id
+  operationId: getDriverById
   parameters:
     parameters:
       - in: path
