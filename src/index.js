@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import swaggerUi from "swagger-ui-express";
 import { fileURLToPath } from "url";
 import path from "path";
+import cors from "cors";
 import YAML from "yamljs";
 import $RefParser from "json-schema-ref-parser";
 import authMiddleware from "./middlewares/checkAuth.js";
@@ -36,14 +37,12 @@ app.use(WebSocketExpress.urlencoded({ extended: true }));
 app.use(responseLogger);
 app.set('shutdown timeout', 1000);
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', process.env.WEB_SERVER);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
+const corsOptions = {
+  origin: 'http://' + process.env.WEB_SERVER,
+  optionsSuccessStatus: 200
+}
 
+app.use(cors(corsOptions))
 app.use("/uploads", WebSocketExpress.static(path.join(__dirname, "..", "uploads")))
 
 const swaggerDocument = YAML.load(path.join(__dirname, "docs", "swagger.yaml"));
