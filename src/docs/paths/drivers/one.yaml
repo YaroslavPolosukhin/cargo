@@ -4,13 +4,12 @@ get:
   summary: Get driver by id
   operationId: getDriverById
   parameters:
-    parameters:
-      - in: path
-        name: driverId
-        schema:
-          type: integer
-        required: true
-        description: Driver Id
+    - in: path
+      name: driverId
+      schema:
+        type: integer
+      required: true
+      description: Driver Id
   responses:
     '200':
       description: A driver

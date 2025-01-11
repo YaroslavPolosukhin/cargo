@@ -1,5 +1,5 @@
 get:
-  summary: Get a logistics point by ip
+  summary: Get a logistics point by id
   operationId: getLogisticsPoint
   tags:
     - Logistics Points
