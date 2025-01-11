@@ -30,6 +30,11 @@ router.post(
   createLogisticsPointValidator,
   logisticPointsController.create
 );
+router.get(
+  "/:pointId",
+  checkRole([Roles.MANAGER]),
+  logisticPointsController.getOne
+);
 router.put(
   "/:pointId",
   checkRole([Roles.MANAGER]),

@@ -1,0 +1,24 @@
+get:
+  summary: Retrieves all nomenclatures
+  operationId: getNomenclatures
+  tags:
+    - Nomenclature
+  parameters:
+    - in: path
+      name: nomenclatureId
+      schema:
+        type: integer
+      required: true
+      description: Nomenclature ID
+  responses:
+    '200':
+      description: An nomenclatures
+      content:
+        application/json:
+          schema:
+            type: array
+            properties:
+              nomenclature:
+                $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
+    '500':
+      description: Error retrieving nomenclatures

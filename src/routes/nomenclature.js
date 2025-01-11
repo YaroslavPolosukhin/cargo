@@ -13,6 +13,11 @@ router.post(
   createNomenclatureValidator,
   nomenclatureController.createNomenclature
 );
+router.get(
+  "/:nomenclatureId",
+  checkRole([Roles.MANAGER]),
+  nomenclatureController.getNomenclature
+);
 router.put(
   "/:nomenclatureId",
   checkRole([Roles.MANAGER]),

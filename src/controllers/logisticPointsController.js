@@ -34,6 +34,47 @@ export const create = async (req, res) => {
   }
 };
 
+export const getOne = async (req, res) => {
+  const { pointId } = req.params;
+
+  try {
+    const logisticPoint = await models.LogisticsPoint.findByPk(pointId, {
+      include: [
+        {
+          model: models.Address,
+          as: "Address",
+          include: [
+            {
+              model: models.City,
+              as: "City",
+            },
+            {
+              model: models.Street,
+              as: "Street",
+            },
+            {
+              model: models.Country,
+              as: "Country",
+            },
+            {
+              model: models.Region,
+              as: "Region",
+            }
+          ]
+        }
+      ],
+    })
+    if (logisticPoint === null) {
+      return res.status(404).json({ error: "Logistic point not found" });
+    }
+
+    return res.status(200).json({ logisticPoint });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export const update = async (req, res) => {
   const { pointId } = req.params;
 
@@ -217,4 +258,4 @@ export const search = async (req, res) => {
   }
 };
 
-export default { create, getAll, update, deleteLogisticsPoint, search };
+export default { create, getAll, update, deleteLogisticsPoint, search, getOne };

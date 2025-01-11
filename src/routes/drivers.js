@@ -25,6 +25,11 @@ router.get(
   paginationMiddleware,
   driversController.getUnapproved
 );
+router.get(
+  "/:driverId",
+  checkRole([Roles.MANAGER]),
+  driversController.getOne
+)
 router.put(
   "/update",
   checkRole([Roles.MANAGER, Roles.DRIVER]),

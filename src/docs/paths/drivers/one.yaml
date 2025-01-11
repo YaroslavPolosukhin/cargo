@@ -1,0 +1,26 @@
+get:
+  tags:
+    - Drivers
+  summary: Get a list of approved drivers
+  description: Retrieve all drivers that have been approved.
+  operationId: getApproved
+  parameters:
+    parameters:
+      - in: path
+        name: driverId
+        schema:
+          type: integer
+        required: true
+        description: Driver Id
+  responses:
+    '200':
+      description: A driver
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              user:
+                $ref: '../../components/users.yaml#/components/schemas/Person'
+    '500':
+      description: Internal Server Error

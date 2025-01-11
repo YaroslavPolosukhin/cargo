@@ -142,6 +142,61 @@ export const getApproved = async (req, res) => {
   }
 };
 
+export const getOne = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+
+    const attrs = {
+      where: {
+        id: driverId,
+      },
+      include: [
+        {
+          model: models.Role,
+          as: "role",
+          where: {
+            name: Roles.DRIVER,
+          },
+          attributes: ["name"],
+        },
+        {
+          model: models.Person,
+          as: "Person",
+          include: [
+            { model: models.Contragent, as: "contragent" },
+            { model: models.JobPosition, as: "jobPosition" },
+            {
+              model: models.DrivingLicence,
+              as: "drivingLicense",
+            },
+            {
+              model: models.Passport,
+              as: "passport",
+              include: [
+                {
+                  model: models.PassportPhoto,
+                  as: "photos"
+                }
+              ]
+            }
+          ]
+        },
+      ],
+    };
+
+    const user = await models.User.findOne(attrs)
+
+    if (user == null) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
+}
+
 export const update = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

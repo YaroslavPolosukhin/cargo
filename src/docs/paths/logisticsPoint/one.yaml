@@ -1,0 +1,25 @@
+get:
+  summary: Retrieve all logistics points
+  operationId: getAllLogisticsPoints
+  tags:
+    - Logistics Points
+  parameters:
+    - in: path
+      name: pointId
+      required: true
+      schema:
+        type: integer
+        format: int64
+      description: Logistics point id
+  responses:
+    '200':
+      description: A logistics point
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              logisticPoint:
+                $ref: '../../components/shipping.yaml#/components/schemas/LogisticPoint'
+    '500':
+      description: Internal Server Error

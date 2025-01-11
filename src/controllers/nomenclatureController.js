@@ -78,6 +78,23 @@ export const createNomenclature = async (req, res) => {
   }
 };
 
+export const getNomenclature = async (req, res) => {
+  try {
+    const { nomenclatureId } = req.params;
+    const nomenclature = await models.Nomenclature.findByPk(nomenclatureId);
+    if (nomenclature === null) {
+      return res.status(404).json({ error: "Nomenclature not found" });
+    }
+    const measure = await models.Measure.findByPk(nomenclature.measure_id);
+    nomenclature.dataValues.measure = measure.dataValues;
+    delete nomenclature.dataValues.measure_id;
+    return res.status(200).json(nomenclature);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 export const updateNomenclature = async (req, res) => {
   try {
     const { nomenclatureId } = req.params;
@@ -137,4 +154,5 @@ export default {
   getNomenclaturesByName,
   updateNomenclature,
   deleteNomenclature,
+  getNomenclature
 };
