@@ -1,0 +1,71 @@
+post:
+  tags:
+    - Drivers
+  summary: Create passport
+  operationId: createPassport
+  requestBody:
+    required: false
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            passportSeries:
+              type: string
+              description: Series of the passport
+              nullable: true
+            passportNumber:
+              type: string
+              description: Number of the passport
+              nullable: true
+            passportIssuedBy:
+              type: string
+              description: Authority that issued the passport
+              nullable: true
+            passportIssueDate:
+              type: string
+              format: date-time
+              description: Date when the passport was issued
+              nullable: true
+            passportDepartmentCode:
+              type: string
+              description: Department code of the passport
+              nullable: true
+            photos:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Passport photos of the driver
+              maxItems: 6
+              nullable: true
+  responses:
+    '200':
+      description: Created passport successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Passport created successfully
+              id:
+                type: integer
+                description: ID of created the passport
+    '400':
+      description: Bad Request - Validation failed or job position not found or driver not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    msg:
+                      type: string
+    '500':
+      description: Internal server error

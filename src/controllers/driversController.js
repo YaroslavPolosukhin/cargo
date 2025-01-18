@@ -489,6 +489,76 @@ export const getJobs = async (req, res) => {
   }
 };
 
+export const createPassport = async (req, res) => {
+  try {
+    const {
+      passportSeries,
+      passportNumber,
+      passportIssuedBy,
+      passportIssueDate,
+      passportDepartmentCode
+    } = req.body
+
+    const passport = await models.Passport.findOrCreate({
+      where: {
+        series: passportSeries,
+        number: passportNumber
+      },
+      defaults: {
+        series: passportSeries,
+        number: passportNumber,
+        authority: passportIssuedBy,
+        date_of_issue: new Date(passportIssueDate).setHours(0, 0, 0, 0),
+        department_code: passportDepartmentCode
+      }
+    })
+
+    const passportPhotos = req.files.map((file) => {
+      return {
+        passport_id: passport.id,
+        photo_url: file.path
+      }
+    })
+
+    if (passportPhotos.length > 0) {
+      await models.PassportPhoto.bulkCreate(passportPhotos)
+    }
+
+    return res.status(200).json({ message: 'created', id: passport.id })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const createContragent = async (req, res) => {
+  try {
+    const {
+      contragentName,
+      contragentINN,
+      kpp,
+      companyType
+    } = req.body
+
+    const contragent = await models.Contragent.findOrCreate({
+      where: { inn: contragentINN },
+      defaults: {
+        name: contragentName,
+        inn: contragentINN,
+        kpp,
+        supplier: companyType === 'supplier',
+        buyer: companyType === 'buyer',
+        transport_company: companyType === 'transport_company'
+      }
+    })
+
+    return res.status(200).json({ message: 'created', id: contragent.id })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
 export const getManagerPhone = async (req, res) => {
   try {
     const driverUser = await models.User.findByPk(req.user.id);

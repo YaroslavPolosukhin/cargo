@@ -1,5 +1,5 @@
-import { validationResult } from 'express-validator'
-import { models, sequelize } from '../models/index.js'
+import {validationResult} from 'express-validator'
+import {models, sequelize} from '../models/index.js'
 import Sequelize from 'sequelize'
 
 export const create = async (req, res) => {
@@ -62,16 +62,31 @@ export const getOne = async (req, res) => {
             }
           ]
         }
-      ],
+      ]
     })
     if (logisticPoint === null) {
-      return res.status(404).json({ error: "Logistic point not found" });
+      return res.status(404).json({ error: 'Logistic point not found' });
     }
+
+    logisticPoint.dataValues.contacts = await models.LogisticsPointContacts.findAll({
+      where: {
+        logistics_point_id: logisticPoint.id
+      },
+      include: [
+        {
+          model: models.Contact,
+          as: 'contact'
+        }
+      ],
+      attributes: [
+        'contact_id'
+      ]
+    });
 
     return res.status(200).json({ logisticPoint });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 

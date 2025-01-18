@@ -3,7 +3,7 @@ import checkRole from "../middlewares/checkRole.js";
 import paginationMiddleware from "../middlewares/paginationMiddleware.js";
 import Roles from "../enums/roles.js";
 import {
-  confirmDriverValidator,
+  confirmDriverValidator, createContragentValidator, createPassportValidator,
   updateDriverValidator,
 } from "../validators/drivers.js";
 import { passportUpload } from "../config/multer.js";
@@ -43,6 +43,21 @@ router.post(
   confirmDriverValidator,
   driversController.confirm
 );
+
+router.post(
+  '/createPassport',
+  checkRole([Roles.MANAGER]),
+  passportUpload.array("photos", 6),
+  createPassportValidator,
+  driversController.createPassport
+)
+
+router.post(
+  '/createContragent',
+  checkRole([Roles.MANAGER]),
+  createContragentValidator,
+  driversController.createContragent
+)
 
 router.get(
   '/jobs',

@@ -1,0 +1,58 @@
+post:
+  tags:
+    - Drivers
+  summary: Create contragent
+  operationId: createContragent
+  requestBody:
+    required: false
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            contragentName:
+              type: string
+              description: Name of the contragent
+              nullable: true
+            contragentINN:
+              type: integer
+              description: Taxpayer Identification Number (INN) of the contragent
+              nullable: true
+            kpp:
+              type: integer
+              description: Code of reason for registration (KPP)
+              nullable: true
+            companyType:
+              type: string
+              description: Company type
+              nullable: true
+  responses:
+    '200':
+      description: Created contragent successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Contragent created successfully
+              id:
+                type: integer
+                description: ID of created the contragent
+    '400':
+      description: Bad Request - Validation failed or job position not found or driver not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    msg:
+                      type: string
+    '500':
+      description: Internal server error

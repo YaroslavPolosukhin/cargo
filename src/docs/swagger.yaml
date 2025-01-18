@@ -38,6 +38,10 @@ paths:
     $ref: 'src/docs/paths/drivers/one.yaml'
   /api/drivers/confirm:
     $ref: 'src/docs/paths/drivers/confirm.yaml'
+  /api/drivers/createPassport:
+    $ref: 'src/docs/paths/drivers/createPassport.yaml'
+  /api/drivers/createContragent:
+    $ref: 'src/docs/paths/drivers/createContragent.yaml'
   /api/drivers/jobs:
     $ref: 'src/docs/paths/drivers/jobs.yaml'
   /api/drivers/update:

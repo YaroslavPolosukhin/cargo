@@ -18,6 +18,7 @@ export const confirmDriverValidator = [
   body("contragentINN")
     .optional(),
   body("kpp").optional(),
+  body('companyType').optional(),
   body("passportSeries").optional(),
   body("passportNumber").optional(),
   body("passportIssuedBy").optional(),
@@ -34,6 +35,24 @@ export const confirmDriverValidator = [
     .isNumeric()
     .withMessage("Driving license number must be numeric"),
 ];
+
+export const createPassportValidator = [
+  body('passportSeries').optional(),
+  body('passportNumber').optional(),
+  body('passportIssuedBy').optional(),
+  body('passportIssueDate')
+    .optional(),
+  body('passportDepartmentCode')
+    .optional()
+]
+
+export const createContragentValidator = [
+  body('contragentName').optional(),
+  body('contragentINN')
+    .optional(),
+  body('kpp').optional(),
+  body('companyType').optional()
+]
 
 export const updateDriverValidator = [
   body().custom((value, { req }) => {
