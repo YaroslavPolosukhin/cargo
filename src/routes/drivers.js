@@ -59,6 +59,12 @@ router.post(
   driversController.createContragent
 )
 
+router.post(
+  '/updateContragent/:contragentId',
+  checkRole([Roles.MANAGER]),
+  driversController.updateContraget
+)
+
 router.get(
   '/jobs',
   checkRole([Roles.MANAGER]),

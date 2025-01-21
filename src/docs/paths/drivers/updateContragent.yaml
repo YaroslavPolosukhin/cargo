@@ -1,8 +1,15 @@
 post:
   tags:
     - Drivers
-  summary: Create contragent
-  operationId: createContragent
+  summary: Update contragent
+  operationId: updateContragent
+  parameters:
+    - in: path
+      name: contragentId
+      schema:
+        type: integer
+      required: true
+      description: Contragent Id
   requestBody:
     required: false
     content:
@@ -28,7 +35,7 @@ post:
               nullable: true
   responses:
     '200':
-      description: Created contragent successfully
+      description: Update contragent successfully
       content:
         application/json:
           schema:
@@ -36,10 +43,10 @@ post:
             properties:
               message:
                 type: string
-                description: Contragent created successfully
-              id:
-                type: integer
-                description: ID of created the contragent
+                description: Contragent updated successfully
+              contragent:
+                type: object
+                description: Contragent
     '400':
       description: Bad Request - Validation failed or job position not found or driver not found
       content:

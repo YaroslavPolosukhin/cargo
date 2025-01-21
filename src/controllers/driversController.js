@@ -481,13 +481,16 @@ export const confirm = async (req, res) => {
 
 export const getJobs = async (req, res) => {
   try {
-    const jobs = await models.JobPosition.findAll();
+    const jobs = await models.JobPosition.findAll({
+      attributes: ['id', 'name'],
+      order: [['name', 'ASC']]
+    });
     res.status(200).json({ jobs });
   } catch (error) {
     console.error(error);
     res.status(500).send();
   }
-};
+}
 
 export const createPassport = async (req, res) => {
   try {
@@ -499,7 +502,7 @@ export const createPassport = async (req, res) => {
       passportDepartmentCode
     } = req.body
 
-    const passport = await models.Passport.findOrCreate({
+    const [passport] = await models.Passport.findOrCreate({
       where: {
         series: passportSeries,
         number: passportNumber
@@ -533,6 +536,8 @@ export const createPassport = async (req, res) => {
 
 export const createContragent = async (req, res) => {
   try {
+    console.log(req.body)
+
     const {
       contragentName,
       contragentINN,
@@ -540,7 +545,7 @@ export const createContragent = async (req, res) => {
       companyType
     } = req.body
 
-    const contragent = await models.Contragent.findOrCreate({
+    const [contragent] = await models.Contragent.findOrCreate({
       where: { inn: contragentINN },
       defaults: {
         name: contragentName,
@@ -553,6 +558,47 @@ export const createContragent = async (req, res) => {
     })
 
     return res.status(200).json({ message: 'created', id: contragent.id })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const updateContraget = async (req, res) => {
+  try {
+    const { contragentId } = req.params
+
+    let contragent = await models.Contragent.findByPk(contragentId)
+
+    if (!contragent) {
+      return res.status(404).json({ error: 'Contragent not found' })
+    }
+
+    const body = req.body
+
+    if (body.hasOwnProperty('companyType') && body.companyType !== null) {
+      body.supplier = body.companyType === 'supplier'
+      body.buyer = body.companyType === 'buyer'
+      body.transport_company = body.companyType === 'transport_company'
+
+      delete body.companyType
+    }
+
+    if (body.hasOwnProperty('contragentINN') && body.contragentINN !== null) {
+      body.inn = body.contragentINN
+      delete body.contragentINN
+    }
+
+    if (body.hasOwnProperty('contragentName') && body.contragentName !== null) {
+      body.name = body.contragentName
+      delete body.contragentName
+    }
+
+    await contragent.update(body)
+
+    contragent = await models.Contragent.findByPk(contragentId)
+
+    return res.status(200).json({ message: 'updated', contragent })
   } catch (error) {
     console.error(error)
     res.status(500).send()
