@@ -104,32 +104,20 @@ export const updateDriverValidator = [
     .isNumeric()
     .withMessage("Passport ID must be numeric"),
   body("jobPositionId")
-    .optional()
-    .isNumeric()
-    .withMessage("Job Position ID must be numeric"),
-  body("email").optional().isEmail().withMessage("Please enter a valid email"),
+    .optional(),
+  body("email").optional(),
   body("individual")
-    .optional()
-    .isBoolean()
-    .withMessage("Individual must be boolean"),
+    .optional(),
   body("self_employed")
-    .optional()
-    .isBoolean()
-    .withMessage("self_employed must be boolean"),
+    .optional(),
   body("telegram")
     .optional()
     .isString()
     .withMessage("Telegram handle must be a string"),
   body("contragentId")
-    .optional()
-    .isNumeric()
-    .withMessage("Contragent ID must be numeric"),
+    .optional(),
   body('drivingLicenseSerial')
-    .optional()
-    .isNumeric()
-    .withMessage("Driving license serial must be numeric"),
+    .optional(),
   body('drivingLicenseNumber')
-    .optional()
-    .isNumeric()
-    .withMessage("Driving license number must be numeric"),
+    .optional(),
 ];

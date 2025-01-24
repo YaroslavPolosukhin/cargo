@@ -247,8 +247,8 @@ export const update = async (req, res) => {
       return res.status(404).json({ error: `Access denied` });
     }
 
-    if (body.hasOwnProperty("job_position_id")) {
-      const jobPositionId = body.job_position_id;
+    if (body.hasOwnProperty("jobPositionId") && body.jobPositionId) {
+      const jobPositionId = body.jobPositionId;
 
       const jobPosition = await models.JobPosition.findByPk(jobPositionId);
 
@@ -257,10 +257,12 @@ export const update = async (req, res) => {
           .status(404)
           .json({ error: `Job position with id ${jobPositionId} not found` });
       }
+
+      body.job_position_id = jobPosition.id;
     }
 
-    if (body.hasOwnProperty("passport_id")) {
-      const passportId = body.passport_id;
+    if (body.hasOwnProperty("passportId") && body.passportId) {
+      const passportId = body.passportId;
 
       const passport = await models.Passport.findByPk(passportId);
 
@@ -269,10 +271,12 @@ export const update = async (req, res) => {
           .status(404)
           .json({ error: `Passport with id ${passportId} not found` });
       }
+
+      body.passport_id = passport.id;
     }
 
-    if (body.hasOwnProperty("contragent_id")) {
-      const contragentId = body.contragent_id;
+    if (body.hasOwnProperty("contragentId") && body.contragentId) {
+      const contragentId = body.contragentId;
 
       const contragent = await models.Contragent.findByPk(contragentId);
 
@@ -281,9 +285,11 @@ export const update = async (req, res) => {
           .status(404)
           .json({ error: `Contragent with id ${contragentId} not found` });
       }
+
+      body.contragent_id = contragent.id;
     }
 
-    if (body.hasOwnProperty("drivingLicenseNumber") && body.hasOwnProperty("drivingLicenseSerial")) {
+    if (body.hasOwnProperty("drivingLicenseNumber") && body.hasOwnProperty("drivingLicenseSerial") && body.drivingLicenseNumber && body.drivingLicenseSerial) {
       const drivingLicenseNumber = body.drivingLicenseNumber
       const drivingLicenseSerial = body.drivingLicenseSerial
 
@@ -292,10 +298,16 @@ export const update = async (req, res) => {
 
       const drivingLicense = await models.DrivingLicence.create({
         serial: drivingLicenseSerial,
-        number: drivingLicenseNumber,
+        number: drivingLicenseNumber
       })
 
-      body["driving_license_id"] = drivingLicense.id
+      body.driving_license_id = drivingLicense.id
+    }
+
+    for (const key in body) {
+      if (!body[key]) {
+        delete body[key]
+      }
     }
 
     await models.Person.update(body, { where: { id: person.id } });
