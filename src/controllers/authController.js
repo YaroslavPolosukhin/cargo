@@ -58,6 +58,49 @@ const codeCheck = async (phone, code) => {
   return { user, attempt }
 }
 
+export const getRoles = async (req, res) => {
+  try {
+    const roles = await models.Role.findAll({
+      where: {
+        show_on_registration: true
+      },
+      attributes: ['id', 'name', 'transport_company_linked']
+    })
+    res.status(200).send({ roles })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ message: 'Internal server error' })
+  }
+}
+
+export const getContragent = async (req, res) => {
+  try {
+    const query = {}
+
+    if (req.query.name) {
+      query.name = req.query.name
+    } else if (req.query.inn) {
+      query.inn = req.query.inn
+    } else {
+      return res.status(400).send({ message: 'Name or INN is required' })
+    }
+
+    const contragent = await models.Contragent.findOne({
+      where: query,
+      attributes: ['id', 'name']
+    })
+
+    if (!contragent) {
+      return res.status(404).send({ message: 'Contragent not found' })
+    }
+
+    res.status(200).send({ id: contragent.id, name: contragent.name })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ message: 'Internal server error' })
+  }
+}
+
 export const register = async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -75,21 +118,64 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password.trim(), 8)
+
+    const roleId = req.body.roleId
+    const role = await models.Role.findOne({ where: { id: roleId } })
+    if (!role) {
+      return res.status(400).send({ message: 'Role not found' })
+    }
+
     let user = await models.User.create({
       phone,
       password: hashedPassword,
-      role_id: 1,
+      role_id: roleId,
       fcm_token: fcmToken,
       device_type: deviceType
     })
-
-    const role = await models.Role.findOne({ where: { id: user.role_id } })
     user.dataValues.role = role.dataValues
 
-    await models.Person.create(
-      {
-        user_id: user.id
-      })
+    const personVals = {
+      user_id: user.id
+    }
+
+    if (role.transport_company_linked) {
+      let contragentId = 0
+
+      if (req.body.contragentId) {
+        const contragent = await models.Contragent.findOne({
+          where: { id: req.body.contragentId }
+        })
+
+        if (!contragent) {
+          return res.status(400).send({ message: 'Contragent not found' })
+        }
+
+        contragentId = contragent.id
+      } else {
+        const contragentName = req.body.contragentName
+        const contragentINN = req.body.contragentINN
+        const kpp = req.body.kpp
+
+        if (!contragentName || !contragentINN || !kpp) {
+          return res.status(400).send({ message: 'Contragent data is required' })
+        }
+
+        const contragent = await models.Contragent.create({
+          name: contragentName,
+          inn: contragentINN,
+          kpp,
+          supplier: false,
+          buyer: false,
+          transport_company: true
+        })
+
+        contragentId = contragent.id
+      }
+
+      personVals.contragent_id = contragentId
+    }
+
+    await models.Person.create(personVals)
 
     const accessToken = generateAccessToken(user)
     const refreshToken = await generateRefreshToken(user)

@@ -27,12 +27,6 @@ router.get(
 )
 
 router.get(
-  '/roles',
-  checkRole([Roles.MANAGER]),
-  driversController.getRoles
-)
-
-router.get(
   '/approved',
   checkRole([Roles.MANAGER]),
   paginationMiddleware,

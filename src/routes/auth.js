@@ -12,6 +12,16 @@ import { Router } from 'websocket-express'
 
 const router = new Router()
 
+router.get(
+  '/roles',
+  authController.getRoles
+)
+
+router.get(
+  '/contragent',
+  authController.getContragent
+)
+
 router.ws('/new', authMiddleware, authController.newUsers)
 router.post('/signUp', registerValidator, authController.register)
 router.post('/signIn', loginValidator, authController.login)

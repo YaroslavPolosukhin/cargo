@@ -16,9 +16,6 @@ post:
             userId:
               type: integer
               description: Numeric ID of the user
-            roleId:
-              type: integer
-              description: Numeric ID of the role
             name:
               type: string
               description: Name of the driver

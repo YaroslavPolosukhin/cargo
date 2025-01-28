@@ -1,0 +1,46 @@
+get:
+  tags:
+    - Authentication
+  parameters:
+    - name: name
+      in: query
+      description: Name of the contragent
+      required: false
+      schema:
+        type: string
+    - name: inn
+      in: query
+      description: Taxpayer Identification Number (INN) of the contragent
+      required: false
+      schema:
+        type: string
+  summary: Check if contragent exists
+  description: >
+    This endpoint returns a id of contragent if it exists
+  operationId: getContragent
+  responses:
+    '200':
+      description: Name and id of the contragent
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: The ID of the contragent
+              name:
+                type: string
+                description: The name of the contragent
+
+    '404':
+      description: Contragent not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '500':
+      description: Internal server error

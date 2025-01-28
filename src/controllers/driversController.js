@@ -384,7 +384,6 @@ export const confirm = async (req, res) => {
 
   const {
     userId,
-    roleId,
     name,
     surname,
     patronymic,
@@ -408,13 +407,6 @@ export const confirm = async (req, res) => {
       jobPosition = await models.JobPosition.findByPk(jobPositionId)
       if (!jobPosition) {
         return res.status(400).json({ message: 'Job position not found' })
-      }
-    }
-
-    if (roleId) {
-      const role = await models.Role.findByPk(roleId)
-      if (!role) {
-        return res.status(400).json({ message: 'Role not found' })
       }
     }
 
@@ -473,7 +465,7 @@ export const confirm = async (req, res) => {
       return res.status(404).json({ message: 'User not found' })
     }
 
-    await user.update({ responsible_user: req.user.id, approved: true, role_id: roleId || user.role_id })
+    await user.update({ responsible_user: req.user.id, approved: true })
     await person.update({
       name,
       surname,
@@ -814,20 +806,5 @@ export const updates = async (req, res) => {
       ws.send(JSON.stringify({ status: "You don't need websocket connection" }))
       ws.close()
       break
-  }
-}
-
-export const getRoles = async (req, res) => {
-  try {
-    const roles = await models.Role.findAll({
-      where: {
-        show_on_registration: true
-      },
-      attributes: ['id', 'name', 'transport_company_linked']
-    })
-    res.status(200).send({ roles })
-  } catch (error) {
-    console.error(error)
-    res.status(500).send({ message: 'Internal server error' })
   }
 }

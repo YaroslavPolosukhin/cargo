@@ -28,6 +28,10 @@ paths:
     $ref: 'src/docs/paths/auth/password/checkcode.yaml'
   /api/auth/password/reset:
     $ref: 'src/docs/paths/auth/password/reset.yaml'
+  /api/auth/roles:
+    $ref: 'src/docs/paths/auth/roles.yaml'
+  /api/auth/contragent:
+    $ref: 'src/docs/paths/auth/contragent.yaml'
 
   # DRIVERS
   /api/drivers/approved:
@@ -46,8 +50,6 @@ paths:
     $ref: 'src/docs/paths/drivers/updateContragent.yaml'
   /api/drivers/jobs:
     $ref: 'src/docs/paths/drivers/jobs.yaml'
-  /api/drivers/roles:
-    $ref: 'src/docs/paths/drivers/roles.yaml'
   /api/drivers/update:
     $ref: 'src/docs/paths/drivers/update.yaml'
   /api/drivers/getManagerPhone:

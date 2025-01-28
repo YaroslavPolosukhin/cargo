@@ -2,7 +2,8 @@ import { body } from 'express-validator'
 
 export const registerValidator = [
   body('phone').isMobilePhone().withMessage('Please enter a valid phone number'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  body('roleId').isInt().withMessage('Role id must be an integer')
 ]
 
 export const loginValidator = [
@@ -22,11 +23,11 @@ export const passwordRecoverValidator = [
 
 export const passwordRecoverCodeCheckValidator = [
   body('phone').isMobilePhone().withMessage('Please enter a valid mobile phone.'),
-  body('code').isString().isLength({ min: 6, max: 6}).withMessage('Please enter a 6-digit SMS code.')
+  body('code').isString().isLength({ min: 6, max: 6 }).withMessage('Please enter a 6-digit SMS code.')
 ]
 
 export const passwordResetValidator = [
   body('phone').isMobilePhone().withMessage('Please enter a valid mobile phone.'),
-  body('code').isString().isLength({ min: 6, max: 6}).withMessage('Please enter a 6-digit SMS code.'),
+  body('code').isString().isLength({ min: 6, max: 6 }).withMessage('Please enter a 6-digit SMS code.'),
   body('password').notEmpty().withMessage('Password must not be empty.')
 ]

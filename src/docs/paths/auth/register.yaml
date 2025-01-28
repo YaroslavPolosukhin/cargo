@@ -27,9 +27,29 @@ post:
               description: Firebase Cloud Messaging token for push notifications (optional).
               example: "your_fcm_token"
             deviceType:
-                type: string
-                description: The type of device used for registration (optional).
-                example: "android"
+              type: string
+              description: The type of device used for registration (optional).
+              example: "android"
+            roleId:
+              type: integer
+              description: The role ID of the user (optional).
+              example: 1
+            contragentId:
+              type: integer
+              description: The contragent ID of the user (optional).
+              example: 1
+            contragentName:
+              type: string
+              description: Name of the contragent
+              example: "Contragent Name"
+            contragentINN:
+              type: string
+              description: Taxpayer Identification Number (INN) of the contragent
+              example: "1234567890"
+            kpp:
+              type: string
+              description: Code of reason for registration (KPP)
+              example: "123456789"
   responses:
     '201':
       description: User registered successfully.
