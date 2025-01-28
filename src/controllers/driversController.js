@@ -1,117 +1,123 @@
-import { validationResult } from "express-validator";
-import EmploymentType from "../enums/employmentType.js";
-import { models } from "../models/index.js";
-import Roles from "../enums/roles.js";
+import { validationResult } from 'express-validator'
+import EmploymentType from '../enums/employmentType.js'
+import { models } from '../models/index.js'
+import Roles from '../enums/roles.js'
 import Sequelize from 'sequelize'
 import { sendNotification } from '../utils/send_notification.js'
-import {getFullUrl} from "../utils/utils.js";
+import { getFullUrl } from '../utils/utils.js'
 
-const driversSockets = {};
+const driversSockets = {}
 
 export const getUnapproved = async (req, res) => {
   try {
-    const { limit, offset } = req.pagination;
+    const { limit, offset } = req.pagination
 
-    if (req.query.hasOwnProperty("search")) {
-      return search(req, res);
+    if (req.query.hasOwnProperty('search')) {
+      return search(req, res)
     }
 
     const attrs = {
       where: {
-        approved: false,
+        approved: false
       },
       include: [
         {
           model: models.Role,
-          as: "role",
+          as: 'role',
           where: {
-            name: Roles.DRIVER,
+            name: Roles.DRIVER
           },
-          attributes: ["name"],
+          attributes: ['name']
         },
         {
           model: models.Person,
-          as: "Person",
+          as: 'Person',
           include: [
-            { model: models.Contragent, as: "contragent" },
-            { model: models.JobPosition, as: "jobPosition" },
+            { model: models.Contragent, as: 'contragent' },
+            { model: models.JobPosition, as: 'jobPosition' },
             {
               model: models.DrivingLicence,
-              as: "drivingLicense",
+              as: 'drivingLicense'
             },
             {
               model: models.Passport,
-              as: "passport",
+              as: 'passport',
               include: [
                 {
                   model: models.PassportPhoto,
-                  as: "photos"
+                  as: 'photos'
                 }
               ]
             }
           ]
-        },
-      ],
-    };
+        }
+      ]
+    }
 
-    const count = await models.User.count(attrs);
-    const users = await models.User.findAll({ ...attrs, limit, offset });
+    const count = await models.User.count(attrs)
+    const users = await models.User.findAll({ ...attrs, limit, offset })
 
-    const totalPages = Math.ceil(count / limit);
-    return res.status(200).json({ totalPages, count, users });
+    const totalPages = Math.ceil(count / limit)
+    return res.status(200).json({ totalPages, count, users })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
-};
+}
 
 export const getApproved = async (req, res) => {
   try {
-    const { limit, offset } = req.pagination;
+    const { limit, offset } = req.pagination
 
-    if (req.query.hasOwnProperty("search")) {
-      return search(req, res);
+    if (req.query.hasOwnProperty('search')) {
+      return search(req, res)
     }
 
     const attrs = {
       include: [
         {
           model: models.User,
-          as: "user",
+          as: 'user',
           where: {
-            approved: true,
+            approved: true
           },
           include: [
             {
               model: models.Role,
-              as: "role",
+              as: 'role',
               where: {
-                name: Roles.DRIVER,
-              },
-            },
-          ],
+                name: Roles.DRIVER
+              }
+            }
+          ]
         },
-        { model: models.Contragent, as: "contragent" },
-        { model: models.JobPosition, as: "jobPosition" },
+        { model: models.Contragent, as: 'contragent' },
+        { model: models.JobPosition, as: 'jobPosition' },
         {
           model: models.DrivingLicence,
-          as: "drivingLicense",
+          as: 'drivingLicense',
+          include: [
+            {
+              model: models.DrivingLicencePhoto,
+              as: 'photos'
+            }
+          ]
         },
         {
           model: models.Passport,
-          as: "passport",
+          as: 'passport',
           include: [
             {
               model: models.PassportPhoto,
-              as: "photos"
+              as: 'photos'
             }
           ]
         }
-      ],
-    };
+      ]
+    }
 
-    const count = await models.Person.count(attrs);
-    const users = await models.Person.findAll({ ...attrs, limit, offset });
+    const count = await models.Person.count(attrs)
+    const users = await models.Person.findAll({ ...attrs, limit, offset })
 
     const userList = []
     users.forEach(user => {
@@ -122,179 +128,193 @@ export const getApproved = async (req, res) => {
 
         if (userObj.passport.hasOwnProperty('photos') && userObj.passport.photos !== null) {
           userObj.passport.photos.forEach(photo => {
-            if (photo.photo_url !== "no_url") {
+            if (photo.photo_url !== 'no_url') {
               photos.push(getFullUrl(req, photo.photo_url))
             }
-          });
+          })
         }
 
         userObj.passport.photos = photos
       }
 
-      userList.push(userObj)
-    });
+      if (userObj.hasOwnProperty('drivingLicense') && userObj.drivingLicense !== null) {
+        const photos = []
 
-    const totalPages = Math.ceil(count / limit);
-    return res.status(200).json({ totalPages, count, userList });
+        if (userObj.drivingLicense.hasOwnProperty('photos') && userObj.drivingLicense.photos !== null) {
+          userObj.drivingLicense.photos.forEach(photo => {
+            if (photo.photo_url !== 'no_url') {
+              photos.push(getFullUrl(req, photo.photo_url))
+            }
+          })
+        }
+
+        userObj.drivingLicense.photos = photos
+      }
+
+      userList.push(userObj)
+    })
+
+    const totalPages = Math.ceil(count / limit)
+    return res.status(200).json({ totalPages, count, userList })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
-};
+}
 
 export const getOne = async (req, res) => {
   try {
-    const { driverId } = req.params;
+    const { driverId } = req.params
 
     const attrs = {
       where: {
-        id: driverId,
+        id: driverId
       },
       include: [
         {
           model: models.Role,
-          as: "role",
+          as: 'role',
           where: {
-            name: Roles.DRIVER,
+            name: Roles.DRIVER
           },
-          attributes: ["name"],
+          attributes: ['name']
         },
         {
           model: models.Person,
-          as: "Person",
+          as: 'Person',
           include: [
-            { model: models.Contragent, as: "contragent" },
-            { model: models.JobPosition, as: "jobPosition" },
+            { model: models.Contragent, as: 'contragent' },
+            { model: models.JobPosition, as: 'jobPosition' },
             {
               model: models.DrivingLicence,
-              as: "drivingLicense",
+              as: 'drivingLicense'
             },
             {
               model: models.Passport,
-              as: "passport",
+              as: 'passport',
               include: [
                 {
                   model: models.PassportPhoto,
-                  as: "photos"
+                  as: 'photos'
                 }
               ]
             }
           ]
-        },
-      ],
-    };
+        }
+      ]
+    }
 
     const user = await models.User.findOne(attrs)
 
     if (user == null) {
-      return res.status(404).json({ error: "Driver not found" });
+      return res.status(404).json({ error: 'Driver not found' })
     }
 
-    return res.status(200).json({ user });
+    return res.status(200).json({ user })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
 }
 
 export const update = async (req, res) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array() });
+    return res.status(400).json({ message: errors.array() })
   }
 
-  const body = JSON.parse(JSON.stringify(req.body));
+  const body = JSON.parse(JSON.stringify(req.body))
 
-  if (!body.hasOwnProperty("personId")) {
-    return res.status(400).json({ error: "Person ID is required" });
+  if (!body.hasOwnProperty('personId')) {
+    return res.status(400).json({ error: 'Person ID is required' })
   }
 
-  const personId = body.personId;
+  const personId = body.personId
 
   try {
     let person = await models.Person.findByPk(personId, {
       include: [
         {
           model: models.User,
-          as: "user",
+          as: 'user',
           include: [
             {
               model: models.Role,
-              as: "role",
-            },
+              as: 'role'
+            }
           ],
-          attributes: { exclude: ["role_id"] },
-        },
+          attributes: { exclude: ['role_id'] }
+        }
       ],
-      attributes: { exclude: ["user_id"] },
-    });
+      attributes: { exclude: ['user_id'] }
+    })
 
     if (person === null) {
-      return res.status(404).json({ error: "Person not found" });
+      return res.status(404).json({ error: 'Person not found' })
     }
 
-    //если роль обновляемого пользователя не driver
+    // если роль обновляемого пользователя не driver
     if (person.user.role.name !== Roles.DRIVER) {
       return res
         .status(404)
-        .json({ error: "You can only update the personal data of drivers" });
+        .json({ error: 'You can only update the personal data of drivers' })
     }
 
-    const { role, id } = req.user;
+    const { role, id } = req.user
 
-    //если водитель, но не тот, который auth
+    // если водитель, но не тот, который auth
     if (role === Roles.DRIVER && person.user.id !== id) {
-      return res.status(404).json({ error: `Access denied` });
+      return res.status(404).json({ error: 'Access denied' })
     }
 
-    if (body.hasOwnProperty("jobPositionId") && body.jobPositionId) {
-      const jobPositionId = body.jobPositionId;
+    if (body.hasOwnProperty('jobPositionId') && body.jobPositionId) {
+      const jobPositionId = body.jobPositionId
 
-      const jobPosition = await models.JobPosition.findByPk(jobPositionId);
+      const jobPosition = await models.JobPosition.findByPk(jobPositionId)
 
       if (!jobPosition) {
         return res
           .status(404)
-          .json({ error: `Job position with id ${jobPositionId} not found` });
+          .json({ error: `Job position with id ${jobPositionId} not found` })
       }
 
-      body.job_position_id = jobPosition.id;
+      body.job_position_id = jobPosition.id
     }
 
-    if (body.hasOwnProperty("passportId") && body.passportId) {
-      const passportId = body.passportId;
+    if (body.hasOwnProperty('passportId') && body.passportId) {
+      const passportId = body.passportId
 
-      const passport = await models.Passport.findByPk(passportId);
+      const passport = await models.Passport.findByPk(passportId)
 
       if (!passport) {
         return res
           .status(404)
-          .json({ error: `Passport with id ${passportId} not found` });
+          .json({ error: `Passport with id ${passportId} not found` })
       }
 
-      body.passport_id = passport.id;
+      body.passport_id = passport.id
     }
 
-    if (body.hasOwnProperty("contragentId") && body.contragentId) {
-      const contragentId = body.contragentId;
+    if (body.hasOwnProperty('contragentId') && body.contragentId) {
+      const contragentId = body.contragentId
 
-      const contragent = await models.Contragent.findByPk(contragentId);
+      const contragent = await models.Contragent.findByPk(contragentId)
 
       if (!contragent) {
         return res
           .status(404)
-          .json({ error: `Contragent with id ${contragentId} not found` });
+          .json({ error: `Contragent with id ${contragentId} not found` })
       }
 
-      body.contragent_id = contragent.id;
+      body.contragent_id = contragent.id
     }
 
-    if (body.hasOwnProperty("drivingLicenseNumber") && body.hasOwnProperty("drivingLicenseSerial") && body.drivingLicenseNumber && body.drivingLicenseSerial) {
+    if (body.hasOwnProperty('drivingLicenseNumber') && body.hasOwnProperty('drivingLicenseSerial') && body.drivingLicenseNumber && body.drivingLicenseSerial) {
       const drivingLicenseNumber = body.drivingLicenseNumber
       const drivingLicenseSerial = body.drivingLicenseSerial
 
-      delete body["drivingLicenseNumber"]
-      delete body["drivingLicenseSerial"]
+      delete body.drivingLicenseNumber
+      delete body.drivingLicenseSerial
 
       const drivingLicense = await models.DrivingLicence.create({
         serial: drivingLicenseSerial,
@@ -302,6 +322,17 @@ export const update = async (req, res) => {
       })
 
       body.driving_license_id = drivingLicense.id
+
+      const drivingLicensePhotos = req.files.map((file) => {
+        return {
+          driving_license_id: drivingLicense.id,
+          photo_url: file.path
+        }
+      })
+
+      if (drivingLicensePhotos.length > 0) {
+        await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+      }
     }
 
     for (const key in body) {
@@ -310,49 +341,50 @@ export const update = async (req, res) => {
       }
     }
 
-    await models.Person.update(body, { where: { id: person.id } });
+    await models.Person.update(body, { where: { id: person.id } })
 
     person = await models.Person.findByPk(personId, {
       include: [
         {
           model: models.User,
-          as: "user",
+          as: 'user',
           include: [
             {
               model: models.Role,
-              as: "role",
+              as: 'role'
             }
           ],
-          attributes: { exclude: ["role_id"] },
+          attributes: { exclude: ['role_id'] }
         },
         {
           model: models.DrivingLicence,
-          as: "drivingLicense"
+          as: 'drivingLicense'
         }
       ],
-      attributes: { exclude: ["user_id", "driving_license_id"] },
-    });
+      attributes: { exclude: ['user_id', 'driving_license_id'] }
+    })
 
     return res
       .status(200)
       .json({
         message: "The user's personal data has been updated",
         person
-      });
+      })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
-};
+}
 
 export const confirm = async (req, res) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array() });
+    return res.status(400).json({ message: errors.array() })
   }
 
   const {
     userId,
+    roleId,
     name,
     surname,
     patronymic,
@@ -365,25 +397,28 @@ export const confirm = async (req, res) => {
     contragentINN,
     kpp,
     companyType,
-    passportSeries,
-    passportNumber,
-    passportIssuedBy,
-    passportIssueDate,
-    passportDepartmentCode,
+    passportId,
     drivingLicenseNumber,
     drivingLicenseSerial
-  } = req.body;
+  } = req.body
 
   try {
-    let jobPosition = null;
+    let jobPosition = null
     if (jobPositionId) {
-      jobPosition = await models.JobPosition.findByPk(jobPositionId);
+      jobPosition = await models.JobPosition.findByPk(jobPositionId)
       if (!jobPosition) {
-        return res.status(400).json({ message: "Job position not found" });
+        return res.status(400).json({ message: 'Job position not found' })
       }
     }
 
-    let contragent = null;
+    if (roleId) {
+      const role = await models.Role.findByPk(roleId)
+      if (!role) {
+        return res.status(400).json({ message: 'Role not found' })
+      }
+    }
+
+    let contragent = null
     if (contragentName) {
       // Get or create Contragent
       [contragent] = await models.Contragent.findOrCreate({
@@ -392,64 +427,53 @@ export const confirm = async (req, res) => {
           name: contragentName,
           inn: contragentINN,
           kpp,
-          supplier: companyType === "supplier",
-          buyer: companyType === "buyer",
-          transport_company: companyType === "transport_company",
-        },
-      });
+          supplier: companyType === 'supplier',
+          buyer: companyType === 'buyer',
+          transport_company: companyType === 'transport_company'
+        }
+      })
     }
 
-    let passport = null;
-    if (passportNumber) {
-      // Get or create Passport
-      [passport] = await models.Passport.findOrCreate({
-        where: {
-          series: passportSeries,
-          number: passportNumber
-        },
-        defaults: {
-          series: passportSeries,
-          number: passportNumber,
-          authority: passportIssuedBy,
-          date_of_issue: new Date(passportIssueDate).setHours(0, 0, 0, 0),
-          department_code: passportDepartmentCode,
-        },
-      });
-
-      const passportPhotos = req.files.map((file) => {
-        return {
-          passport_id: passport.id,
-          photo_url: file.path,
-        };
-      });
-
-      if (passportPhotos.length > 0) {
-        await models.PassportPhoto.bulkCreate(passportPhotos);
+    let passport = null
+    if (passportId) {
+      passport = await models.Passport.findByPk(passportId)
+      if (!passport) {
+        return res.status(400).json({ message: 'Passport not found' })
       }
     }
 
-    let drivingLicenseId = null;
+    let drivingLicenseId = null
     if (drivingLicenseSerial && drivingLicenseNumber) {
       const drivingLicense = await models.DrivingLicence.create({
         serial: drivingLicenseSerial,
-        number: drivingLicenseNumber,
+        number: drivingLicenseNumber
       })
 
       drivingLicenseId = drivingLicense.id
+
+      const drivingLicensePhotos = req.files.map((file) => {
+        return {
+          driving_license_id: drivingLicenseId,
+          photo_url: file.path
+        }
+      })
+
+      if (drivingLicensePhotos.length > 0) {
+        await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+      }
     }
 
-    // Get Person by user_id
-    const person = await models.Person.findByUserId(userId);
+    const person = await models.Person.findByUserId(userId)
     if (!person) {
-      return res.status(400).json({ message: "Driver not found" });
+      return res.status(400).json({ message: 'Driver not found' })
     }
 
-    const user = await models.User.scope("withTokens").findByPk(userId);
+    const user = await models.User.scope('withTokens').findByPk(userId)
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' })
     }
 
-    await user.update({ responsible_user: req.user.id, approved: true });
+    await user.update({ responsible_user: req.user.id, approved: true, role_id: roleId || user.role_id })
     await person.update({
       name,
       surname,
@@ -463,11 +487,11 @@ export const confirm = async (req, res) => {
       email,
       telegram,
       driving_license_id: drivingLicenseId
-    });
+    })
 
-    if (person.id in driversSockets){
-      driversSockets[person.id].send(JSON.stringify({ status: "approved" }));
-      driversSockets[person.id].close();
+    if (person.id in driversSockets) {
+      driversSockets[person.id].send(JSON.stringify({ status: 'approved' }))
+      driversSockets[person.id].close()
     }
 
     try {
@@ -475,32 +499,29 @@ export const confirm = async (req, res) => {
 
       await sendNotification('Ваш статус обновлен', body, { title: 'Ваш статус обновлен', body }, user.fcm_token, user.device_type)
     } catch (e) {
-      console.log("something wrong with sending notification")
+      console.log('something wrong with sending notification')
       console.error(e)
     }
 
     res
       .status(200)
       .json({
-        message: "Driver registration confirmed successfully",
+        message: 'Driver registration confirmed successfully',
         person
-      });
+      })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
-};
+}
 
 export const getJobs = async (req, res) => {
   try {
-    const jobs = await models.JobPosition.findAll({
-      attributes: ['id', 'name'],
-      order: [['name', 'ASC']]
-    });
-    res.status(200).json({ jobs });
+    const jobs = await models.JobPosition.findAll()
+    return res.status(200).json({ jobs })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
 }
 
@@ -548,8 +569,6 @@ export const createPassport = async (req, res) => {
 
 export const createContragent = async (req, res) => {
   try {
-    console.log(req.body)
-
     const {
       contragentName,
       contragentINN,
@@ -619,7 +638,7 @@ export const updateContraget = async (req, res) => {
 
 export const getManagerPhone = async (req, res) => {
   try {
-    const driverUser = await models.User.findByPk(req.user.id);
+    const driverUser = await models.User.findByPk(req.user.id)
 
     let manager = await models.Person.findOne(
       {
@@ -677,23 +696,23 @@ export const getManagerPhone = async (req, res) => {
             as: 'passport'
           }
         ]
-      });
-      manager = managers[0];
+      })
+      manager = managers[0]
     }
 
-    return res.status(200).json({ phone: manager.user.phone, manager})
+    return res.status(200).json({ phone: manager.user.phone, manager })
   } catch (error) {
     console.error(error)
     res.status(500).send()
   }
-};
+}
 
 export const search = async (req, res) => {
   try {
-    const { limit, offset } = req.pagination;
-    const search = req.query.search;
+    const { limit, offset } = req.pagination
+    const search = req.query.search
 
-    const searchWordsLike = search.split(" ").map(word => {
+    const searchWordsLike = search.split(' ').map(word => {
       return {
         [Sequelize.Op.iLike]: `%${word}%`
       }
@@ -709,7 +728,7 @@ export const search = async (req, res) => {
                   [Sequelize.Op.or]: searchWordsLike
                 },
                 {
-                  [Sequelize.Op.in]: search.split(" ")
+                  [Sequelize.Op.in]: search.split(' ')
                 }
               ]
             }
@@ -721,7 +740,7 @@ export const search = async (req, res) => {
                   [Sequelize.Op.or]: searchWordsLike
                 },
                 {
-                  [Sequelize.Op.in]: search.split(" ")
+                  [Sequelize.Op.in]: search.split(' ')
                 }
               ]
             }
@@ -733,67 +752,82 @@ export const search = async (req, res) => {
                   [Sequelize.Op.or]: searchWordsLike
                 },
                 {
-                  [Sequelize.Op.in]: search.split(" ")
+                  [Sequelize.Op.in]: search.split(' ')
                 }
               ]
             }
-          },
+          }
         ]
       },
       include: [
         {
           model: models.User,
-          as: "user",
+          as: 'user',
           include: [
             {
               model: models.Role,
-              as: "role",
+              as: 'role',
               where: {
-                name: Roles.DRIVER,
-              },
-            },
+                name: Roles.DRIVER
+              }
+            }
           ],
           where: {
-            approved: true,
-          },
+            approved: true
+          }
         },
-        { model: models.Contragent, as: "contragent" },
-        { model: models.JobPosition, as: "jobPosition" },
-        { model: models.Passport, as: "passport" },
+        { model: models.Contragent, as: 'contragent' },
+        { model: models.JobPosition, as: 'jobPosition' },
+        { model: models.Passport, as: 'passport' },
         {
           model: models.DrivingLicence,
-          as: "drivingLicense",
+          as: 'drivingLicense'
         }
-      ],
-    };
+      ]
+    }
 
-    const count = await models.Person.count(attrs);
-    const users = await models.Person.findAll({ ...attrs, limit, offset });
+    const count = await models.Person.count(attrs)
+    const users = await models.Person.findAll({ ...attrs, limit, offset })
 
-    const totalPages = Math.ceil(count / limit);
-    return res.status(200).json({ totalPages, count, users });
+    const totalPages = Math.ceil(count / limit)
+    return res.status(200).json({ totalPages, count, users })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
   }
-};
+}
 
 export const updates = async (req, res) => {
-  const ws = await res.accept();
+  const ws = await res.accept()
 
   switch (req.user.role) {
     case Roles.DRIVER:
-      driversSockets[req.user.id] = ws;
+      driversSockets[req.user.id] = ws
 
       ws.on('close', () => {
-        delete driversSockets[req.user.id];
-      });
+        delete driversSockets[req.user.id]
+      })
 
-      break;
+      break
 
     default:
-      ws.send(JSON.stringify({ status: "You don't need websocket connection" }));
-      ws.close();
-      break;
+      ws.send(JSON.stringify({ status: "You don't need websocket connection" }))
+      ws.close()
+      break
+  }
+}
+
+export const getRoles = async (req, res) => {
+  try {
+    const roles = await models.Role.findAll({
+      where: {
+        show_on_registration: true
+      },
+      attributes: ['id', 'name', 'transport_company_linked']
+    })
+    res.status(200).send({ roles })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send({ message: 'Internal server error' })
   }
 }

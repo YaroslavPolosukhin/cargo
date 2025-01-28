@@ -17,6 +17,10 @@ export default (sequelize) => {
     vin: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    trailer_number: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     sequelize,

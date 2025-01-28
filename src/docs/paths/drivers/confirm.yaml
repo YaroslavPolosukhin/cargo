@@ -16,6 +16,9 @@ post:
             userId:
               type: integer
               description: Numeric ID of the user
+            roleId:
+              type: integer
+              description: Numeric ID of the role
             name:
               type: string
               description: Name of the driver
@@ -66,41 +69,23 @@ post:
               type: string
               description: Company type
               nullable: true
-            passportSeries:
-              type: string
-              description: Series of the passport
-              nullable: true
-            passportNumber:
-              type: string
-              description: Number of the passport
-              nullable: true
-            passportIssuedBy:
-              type: string
-              description: Authority that issued the passport
-              nullable: true
-            passportIssueDate:
-              type: string
-              format: date-time
-              description: Date when the passport was issued
-              nullable: true
-            passportDepartmentCode:
-              type: string
-              description: Department code of the passport
-              nullable: true
-            photos:
-              type: array
-              items:
-                type: string
-                format: binary
-              description: Passport photos of the driver
-              maxItems: 6
-              nullable: true
+            passportId:
+              type: integer
+              description: The ID of the passport
             drivingLicenseSerial:
               type: integer
               description: Serial of driver's license
             drivingLicenseNumber:
               type: integer
               description: Number of driver's license
+            drivingLicensePhotos:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Photos of driver's licenses
+              maxItems: 6
+              nullable: true
   responses:
     '200':
       description: Driver registration confirmed successfully

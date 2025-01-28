@@ -46,8 +46,10 @@ paths:
     $ref: 'src/docs/paths/drivers/updateContragent.yaml'
   /api/drivers/jobs:
     $ref: 'src/docs/paths/drivers/jobs.yaml'
+  /api/drivers/roles:
+    $ref: 'src/docs/paths/drivers/roles.yaml'
   /api/drivers/update:
-    $ref: 'src/docs/paths/drivers/person.yaml'
+    $ref: 'src/docs/paths/drivers/update.yaml'
   /api/drivers/getManagerPhone:
     $ref: 'src/docs/paths/drivers/getManagerPhone.yaml'
   /api/drivers/search:

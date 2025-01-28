@@ -29,6 +29,10 @@ post:
               type: string
               description: The Vehicle Identification Number of the truck.
               example: "1HGBH41JXMN109186"
+            trailerNumber:
+              type: string
+              description: The trailer number.
+              example: "T1234"
           required:
             - orderId
             - plannedLoadingDate

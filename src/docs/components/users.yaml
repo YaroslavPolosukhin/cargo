@@ -38,7 +38,9 @@ components:
           type: integer
           format: int32
         name:
-          type: string
+          type: string,
+        transport_company_linked:
+          type: boolean
       required:
         - name
 

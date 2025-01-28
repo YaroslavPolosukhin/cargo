@@ -24,3 +24,4 @@ function createMulterStorage (folderName) {
 }
 
 export const passportUpload = multer({ storage: createMulterStorage('passports') })
+export const driverLicenseUpload = multer({ storage: createMulterStorage('driver_license') })

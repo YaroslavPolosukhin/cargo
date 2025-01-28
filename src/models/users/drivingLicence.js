@@ -4,6 +4,7 @@ export default (sequelize) => {
   class DrivingLicence extends Model {
     static associate (models) {
       this.hasMany(models.Person, { foreignKey: 'driving_license_id' })
+      this.hasMany(models.DrivingLicencePhoto, { foreignKey: 'driving_license_id', as: 'photos' })
     }
   }
 

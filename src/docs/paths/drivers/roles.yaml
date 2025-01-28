@@ -1,0 +1,21 @@
+get:
+  tags:
+    - Drivers
+  summary: Get available roles
+  description: >
+    This endpoint returns a list of available roles
+  operationId: getRoles
+  responses:
+    '200':
+      description: A list of available roles
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/users.yaml#/components/schemas/Role'
+
+    '401':
+      description: Authentication failed
+    '500':
+      description: Internal server error

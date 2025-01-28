@@ -4,7 +4,11 @@ import { models } from '../models/index.js'
 export default async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
-      return res.status(401).send({ message: 'Authentication failed' })
+      if (!req.query.authorization) {
+        return res.status(401).send({ message: 'Authentication failed' })
+      } else {
+        req.headers.authorization = `Bearer ${req.query.authorization}`
+      }
     }
 
     const token = req.headers.authorization.split(' ')[1]

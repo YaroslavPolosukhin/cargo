@@ -1,53 +1,85 @@
 import { Router } from 'websocket-express'
-import checkRole from "../middlewares/checkRole.js";
-import paginationMiddleware from "../middlewares/paginationMiddleware.js";
-import Roles from "../enums/roles.js";
+import checkRole from '../middlewares/checkRole.js'
+import paginationMiddleware from '../middlewares/paginationMiddleware.js'
+import Roles from '../enums/roles.js'
 import {
   confirmDriverValidator, createContragentValidator, createPassportValidator,
-  updateDriverValidator,
-} from "../validators/drivers.js";
-import { passportUpload } from "../config/multer.js";
+  updateDriverValidator
+} from '../validators/drivers.js'
+import { driverLicenseUpload, passportUpload } from '../config/multer.js'
 import * as driversController from '../controllers/driversController.js'
 import searchMiddleware from '../middlewares/searchMiddleware.js'
 
-const router = new Router();
+const router = new Router()
 
-router.ws("/updates", driversController.updates);
+router.ws('/updates', driversController.updates)
+
 router.get(
-  "/approved",
+  '/getManagerPhone',
+  checkRole([Roles.DRIVER]),
+  driversController.getManagerPhone
+)
+
+router.get(
+  '/jobs',
+  checkRole([Roles.MANAGER]),
+  driversController.getJobs
+)
+
+router.get(
+  '/roles',
+  checkRole([Roles.MANAGER]),
+  driversController.getRoles
+)
+
+router.get(
+  '/approved',
   checkRole([Roles.MANAGER]),
   paginationMiddleware,
   driversController.getApproved
-);
+)
+
 router.get(
-  "/unapproved",
+  '/unapproved',
   checkRole([Roles.MANAGER]),
   paginationMiddleware,
   driversController.getUnapproved
-);
+)
+
 router.get(
-  "/:driverId",
+  '/:driverId',
   checkRole([Roles.MANAGER]),
   driversController.getOne
 )
+
+router.get(
+  '/search',
+  checkRole([Roles.MANAGER]),
+  paginationMiddleware,
+  searchMiddleware,
+  driversController.search
+)
+
 router.put(
-  "/update",
+  '/update',
   checkRole([Roles.MANAGER, Roles.DRIVER]),
+  driverLicenseUpload.array('drivingLicensePhotos', 6),
   updateDriverValidator,
   driversController.update
-);
+)
+
 router.post(
-  "/confirm",
+  '/confirm',
   checkRole([Roles.MANAGER]),
-  passportUpload.array("photos", 6),
+  driverLicenseUpload.array('drivingLicensePhotos', 6),
   confirmDriverValidator,
   driversController.confirm
-);
+)
 
 router.post(
   '/createPassport',
   checkRole([Roles.MANAGER]),
-  passportUpload.array("photos", 6),
+  passportUpload.array('photos', 6),
   createPassportValidator,
   driversController.createPassport
 )
@@ -65,24 +97,4 @@ router.post(
   driversController.updateContraget
 )
 
-router.get(
-  '/jobs',
-  checkRole([Roles.MANAGER]),
-  driversController.getJobs
-)
-
-router.get(
-  '/getManagerPhone',
-  checkRole([Roles.DRIVER]),
-  driversController.getManagerPhone
-)
-
-router.get(
-  '/search',
-  checkRole([Roles.MANAGER]),
-  paginationMiddleware,
-  searchMiddleware,
-  driversController.search
-)
-
-export default router;
+export default router

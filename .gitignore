@@ -11,3 +11,4 @@ serviceAccountKey.json
 error_responses
 AuthKey.p8
 uploads
+docker-compose.yaml

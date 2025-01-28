@@ -57,6 +57,14 @@ put:
             drivingLicenseNumber:
               type: integer
               description: Number of driver's license
+            drivingLicensePhotos:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Photos of driver's licenses
+              maxItems: 6
+              nullable: true
   responses:
     '200':
       description: Driver information updated successfully.
