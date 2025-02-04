@@ -119,7 +119,10 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(req.body.password.trim(), 8)
 
-    const roleId = req.body.roleId
+    let roleId = 1
+    if (req.body.roleId) {
+      roleId = req.body.roleId
+    }
     const role = await models.Role.findOne({ where: { id: roleId } })
     if (!role) {
       return res.status(400).send({ message: 'Role not found' })
