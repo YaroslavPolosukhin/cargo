@@ -37,12 +37,28 @@ app.use(WebSocketExpress.urlencoded({ extended: true }))
 app.use(responseLogger)
 app.set('shutdown timeout', 1000)
 
-const corsOptions = {
-  origin: 'http://' + process.env.WEB_SERVER,
-  optionsSuccessStatus: 200
+const allowlist = ['http://localhost:4000', 'localhost:4000', process.env.WEB_SERVER, 'http://' + process.env.WEB_SERVER]
+const corsOptionsDelegate = function (req, callback) {
+  let corsOptions
+
+  let origin = req.header('Origin')
+  if (origin === undefined) {
+    origin = req.header('origin')
+    if (origin === undefined) {
+      origin = req.header('host')
+    }
+  }
+
+  if (allowlist.indexOf(origin) !== -1) {
+    corsOptions = { origin: true }
+  } else {
+    corsOptions = { origin: false }
+  }
+
+  callback(null, corsOptions)
 }
 
-app.use(cors(corsOptions))
+app.use(cors(corsOptionsDelegate))
 app.use('/uploads', WebSocketExpress.static(path.join(__dirname, '..', 'uploads')))
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'docs', 'swagger.yaml'))
