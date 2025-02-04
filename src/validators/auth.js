@@ -2,8 +2,8 @@ import { body } from 'express-validator'
 
 export const registerValidator = [
   body('phone').isMobilePhone().withMessage('Please enter a valid phone number'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  body('roleId').isInt().withMessage('Role id must be an integer')
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+  // body('roleId').isInt().withMessage('Role id must be an integer')
 ]
 
 export const loginValidator = [
