@@ -8,7 +8,7 @@ import searchMiddleware from '../middlewares/searchMiddleware.js'
 const router = new Router()
 
 router.ws('/updates', ordersController.updates)
-router.ws('/location/:orderId', ordersController.location)
+router.ws('/location/:orderId/geo', ordersController.location)
 router.get('/available', paginationMiddleware, ordersController.getAvailableOrders)
 router.get('/current', ordersController.getCurrentOrder)
 router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, ordersController.getAll)
