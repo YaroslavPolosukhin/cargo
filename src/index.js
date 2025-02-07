@@ -47,6 +47,8 @@ const allowlist = [
 const corsOptionsDelegate = function (req, callback) {
   let corsOptions
 
+  console.log(req.headers)
+
   let origin = null
   if (Object.hasOwn(req.headers, 'origin')) {
     origin = req.headers.origin
@@ -65,17 +67,17 @@ const corsOptionsDelegate = function (req, callback) {
   callback(null, corsOptions)
 }
 
-const fixeResGetHeader = function (req, res, next) {
-  res.getHeader = function (name) {
-    if (Object.hasOwn(this.headers, name)) {
-      return this.headers[name]
-    } else {
-      return undefined
-    }
-  }
-}
-
-app.use(fixeResGetHeader)
+// const fixeResGetHeader = function (req, res, next) {
+//   res.getHeader = function (name) {
+//     if (Object.hasOwn(this.headers, name)) {
+//       return this.headers[name]
+//     } else {
+//       return undefined
+//     }
+//   }
+// }
+//
+// app.use(fixeResGetHeader)
 app.use(cors(corsOptionsDelegate))
 app.use('/uploads', WebSocketExpress.static(path.join(__dirname, '..', 'uploads')))
 
