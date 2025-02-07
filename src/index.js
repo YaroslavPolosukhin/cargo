@@ -16,6 +16,7 @@ import contactsRoutes from './routes/contacts.js'
 import measureRoutes from './routes/measure.js'
 import generalRoutes from './routes/general.js'
 import logisticPointsRoutes from './routes/logisticPoints.js'
+import wsRoutes from './routes/ws.js'
 import admin from 'firebase-admin'
 import { createRequire } from 'node:module'
 import { responseLogger } from './middlewares/logger.js'
@@ -65,18 +66,6 @@ const corsOptionsDelegate = function (req, callback) {
   callback(null, corsOptions)
 }
 
-// const fixeResGetHeader = function (req, res, next) {
-//   res.getHeader = function (name) {
-//     if (Object.hasOwn(this.headers, name)) {
-//       return this.headers[name]
-//     } else {
-//       return undefined
-//     }
-//   }
-// }
-//
-// app.use(fixeResGetHeader)
-app.use(cors(corsOptionsDelegate))
 app.use('/uploads', WebSocketExpress.static(path.join(__dirname, '..', 'uploads')))
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'docs', 'swagger.yaml'))
@@ -94,15 +83,16 @@ $RefParser
     console.error('Error resolving $ref in Swagger document:', err)
   })
 
-app.use('/api/auth', authRoutes)
-app.use('/api/orders', authMiddleware, ordersRoutes)
-app.use('/api/general', authMiddleware, generalRoutes)
-app.use('/api/address', authMiddleware, addressRoutes)
-app.use('/api/contacts', authMiddleware, contactsRoutes)
-app.use('/api/measures', authMiddleware, measureRoutes)
-app.use('/api/nomenclature', authMiddleware, nomenclatureRoutes)
-app.use('/api/drivers', authMiddleware, driversRoutes)
-app.use('/api/logisticPoint', authMiddleware, logisticPointsRoutes)
+app.use('/api', authMiddleware, wsRoutes)
+app.use('/api/auth', cors(corsOptionsDelegate), authRoutes)
+app.use('/api/orders', cors(corsOptionsDelegate), authMiddleware, ordersRoutes)
+app.use('/api/general', cors(corsOptionsDelegate), authMiddleware, generalRoutes)
+app.use('/api/address', cors(corsOptionsDelegate), authMiddleware, addressRoutes)
+app.use('/api/contacts', cors(corsOptionsDelegate), authMiddleware, contactsRoutes)
+app.use('/api/measures', cors(corsOptionsDelegate), authMiddleware, measureRoutes)
+app.use('/api/nomenclature', cors(corsOptionsDelegate), authMiddleware, nomenclatureRoutes)
+app.use('/api/drivers', cors(corsOptionsDelegate), authMiddleware, driversRoutes)
+app.use('/api/logisticPoint', cors(corsOptionsDelegate), authMiddleware, logisticPointsRoutes)
 
 const PORT = process.env.PORT || 8080
 

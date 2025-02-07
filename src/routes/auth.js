@@ -22,7 +22,6 @@ router.get(
   authController.getContragent
 )
 
-router.ws('/new', authMiddleware, authController.newUsers)
 router.post('/signUp', registerValidator, authController.register)
 router.post('/signIn', loginValidator, authController.login)
 router.post('/password/recover', passwordRecoverValidator, authController.recoverPassword)

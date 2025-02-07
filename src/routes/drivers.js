@@ -12,8 +12,6 @@ import searchMiddleware from '../middlewares/searchMiddleware.js'
 
 const router = new Router()
 
-router.ws('/updates', driversController.updates)
-
 router.get(
   '/getManagerPhone',
   checkRole([Roles.DRIVER]),
