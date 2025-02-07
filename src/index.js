@@ -89,7 +89,6 @@ $RefParser
     console.error('Error resolving $ref in Swagger document:', err)
   })
 
-app.use('/api', authMiddleware, wsRoutes)
 app.use('/api/auth', cors(corsOptionsDelegate), authRoutes)
 app.use('/api/orders', cors(corsOptionsDelegate), authMiddleware, ordersRoutes)
 app.use('/api/general', cors(corsOptionsDelegate), authMiddleware, generalRoutes)
@@ -99,6 +98,7 @@ app.use('/api/measures', cors(corsOptionsDelegate), authMiddleware, measureRoute
 app.use('/api/nomenclature', cors(corsOptionsDelegate), authMiddleware, nomenclatureRoutes)
 app.use('/api/drivers', cors(corsOptionsDelegate), authMiddleware, driversRoutes)
 app.use('/api/logisticPoint', cors(corsOptionsDelegate), authMiddleware, logisticPointsRoutes)
+app.use('/api', authMiddleware, wsRoutes)
 
 const PORT = process.env.PORT || 8080
 
