@@ -43,12 +43,13 @@ const corsOptionsDelegate = function (req, callback) {
 
   console.log(req.headers)
 
-  let origin = req.header('Origin')
-  if (origin === undefined) {
-    origin = req.header('origin')
-    if (origin === undefined) {
-      origin = req.header('host')
-    }
+  let origin = null
+  if (Object.hasOwn(req.headers, 'origin')) {
+    origin = req.headers.origin
+  } else if (Object.hasOwn(req.headers, 'Origin')) {
+    origin = req.headers.Origin
+  } else if (Object.hasOwn(req.headers, 'host')) {
+    origin = req.headers.host
   }
 
   if (allowlist.indexOf(origin) !== -1) {
