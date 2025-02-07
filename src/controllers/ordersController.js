@@ -2732,6 +2732,8 @@ export const updates = async (req, res) => {
 export const location = async (req, res) => {
   try {
     const ws = await res.accept()
+
+    ws.send('hello')
     const { orderId } = req.params
 
     if (isNaN(orderId) || isNaN(parseFloat(orderId))) {
