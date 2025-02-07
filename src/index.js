@@ -41,6 +41,8 @@ const allowlist = ['http://localhost:4000', 'localhost:4000', process.env.WEB_SE
 const corsOptionsDelegate = function (req, callback) {
   let corsOptions
 
+  console.log(req.headers)
+
   let origin = req.header('Origin')
   if (origin === undefined) {
     origin = req.header('origin')
