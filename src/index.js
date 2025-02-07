@@ -48,9 +48,6 @@ const allowlist = [
 const corsOptionsDelegate = function (req, callback) {
   let corsOptions
 
-  console.log('req.originalUrl:', req.originalUrl)
-  console.log('req.headers:', req.headers)
-
   let origin = null
   if (Object.hasOwn(req.headers, 'origin')) {
     origin = req.headers.origin
@@ -67,8 +64,6 @@ const corsOptionsDelegate = function (req, callback) {
   } else {
     corsOptions = { origin: false }
   }
-
-  console.log('corsOptions:', corsOptions)
 
   callback(null, corsOptions)
 }
