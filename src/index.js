@@ -47,8 +47,6 @@ const allowlist = [
 const corsOptionsDelegate = function (req, callback) {
   let corsOptions
 
-  console.log(req.headers)
-
   let origin = null
   if (Object.hasOwn(req.headers, 'origin')) {
     origin = req.headers.origin

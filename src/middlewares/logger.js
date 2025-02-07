@@ -19,7 +19,6 @@ export const responseLogger = (req, res, next) => {
 
   res.on('finish', () => {
     console.log(`Response status for ${req.method} ${req.originalUrl}: ${res.statusCode}`)
-    console.log(res.headers)
 
     const goodStatuses = [200, 201, 204, 304, 404]
     const excludedUrls = ['/api/docs', '/']
