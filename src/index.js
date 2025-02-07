@@ -99,7 +99,7 @@ app.use('/api/measures', cors(corsOptionsDelegate), authMiddleware, measureRoute
 app.use('/api/nomenclature', cors(corsOptionsDelegate), authMiddleware, nomenclatureRoutes)
 app.use('/api/drivers', cors(corsOptionsDelegate), authMiddleware, driversRoutes)
 app.use('/api/logisticPoint', cors(corsOptionsDelegate), authMiddleware, logisticPointsRoutes)
-app.use('/api', authMiddleware, wsRoutes)
+app.use('/api/ws', authMiddleware, wsRoutes)
 
 const PORT = process.env.PORT || 8080
 
