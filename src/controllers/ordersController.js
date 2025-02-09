@@ -1188,9 +1188,9 @@ export const takeOrder = async (req, res) => {
  */
 export const confirmOrder = async (req, res) => {
   try {
-    const { orderId, plannedLoadingDate, plannedArrivalDate, vin, trailerNumber } =
+    const { orderId, plannedLoadingDate, plannedArrivalDate, vinCode, trailerNumber } =
       req.body
-    const formattedVinCode = vin.replace(/\s/g, '')
+    const formattedVinCode = vinCode.replace(/\s/g, '')
 
     const [truck] = await models.Truck.findOrCreate({
       where: { vin: formattedVinCode },
