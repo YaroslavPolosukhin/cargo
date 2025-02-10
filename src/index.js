@@ -57,8 +57,6 @@ const corsOptionsDelegate = function (req, callback) {
     origin = req.headers.host
   }
 
-  console.log('Origin:', origin)
-
   if (allowlist.indexOf(origin) !== -1) {
     corsOptions = { origin: true }
   } else {

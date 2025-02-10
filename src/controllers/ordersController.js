@@ -2755,7 +2755,7 @@ export const location = async (req, res) => {
         const interval = setInterval(async () => {
           order = await models.Order.findOne({ where: { id: orderId } })
 
-          if (order.hasOwnProperty('geo') && order.geo) {
+          if (Object.prototype.hasOwnProperty.call(order.dataValues, 'geo') && order.geo) {
             ws.send(JSON.stringify({
               latitude: order.geo.coordinates[0],
               longitude: order.geo.coordinates[1]
@@ -2765,7 +2765,7 @@ export const location = async (req, res) => {
 
         order = await models.Order.findOne({ where: { id: orderId } })
 
-        if (order.hasOwnProperty('geo') && order.geo) {
+        if (Object.prototype.hasOwnProperty.call(order.dataValues, 'geo') && order.geo) {
           ws.send(JSON.stringify({
             latitude: order.geo.coordinates[0],
             longitude: order.geo.coordinates[1]
