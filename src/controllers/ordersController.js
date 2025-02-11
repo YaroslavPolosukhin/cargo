@@ -1164,7 +1164,7 @@ export const takeOrder = async (req, res) => {
     }
 
     if (order.manager.user.id in ordersSockets) {
-      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }))
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
 
     res
@@ -1346,7 +1346,7 @@ export const confirmOrder = async (req, res) => {
     }
 
     if (order.driver.user.id in ordersSockets) {
-      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'Confirmed' }))
+      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'Confirmed', geo: order.geo }))
     }
 
     return res
@@ -1496,7 +1496,7 @@ export const rejectDriver = async (req, res) => {
     }
 
     if (order.driver.user.id in ordersSockets) {
-      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'Rejected' }))
+      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'Rejected', geo: order.geo }))
     }
 
     // Reset the order status to 'created' and clear the driver_id
@@ -1798,7 +1798,7 @@ export const markOrderAsDeparted = async (req, res) => {
     }
 
     if (order.manager.user.id in ordersSockets) {
-      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }))
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
 
     return res
@@ -1979,7 +1979,7 @@ export const markOrderAsCompleted = async (req, res) => {
     }
 
     if (order.manager.user.id in ordersSockets) {
-      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }))
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
 
     return res
@@ -2385,7 +2385,7 @@ export const cancelOrder = async (req, res) => {
     })
 
     if (order.manager.user.id in ordersSockets) {
-      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status }))
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
 
     return res.status(200).send({
