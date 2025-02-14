@@ -8,6 +8,7 @@ import { sendNotification } from '../utils/send_notification.js'
 import config from '../config/config.js'
 
 const ordersSockets = {}
+const geoOrderSockets = {}
 
 /**
  * Retrieves the list of available orders.
@@ -2221,6 +2222,15 @@ export const updateGeo = async (req, res) => {
       ]
     })
 
+    if (orderId in geoOrderSockets) {
+      for (const socket of geoOrderSockets[orderId]) {
+        socket.send(JSON.stringify({
+          latitude: order.geo.coordinates[0],
+          longitude: order.geo.coordinates[1]
+        }))
+      }
+    }
+
     return res.status(200).send({ message: 'Order geo updated successfully', order })
   } catch (error) {
     console.error(error)
@@ -2750,9 +2760,11 @@ export const location = async (req, res) => {
       return
     }
 
+    let interval = null
+
     switch (req.user.role) {
       case Roles.MANAGER:
-        const interval = setInterval(async () => {
+        interval = setInterval(async () => {
           order = await models.Order.findOne({ where: { id: orderId } })
 
           if (Object.prototype.hasOwnProperty.call(order.dataValues, 'geo') && order.geo) {
@@ -2774,7 +2786,17 @@ export const location = async (req, res) => {
 
         ws.on('close', function close () {
           clearInterval(interval)
+          ordersSockets[orderId] = ordersSockets[orderId].filter((socket) => socket !== ws)
+          if (ordersSockets[orderId].length === 0) {
+            delete ordersSockets[orderId]
+          }
         })
+
+        if (orderId in ordersSockets) {
+          ordersSockets[orderId].push(ws)
+        } else {
+          ordersSockets[orderId] = [ws]
+        }
 
         break
 
