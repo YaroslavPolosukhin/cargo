@@ -323,15 +323,17 @@ export const update = async (req, res) => {
 
       body.driving_license_id = drivingLicense.id
 
-      const drivingLicensePhotos = req.files.map((file) => {
-        return {
-          driving_license_id: drivingLicense.id,
-          photo_url: file.path
-        }
-      })
+      if (req.files) {
+        const drivingLicensePhotos = req.files.map((file) => {
+          return {
+            driving_license_id: drivingLicense.id,
+            photo_url: file.path
+          }
+        })
 
-      if (drivingLicensePhotos.length > 0) {
-        await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+        if (drivingLicensePhotos.length > 0) {
+          await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+        }
       }
     }
 
