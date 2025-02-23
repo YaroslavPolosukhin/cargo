@@ -232,7 +232,7 @@ export const update = async (req, res) => {
   const personId = body.personId
 
   try {
-    let person = await models.Person.findByPk(personId, {
+    const person = await models.Person.findByPk(personId, {
       include: [
         {
           model: models.User,
@@ -345,7 +345,7 @@ export const update = async (req, res) => {
 
     await models.Person.update(body, { where: { id: person.id } })
 
-    person = await models.Person.findByPk(personId, {
+    const persons = await models.Person.findAll({
       include: [
         {
           model: models.User,
@@ -370,7 +370,7 @@ export const update = async (req, res) => {
       .status(200)
       .json({
         message: "The user's personal data has been updated",
-        person
+        persons
       })
   } catch (error) {
     console.error(error)

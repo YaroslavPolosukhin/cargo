@@ -1,49 +1,49 @@
-import express from "express";
-import logisticPointsController from "../controllers/logisticPointsController.js";
+import express from 'express'
+import logisticPointsController from '../controllers/logisticPointsController.js'
 import {
   createLogisticsPointValidator,
-  updateLogisticsPointValidator,
+  updateLogisticsPointValidator
 } from '../validators/logisticsPoint.js'
-import checkRole from "../middlewares/checkRole.js";
-import paginationMiddleware from "../middlewares/paginationMiddleware.js";
-import Roles from "../enums/roles.js";
+import checkRole from '../middlewares/checkRole.js'
+import paginationMiddleware from '../middlewares/paginationMiddleware.js'
+import Roles from '../enums/roles.js'
 import searchMiddleware from '../middlewares/searchMiddleware.js'
 
-const router = express.Router();
+const router = express.Router()
 
 router.get(
-  "/all",
+  '/all',
   checkRole([Roles.MANAGER]),
   paginationMiddleware,
   logisticPointsController.getAll
-);
+)
 router.get(
-  "/search",
+  '/search',
   checkRole([Roles.MANAGER]),
   paginationMiddleware,
   searchMiddleware,
   logisticPointsController.search
 )
 router.post(
-  "/",
+  '/',
   checkRole([Roles.MANAGER]),
   createLogisticsPointValidator,
   logisticPointsController.create
-);
+)
 router.get(
-  "/:pointId",
+  '/:pointId',
   checkRole([Roles.MANAGER]),
   logisticPointsController.getOne
-);
+)
 router.put(
-  "/:pointId",
+  '/:pointId',
   checkRole([Roles.MANAGER]),
   updateLogisticsPointValidator,
   logisticPointsController.update
-);
+)
 router.delete(
-  "/:pointId",
+  '/:pointId',
   checkRole([Roles.MANAGER]),
   logisticPointsController.deleteLogisticsPoint
-);
-export default router;
+)
+export default router

@@ -47,7 +47,10 @@ put:
       content:
         application/json:
           schema:
-            $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
+            type: array
+            properties:
+              nomenclature:
+                $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
     '400':
       description: Validation error
     '404':
