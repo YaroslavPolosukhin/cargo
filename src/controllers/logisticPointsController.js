@@ -1,18 +1,17 @@
-import {validationResult} from 'express-validator'
-import {models, sequelize} from '../models/index.js'
+import { validationResult } from 'express-validator'
+import { models, sequelize } from '../models/index.js'
 import Sequelize from 'sequelize'
 
 export const create = async (req, res) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array() });
+    return res.status(400).json({ message: errors.array() })
   }
 
-  let { name, addressId, contacts, geo } = req.body;
-  const transaction = await sequelize.transaction();
+  let { name, addressId, contacts, geo } = req.body
+  const transaction = await sequelize.transaction()
 
-  if (geo)
-    geo = `POINT (${geo.lat} ${geo.lon})`
+  if (geo) { geo = `POINT (${geo.lat} ${geo.lon})` }
 
   try {
     const logisticsPoint = await models.LogisticsPoint.create(
@@ -22,50 +21,97 @@ export const create = async (req, res) => {
         geo
       },
       { transaction }
-    );
+    )
 
-    await logisticsPoint.addContacts(contacts, { transaction });
-    await transaction.commit();
-    res.status(201).json({ logisticsPoint });
+    await logisticsPoint.addContacts(contacts, { transaction })
+    await transaction.commit()
+
+    const logisticPoints = await models.LogisticsPoint.findAll({
+      include: [
+        {
+          model: models.Address,
+          as: 'Address',
+          include: [
+            {
+              model: models.City,
+              as: 'City'
+            },
+            {
+              model: models.Street,
+              as: 'Street'
+            },
+            {
+              model: models.Country,
+              as: 'Country'
+            },
+            {
+              model: models.Region,
+              as: 'Region'
+            }
+          ]
+        }
+      ],
+      order: [
+        ['name', 'ASC']
+      ]
+    })
+
+    for (const point of logisticPoints) {
+      point.dataValues.contacts = await models.LogisticsPointContacts.findAll({
+        where: {
+          logistics_point_id: point.id
+        },
+        include: [
+          {
+            model: models.Contact,
+            as: 'contact'
+          }
+        ],
+        attributes: [
+          'contact_id'
+        ]
+      })
+    }
+    res.status(201).json({ logisticPoints })
   } catch (error) {
-    console.error(error);
-    await transaction.rollback();
-    res.status(400).json({ message: "Error creating new logistics point" });
+    console.error(error)
+    await transaction.rollback()
+    res.status(400).json({ message: 'Error creating new logistics point' })
   }
-};
+}
 
 export const getOne = async (req, res) => {
-  const { pointId } = req.params;
+  const { pointId } = req.params
 
   try {
     const logisticPoint = await models.LogisticsPoint.findByPk(pointId, {
       include: [
         {
           model: models.Address,
-          as: "Address",
+          as: 'Address',
           include: [
             {
               model: models.City,
-              as: "City",
+              as: 'City'
             },
             {
               model: models.Street,
-              as: "Street",
+              as: 'Street'
             },
             {
               model: models.Country,
-              as: "Country",
+              as: 'Country'
             },
             {
               model: models.Region,
-              as: "Region",
+              as: 'Region'
             }
           ]
         }
       ]
     })
     if (logisticPoint === null) {
-      return res.status(404).json({ error: 'Logistic point not found' });
+      return res.status(404).json({ error: 'Logistic point not found' })
     }
 
     logisticPoint.dataValues.contacts = await models.LogisticsPointContacts.findAll({
@@ -81,79 +127,78 @@ export const getOne = async (req, res) => {
       attributes: [
         'contact_id'
       ]
-    });
+    })
 
-    return res.status(200).json({ logisticPoint });
+    return res.status(200).json({ logisticPoint })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
   }
 }
 
 export const update = async (req, res) => {
-  const { pointId } = req.params;
+  const { pointId } = req.params
 
-  let { name, address_id, contacts, geo } = req.body;
+  let { name, address_id, contacts, geo } = req.body
 
-  if (geo)
-    geo = `POINT (${geo.lat} ${geo.lon})`
+  if (geo) { geo = `POINT (${geo.lat} ${geo.lon})` }
 
   try {
-    const logisticPoint = await models.LogisticsPoint.findByPk(pointId);
+    const logisticPoint = await models.LogisticsPoint.findByPk(pointId)
     if (logisticPoint === null) {
-      return res.status(404).json({ error: "Logistic point not found" });
+      return res.status(404).json({ error: 'Logistic point not found' })
     }
-    await logisticPoint.update({ name, address_id, geo });
+    await logisticPoint.update({ name, address_id, geo })
 
-    await logisticPoint.setContacts(contacts);
+    await logisticPoint.setContacts(contacts)
 
-    return res.status(200).json(logisticPoint);
+    return res.status(200).json(logisticPoint)
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error(error)
+    return res.status(500).json({ error: 'Internal server error' })
   }
-};
+}
 
 export const getAll = async (req, res) => {
-  const { limit, offset } = req.pagination;
+  const { limit, offset } = req.pagination
 
   try {
-    if (req.query.hasOwnProperty("search")) {
-      return search(req, res);
+    if (req.query.hasOwnProperty('search')) {
+      return search(req, res)
     }
 
-    const count = await models.LogisticsPoint.count({});
+    const count = await models.LogisticsPoint.count({})
     const logisticPoints = await models.LogisticsPoint.findAll({
       include: [
         {
           model: models.Address,
-          as: "Address",
+          as: 'Address',
           include: [
             {
               model: models.City,
-              as: "City",
+              as: 'City'
             },
             {
               model: models.Street,
-              as: "Street",
+              as: 'Street'
             },
             {
               model: models.Country,
-              as: "Country",
+              as: 'Country'
             },
             {
               model: models.Region,
-              as: "Region",
+              as: 'Region'
             }
           ]
         }
       ],
       order: [
-        [ "name", "ASC" ]
+        ['name', 'ASC']
       ],
       limit,
-      offset,
-    });
+      offset
+    })
 
     for (const point of logisticPoints) {
       const logisticPointContacts = await models.LogisticsPointContacts.findAll({
@@ -163,45 +208,45 @@ export const getAll = async (req, res) => {
         include: [
           {
             model: models.Contact,
-            as: "contact",
+            as: 'contact'
           }
         ],
         attributes: [
-          "contact_id",
+          'contact_id'
         ]
-      });
-      point.dataValues.contacts = logisticPointContacts;
+      })
+      point.dataValues.contacts = logisticPointContacts
     }
 
-    const totalPages = Math.ceil(count / limit);
-    res.json({ totalPages, count, logisticPoints });
+    const totalPages = Math.ceil(count / limit)
+    res.json({ totalPages, count, logisticPoints })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
   }
-};
+}
 
 export const deleteLogisticsPoint = async (req, res) => {
-  const { pointId } = req.params;
+  const { pointId } = req.params
 
   try {
-    const logisticPoint = await models.LogisticsPoint.findByPk(pointId);
+    const logisticPoint = await models.LogisticsPoint.findByPk(pointId)
     if (logisticPoint === null) {
-      return res.status(404).json({ error: "Logistic point not found" });
+      return res.status(404).json({ error: 'Logistic point not found' })
     }
 
-    await logisticPoint.destroy();
+    await logisticPoint.destroy()
 
-    return res.status(200).json({ message: "Logistic point has been deleted" });
+    return res.status(200).json({ message: 'Logistic point has been deleted' })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
   }
-};
+}
 
 export const search = async (req, res) => {
-  const { limit, offset } = req.pagination;
-  const search = req.query.search;
+  const { limit, offset } = req.pagination
+  const search = req.query.search
 
   try {
     const count = await models.LogisticsPoint.count({
@@ -210,7 +255,7 @@ export const search = async (req, res) => {
           [Sequelize.Op.iLike]: `%${search}%`
         }
       }
-    });
+    })
     const logisticPoints = await models.LogisticsPoint.findAll({
       where: {
         name: {
@@ -220,33 +265,33 @@ export const search = async (req, res) => {
       include: [
         {
           model: models.Address,
-          as: "Address",
+          as: 'Address',
           include: [
             {
               model: models.City,
-              as: "City",
+              as: 'City'
             },
             {
               model: models.Street,
-              as: "Street",
+              as: 'Street'
             },
             {
               model: models.Country,
-              as: "Country",
+              as: 'Country'
             },
             {
               model: models.Region,
-              as: "Region",
+              as: 'Region'
             }
           ]
         }
       ],
       order: [
-        [ "name", "ASC" ]
+        ['name', 'ASC']
       ],
       limit,
-      offset,
-    });
+      offset
+    })
 
     for (const point of logisticPoints) {
       point.dataValues.contacts = await models.LogisticsPointContacts.findAll({
@@ -256,21 +301,21 @@ export const search = async (req, res) => {
         include: [
           {
             model: models.Contact,
-            as: "contact",
+            as: 'contact'
           }
         ],
         attributes: [
-          "contact_id",
+          'contact_id'
         ]
-      });
+      })
     }
 
-    const totalPages = Math.ceil(count / limit);
-    res.json({ totalPages, count, logisticPoints });
+    const totalPages = Math.ceil(count / limit)
+    res.json({ totalPages, count, logisticPoints })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
   }
-};
+}
 
-export default { create, getAll, update, deleteLogisticsPoint, search, getOne };
+export default { create, getAll, update, deleteLogisticsPoint, search, getOne }
