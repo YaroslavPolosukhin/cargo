@@ -3,7 +3,7 @@ import { Model, DataTypes } from 'sequelize'
 export default (sequelize) => {
   class Measure extends Model {
     static associate (models) {
-      this.hasMany(models.Nomenclature, { foreignKey: 'measure_id' })
+      this.hasMany(models.Nomenclature, { foreignKey: 'measure_id', as: 'nomenclatures' })
     }
   }
 

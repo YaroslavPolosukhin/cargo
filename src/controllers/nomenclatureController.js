@@ -1,5 +1,6 @@
 import { models } from '../models/index.js'
 import { validationResult } from 'express-validator'
+import { Op } from 'sequelize'
 
 export const getNomenclatures = async (req, res) => {
   try {
@@ -7,18 +8,14 @@ export const getNomenclatures = async (req, res) => {
       return getNomenclaturesByName(req, res)
     }
 
-    const nomenclatures = await models.Nomenclature.findAll()
+    const nomenclatures = await models.Nomenclature.findAll({
+      include: {
+        model: models.Measure,
+        as: 'measure'
+      }
+    })
 
-    const updatedNomenclatures = await Promise.all(
-      nomenclatures.map(async (nomenclature) => {
-        const measure = await models.Measure.findByPk(nomenclature.measure_id)
-        nomenclature.dataValues.measure = measure.dataValues
-        delete nomenclature.dataValues.measure_id
-        return nomenclature
-      })
-    )
-
-    return res.status(200).json(updatedNomenclatures)
+    return res.status(200).json(nomenclatures)
   } catch (error) {
     console.error(error)
     return res.status(500).send({ message: 'Error retrieving nomenclatures' })
@@ -31,18 +28,21 @@ export const getNomenclaturesByName = async (req, res) => {
     return res.status(400).json({ message: 'Name is required.' })
   }
   try {
-    const nomenclatures = await models.Nomenclature.searchByName(name)
+    const nomenclatures = await models.Nomenclature.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${name}%`
+        }
+      },
+      include: [
+        {
+          model: models.Measure,
+          as: 'measure'
+        }
+      ]
+    })
 
-    const updatedNomenclatures = await Promise.all(
-      nomenclatures.map(async (nomenclature) => {
-        const measure = await models.Measure.findByPk(nomenclature.measure_id)
-        nomenclature.dataValues.measure = measure.dataValues
-        delete nomenclature.dataValues.measure_id
-        return nomenclature
-      })
-    )
-
-    return res.status(200).json(updatedNomenclatures)
+    return res.status(200).json(nomenclatures)
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Internal server error.' })
@@ -69,16 +69,15 @@ export const createNomenclature = async (req, res) => {
 
     await models.Nomenclature.create({ name, measure_id: measureId })
 
-    const nomenclatures = await models.Nomenclature.findAll()
-    const updatedNomenclatures = await Promise.all(
-      nomenclatures.map(async (nomenclature) => {
-        const measure = await models.Measure.findByPk(nomenclature.measure_id)
-        nomenclature.dataValues.measure = measure.dataValues
-        delete nomenclature.dataValues.measure_id
-        return nomenclature
-      })
-    )
-    return res.status(201).json(updatedNomenclatures)
+    const nomenclatures = await models.Nomenclature.findAll({
+      include: [
+        {
+          model: models.Measure,
+          as: 'measure'
+        }
+      ]
+    })
+    return res.status(201).json(nomenclatures)
   } catch (error) {
     console.error(error)
     return res.status(500).send({ message: 'Error creating new nomenclature' })
