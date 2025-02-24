@@ -107,7 +107,7 @@ export const getAvailableOrders = async (req, res) => {
         include: [
           {
             model: models.Measure,
-            as: 'Measure'
+            as: 'measure'
           }
         ]
       }
@@ -235,7 +235,7 @@ export const getCurrentOrder = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -345,7 +345,7 @@ export const getOrderById = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -479,7 +479,7 @@ export const getAll = async (req, res) => {
         include: [
           {
             model: models.Measure,
-            as: 'Measure'
+            as: 'measure'
           }
         ]
       }
@@ -702,7 +702,7 @@ export const createOrder = async (req, res) => {
             include: [
               {
                 model: models.Measure,
-                as: 'Measure'
+                as: 'measure'
               }
             ]
           }
@@ -875,7 +875,7 @@ export const updateOrder = async (req, res) => {
             include: [
               {
                 model: models.Measure,
-                as: 'Measure'
+                as: 'measure'
               }
             ]
           }
@@ -997,7 +997,7 @@ export const takeOrder = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -1111,7 +1111,7 @@ export const takeOrder = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -1318,7 +1318,7 @@ export const confirmOrder = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -1462,7 +1462,7 @@ export const rejectDriver = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -1612,7 +1612,7 @@ export const rejectDriver = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -1745,7 +1745,7 @@ export const markOrderAsDeparted = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -1926,7 +1926,7 @@ export const markOrderAsCompleted = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -2088,7 +2088,7 @@ export const getDriversOnTrip = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -2215,7 +2215,7 @@ export const updateGeo = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -2387,7 +2387,7 @@ export const cancelOrder = async (req, res) => {
           include: [
             {
               model: models.Measure,
-              as: 'Measure'
+              as: 'measure'
             }
           ]
         }
@@ -2685,7 +2685,7 @@ export const search = async (req, res) => {
             include: [
               {
                 model: models.Measure,
-                as: 'Measure'
+                as: 'measure'
               }
             ]
           }
