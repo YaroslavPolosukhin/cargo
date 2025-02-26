@@ -20,7 +20,7 @@ export default (sequelize) => {
       allowNull: false
     },
     number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false
     }
   }, {

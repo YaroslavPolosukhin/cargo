@@ -445,15 +445,17 @@ export const confirm = async (req, res) => {
 
       drivingLicenseId = drivingLicense.id
 
-      const drivingLicensePhotos = req.files.map((file) => {
-        return {
-          driving_license_id: drivingLicenseId,
-          photo_url: file.path
-        }
-      })
+      if (req.files) {
+        const drivingLicensePhotos = req.files.map((file) => {
+          return {
+            driving_license_id: drivingLicenseId,
+            photo_url: file.path
+          }
+        })
 
-      if (drivingLicensePhotos.length > 0) {
-        await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+        if (drivingLicensePhotos.length > 0) {
+          await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+        }
       }
     }
 
