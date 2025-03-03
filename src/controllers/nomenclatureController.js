@@ -22,7 +22,7 @@ export const getNomenclatures = async (req, res) => {
 
     const totalPages = Math.ceil(count / limit)
 
-    return res.status(200).json(totalPages, count, nomenclatures)
+    return res.status(200).json({ totalPages, count, nomenclatures })
   } catch (error) {
     console.error(error)
     return res.status(500).send({ message: 'Error retrieving nomenclatures' })
@@ -57,7 +57,7 @@ export const getNomenclaturesByName = async (req, res) => {
 
     const totalPages = Math.ceil(count / limit)
 
-    return res.status(200).json(totalPages, count, nomenclatures)
+    return res.status(200).json({ totalPages, count, nomenclatures })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Internal server error.' })
