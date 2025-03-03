@@ -487,9 +487,10 @@ export const getAll = async (req, res) => {
   }
 
   try {
-    const count = await models.Order.count(options)
-    const orders = await models.Order.findAll({ ...options, limit, offset })
+    const orders = await models.Order.findAll({ ...options })
+    const count = orders.length
     const totalPages = Math.ceil(count / limit)
+    orders.slice(offset, offset + limit)
     return res.status(200).json({ totalPages, count, orders })
   } catch (error) {
     console.error(error)
