@@ -6,12 +6,11 @@ import Roles from '../enums/roles.js'
 import paginationMiddleware from '../middlewares/paginationMiddleware.js'
 const router = express.Router()
 
-router.get('/all', nomenclatureController.getNomenclatures)
-router.get('/search', nomenclatureController.getNomenclaturesByName)
+router.get('/all', paginationMiddleware, nomenclatureController.getNomenclatures)
+router.get('/search', paginationMiddleware, nomenclatureController.getNomenclaturesByName)
 router.post(
   '/',
   checkRole([Roles.MANAGER]),
-  paginationMiddleware,
   createNomenclatureValidator,
   nomenclatureController.createNomenclature
 )

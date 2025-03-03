@@ -12,6 +12,8 @@ get:
       description: Nomenclature name or a part of the name
       schema:
         type: string
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
   responses:
     '200':
       description: An array of nomenclatures
