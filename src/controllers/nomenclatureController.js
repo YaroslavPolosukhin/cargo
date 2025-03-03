@@ -10,7 +10,7 @@ export const getNomenclatures = async (req, res) => {
 
     const { limit, offset } = req.pagination
 
-    const nomenclatures = await models.Nomenclature.findAll({
+    let nomenclatures = await models.Nomenclature.findAll({
       include: {
         model: models.Measure,
         as: 'measure'
@@ -18,7 +18,7 @@ export const getNomenclatures = async (req, res) => {
     })
 
     const count = nomenclatures.length
-    nomenclatures.slice(offset, offset + limit)
+    nomenclatures = nomenclatures.slice(offset, offset + limit)
 
     const totalPages = Math.ceil(count / limit)
 
@@ -38,7 +38,7 @@ export const getNomenclaturesByName = async (req, res) => {
   const { limit, offset } = req.pagination
 
   try {
-    const nomenclatures = await models.Nomenclature.findAll({
+    let nomenclatures = await models.Nomenclature.findAll({
       where: {
         name: {
           [Op.like]: `%${name}%`
@@ -53,7 +53,7 @@ export const getNomenclaturesByName = async (req, res) => {
     })
 
     const count = nomenclatures.length
-    nomenclatures.slice(offset, offset + limit)
+    nomenclatures = nomenclatures.slice(offset, offset + limit)
 
     const totalPages = Math.ceil(count / limit)
 

@@ -115,8 +115,11 @@ export const getAvailableOrders = async (req, res) => {
   }
 
   try {
-    const count = await models.Order.count(options)
-    const orders = await models.Order.findAll({ ...options, limit, offset })
+    // const count = await models.Order.count(options)
+    let orders = await models.Order.findAll({ ...options })
+    const count = orders.length
+
+    orders = orders.slice(offset, offset + limit)
 
     const totalPages = Math.ceil(count / limit)
     return res.status(200).json({ totalPages, count, orders })
@@ -487,10 +490,10 @@ export const getAll = async (req, res) => {
   }
 
   try {
-    const orders = await models.Order.findAll({ ...options })
+    let orders = await models.Order.findAll({ ...options })
     const count = orders.length
     const totalPages = Math.ceil(count / limit)
-    orders.slice(offset, offset + limit)
+    orders = orders.slice(offset, offset + limit)
     return res.status(200).json({ totalPages, count, orders })
   } catch (error) {
     console.error(error)
@@ -2590,7 +2593,9 @@ export const search = async (req, res) => {
     }
 
     // const count = await models.Order.count(attrs);
-    const ordersIdsModel = await models.Order.findAll(attrs)
+    let ordersIdsModel = await models.Order.findAll(attrs)
+
+    ordersIdsModel = ordersIdsModel.slice(offset, offset + limit)
 
     const count = ordersIdsModel.length
     const totalPages = Math.ceil(count / limit)
