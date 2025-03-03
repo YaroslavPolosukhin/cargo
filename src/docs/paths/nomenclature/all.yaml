@@ -4,6 +4,8 @@ get:
   tags:
     - Nomenclature
   parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
     - name: name
       in: query
       description: Search for nomenclatures by name
@@ -16,8 +18,17 @@ get:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              nomenclatures:
+                type: array
+                items:
+                  $ref: '../../components/shipping.yaml#/components/schemas/Nomenclature'
     '500':
       description: Error retrieving nomenclatures

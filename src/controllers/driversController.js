@@ -54,8 +54,10 @@ export const getUnapproved = async (req, res) => {
       ]
     }
 
-    const count = await models.User.count(attrs)
-    const users = await models.User.findAll({ ...attrs, limit, offset })
+    const users = await models.User.findAll({ ...attrs })
+    const count = users.length
+
+    users.slice(offset, offset + limit)
 
     const totalPages = Math.ceil(count / limit)
     return res.status(200).json({ totalPages, count, users })
@@ -116,8 +118,10 @@ export const getApproved = async (req, res) => {
       ]
     }
 
-    const count = await models.Person.count(attrs)
-    const users = await models.Person.findAll({ ...attrs, limit, offset })
+    // const count = await models.Person.count(attrs)
+    const users = await models.Person.findAll({ ...attrs })
+    const count = users.length
+    users.slice(offset, offset + limit)
 
     const userList = []
     users.forEach(user => {

@@ -8,6 +8,8 @@ export const getNomenclatures = async (req, res) => {
       return getNomenclaturesByName(req, res)
     }
 
+    const { limit, offset } = req.pagination
+
     const nomenclatures = await models.Nomenclature.findAll({
       include: {
         model: models.Measure,
@@ -15,7 +17,12 @@ export const getNomenclatures = async (req, res) => {
       }
     })
 
-    return res.status(200).json(nomenclatures)
+    const count = nomenclatures.length
+    nomenclatures.slice(offset, offset + limit)
+
+    const totalPages = Math.ceil(count / limit)
+
+    return res.status(200).json(totalPages, count, nomenclatures)
   } catch (error) {
     console.error(error)
     return res.status(500).send({ message: 'Error retrieving nomenclatures' })
@@ -27,6 +34,9 @@ export const getNomenclaturesByName = async (req, res) => {
   if (!name) {
     return res.status(400).json({ message: 'Name is required.' })
   }
+
+  const { limit, offset } = req.pagination
+
   try {
     const nomenclatures = await models.Nomenclature.findAll({
       where: {
@@ -42,7 +52,12 @@ export const getNomenclaturesByName = async (req, res) => {
       ]
     })
 
-    return res.status(200).json(nomenclatures)
+    const count = nomenclatures.length
+    nomenclatures.slice(offset, offset + limit)
+
+    const totalPages = Math.ceil(count / limit)
+
+    return res.status(200).json(totalPages, count, nomenclatures)
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Internal server error.' })
