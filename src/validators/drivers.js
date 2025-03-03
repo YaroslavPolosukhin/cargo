@@ -82,9 +82,6 @@ export const updateDriverValidator = [
     }
     return true
   }),
-  body('personId')
-    .isNumeric()
-    .withMessage('Person ID must be numeric'),
   body('name')
     .optional()
     .isString()
@@ -99,9 +96,7 @@ export const updateDriverValidator = [
     .withMessage('Patronymic must be a string'),
   body('inn').optional().isString().withMessage('INN must be string'),
   body('passportId')
-    .optional()
-    .isNumeric()
-    .withMessage('Passport ID must be numeric'),
+    .optional(),
   body('jobPositionId')
     .optional(),
   body('email').optional(),

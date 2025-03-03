@@ -1,4 +1,4 @@
-import { Router } from 'websocket-express'
+import express from 'express'
 import checkRole from '../middlewares/checkRole.js'
 import paginationMiddleware from '../middlewares/paginationMiddleware.js'
 import Roles from '../enums/roles.js'
@@ -10,7 +10,7 @@ import { driverLicenseUpload, passportUpload } from '../config/multer.js'
 import * as driversController from '../controllers/driversController.js'
 import searchMiddleware from '../middlewares/searchMiddleware.js'
 
-const router = new Router()
+const router = express.Router()
 
 router.get(
   '/getManagerPhone',

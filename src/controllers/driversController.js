@@ -224,7 +224,7 @@ export const getOne = async (req, res) => {
 export const update = async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array() })
+    if (errors.array()[0].msg != 'Missing fields: drivingLicensePhotos') { return res.status(400).json({ message: errors.array() }) }
   }
 
   const body = JSON.parse(JSON.stringify(req.body))
@@ -233,152 +233,168 @@ export const update = async (req, res) => {
     return res.status(400).json({ error: 'Person ID is required' })
   }
 
-  const personId = body.personId
+  let personId = body.personId
 
-  try {
-    const person = await models.Person.findByPk(personId, {
-      include: [
-        {
-          model: models.User,
-          as: 'user',
-          include: [
-            {
-              model: models.Role,
-              as: 'role'
-            }
-          ],
-          attributes: { exclude: ['role_id'] }
-        }
-      ],
-      attributes: { exclude: ['user_id'] }
-    })
+  delete body.personId
 
-    if (person === null) {
-      return res.status(404).json({ error: 'Person not found' })
-    }
+  if (isNaN(personId)) {
+    return res.status(400).json({ error: 'Person ID must be numeric' })
+  }
 
-    // если роль обновляемого пользователя не driver
-    if (person.user.role.name !== Roles.DRIVER) {
-      return res
-        .status(404)
-        .json({ error: 'You can only update the personal data of drivers' })
-    }
+  personId = Number(personId)
 
-    const { role, id } = req.user
-
-    // если водитель, но не тот, который auth
-    if (role === Roles.DRIVER && person.user.id !== id) {
-      return res.status(404).json({ error: 'Access denied' })
-    }
-
-    if (body.hasOwnProperty('jobPositionId') && body.jobPositionId) {
-      const jobPositionId = body.jobPositionId
-
-      const jobPosition = await models.JobPosition.findByPk(jobPositionId)
-
-      if (!jobPosition) {
-        return res
-          .status(404)
-          .json({ error: `Job position with id ${jobPositionId} not found` })
-      }
-
-      body.job_position_id = jobPosition.id
-    }
-
-    if (body.hasOwnProperty('passportId') && body.passportId) {
-      const passportId = body.passportId
-
-      const passport = await models.Passport.findByPk(passportId)
-
-      if (!passport) {
-        return res
-          .status(404)
-          .json({ error: `Passport with id ${passportId} not found` })
-      }
-
-      body.passport_id = passport.id
-    }
-
-    if (body.hasOwnProperty('contragentId') && body.contragentId) {
-      const contragentId = body.contragentId
-
-      const contragent = await models.Contragent.findByPk(contragentId)
-
-      if (!contragent) {
-        return res
-          .status(404)
-          .json({ error: `Contragent with id ${contragentId} not found` })
-      }
-
-      body.contragent_id = contragent.id
-    }
-
-    if (body.hasOwnProperty('drivingLicenseNumber') && body.hasOwnProperty('drivingLicenseSerial') && body.drivingLicenseNumber && body.drivingLicenseSerial) {
-      const drivingLicenseNumber = body.drivingLicenseNumber
-      const drivingLicenseSerial = body.drivingLicenseSerial
-
-      delete body.drivingLicenseNumber
-      delete body.drivingLicenseSerial
-
-      const drivingLicense = await models.DrivingLicence.create({
-        serial: drivingLicenseSerial,
-        number: drivingLicenseNumber
+  if (personId) {
+    try {
+      const person = await models.Person.findByPk(personId, {
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role'
+              }
+            ],
+            attributes: { exclude: ['role_id'] }
+          }
+        ],
+        attributes: { exclude: ['user_id'] }
       })
 
-      body.driving_license_id = drivingLicense.id
+      if (person === null) {
+        return res.status(404).json({ error: 'Person not found' })
+      }
 
-      if (req.files) {
-        const drivingLicensePhotos = req.files.map((file) => {
-          return {
-            driving_license_id: drivingLicense.id,
-            photo_url: file.path
-          }
+      // если роль обновляемого пользователя не driver
+      if (person.user.role.name !== Roles.DRIVER) {
+        return res
+          .status(404)
+          .json({ error: 'You can only update the personal data of drivers' })
+      }
+
+      const { role, id } = req.user
+
+      // если водитель, но не тот, который auth
+      if (role === Roles.DRIVER && person.user.id !== id) {
+        return res.status(404).json({ error: 'Access denied' })
+      }
+
+      if (body.hasOwnProperty('jobPositionId') && body.jobPositionId) {
+        const jobPositionId = body.jobPositionId
+
+        const jobPosition = await models.JobPosition.findByPk(jobPositionId)
+
+        if (!jobPosition) {
+          return res
+            .status(404)
+            .json({ error: `Job position with id ${jobPositionId} not found` })
+        }
+
+        body.job_position_id = jobPosition.id
+      }
+
+      if (body.hasOwnProperty('passportId') && body.passportId) {
+        let passportId = body.passportId
+
+        if (isNaN(passportId)) {
+          return res.status(400).json({ error: 'Passport ID must be numeric' })
+        }
+
+        passportId = Number(passportId)
+
+        const passport = await models.Passport.findByPk(passportId)
+
+        if (!passport) {
+          return res
+            .status(404)
+            .json({ error: `Passport with id ${passportId} not found` })
+        }
+
+        body.passport_id = passport.id
+      }
+
+      if (body.hasOwnProperty('contragentId') && body.contragentId) {
+        const contragentId = body.contragentId
+
+        const contragent = await models.Contragent.findByPk(contragentId)
+
+        if (!contragent) {
+          return res
+            .status(404)
+            .json({ error: `Contragent with id ${contragentId} not found` })
+        }
+
+        body.contragent_id = contragent.id
+      }
+
+      if (body.hasOwnProperty('drivingLicenseNumber') && body.hasOwnProperty('drivingLicenseSerial') && body.drivingLicenseNumber && body.drivingLicenseSerial) {
+        const drivingLicenseNumber = body.drivingLicenseNumber
+        const drivingLicenseSerial = body.drivingLicenseSerial
+
+        delete body.drivingLicenseNumber
+        delete body.drivingLicenseSerial
+
+        const drivingLicense = await models.DrivingLicence.create({
+          serial: drivingLicenseSerial,
+          number: drivingLicenseNumber
         })
 
-        if (drivingLicensePhotos.length > 0) {
-          await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
-        }
-      }
-    }
+        body.driving_license_id = drivingLicense.id
 
-    for (const key in body) {
-      if (!body[key]) {
-        delete body[key]
-      }
-    }
-
-    await models.Person.update(body, { where: { id: person.id } })
-
-    const persons = await models.Person.findAll({
-      include: [
-        {
-          model: models.User,
-          as: 'user',
-          include: [
-            {
-              model: models.Role,
-              as: 'role'
+        if (req.files) {
+          const drivingLicensePhotos = req.files.map((file) => {
+            return {
+              driving_license_id: drivingLicense.id,
+              photo_url: file.path
             }
-          ],
-          attributes: { exclude: ['role_id'] }
-        },
-        {
-          model: models.DrivingLicence,
-          as: 'drivingLicense'
-        }
-      ],
-      attributes: { exclude: ['user_id', 'driving_license_id'] }
-    })
+          })
 
-    return res
-      .status(200)
-      .json({
-        message: "The user's personal data has been updated",
-        persons
+          if (drivingLicensePhotos.length > 0) {
+            await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+          }
+        }
+      }
+
+      for (const key in body) {
+        if (!body[key]) {
+          delete body[key]
+        }
+      }
+
+      await models.Person.update(body, { where: { id: person.id } })
+
+      const persons = await models.Person.findAll({
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role'
+              }
+            ],
+            attributes: { exclude: ['role_id'] }
+          },
+          {
+            model: models.DrivingLicence,
+            as: 'drivingLicense'
+          }
+        ],
+        attributes: { exclude: ['user_id', 'driving_license_id'] }
       })
-  } catch (error) {
-    console.error(error)
-    res.status(500).send()
+
+      return res
+        .status(200)
+        .json({
+          message: "The user's personal data has been updated",
+          persons
+        })
+    } catch (error) {
+      console.error(error)
+      res.status(500).send()
+    }
   }
 }
 
