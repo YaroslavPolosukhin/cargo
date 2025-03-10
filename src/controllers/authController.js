@@ -368,7 +368,7 @@ export const recoverPassword = async (req, res) => {
       })
     }
 
-    attempt.sms_code = randomInt(100000, 999999).toString()
+    attempt.sms_code = randomInt(1000, 9999).toString()
     await attempt.save()
 
     const result = await SMSService.sendPasswordRecoveryCode(
