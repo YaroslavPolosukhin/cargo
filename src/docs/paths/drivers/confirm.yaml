@@ -50,21 +50,9 @@ post:
               type: string
               description: Telegram handle of the driver
               nullable: true
-            contragentName:
-              type: string
-              description: Name of the contragent
-              nullable: true
-            contragentINN:
+            contragentId:
               type: integer
               description: Taxpayer Identification Number (INN) of the contragent
-              nullable: true
-            kpp:
-              type: integer
-              description: Code of reason for registration (KPP)
-              nullable: true
-            companyType:
-              type: string
-              description: Company type
               nullable: true
             passportId:
               type: integer

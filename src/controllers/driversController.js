@@ -229,23 +229,22 @@ export const update = async (req, res) => {
 
   const body = JSON.parse(JSON.stringify(req.body))
 
-  if (!body.hasOwnProperty('personId')) {
+  if (!req.params.hasOwnProperty('driverId')) {
     return res.status(400).json({ error: 'Person ID is required' })
   }
 
-  let personId = body.personId
+  let { driverId } = req.params
 
-  delete body.personId
-
-  if (isNaN(personId)) {
-    return res.status(400).json({ error: 'Person ID must be numeric' })
+  if (isNaN(driverId)) {
+    console.log('driverId', driverId)
+    return res.status(400).json({ error: 'Person ID must be numeric', driverId })
   }
 
-  personId = Number(personId)
+  driverId = Number(driverId)
 
-  if (personId) {
+  if (driverId) {
     try {
-      const person = await models.Person.findByPk(personId, {
+      const person = await models.Person.findByPk(driverId, {
         include: [
           {
             model: models.User,
@@ -414,10 +413,7 @@ export const confirm = async (req, res) => {
     jobPositionId,
     email,
     telegram,
-    contragentName,
-    contragentINN,
-    kpp,
-    companyType,
+    contragentId,
     passportId,
     drivingLicenseNumber,
     drivingLicenseSerial
@@ -433,19 +429,12 @@ export const confirm = async (req, res) => {
     }
 
     let contragent = null
-    if (contragentName) {
+    if (contragentId) {
       // Get or create Contragent
-      [contragent] = await models.Contragent.findOrCreate({
-        where: { inn: contragentINN },
-        defaults: {
-          name: contragentName,
-          inn: contragentINN,
-          kpp,
-          supplier: companyType === 'supplier',
-          buyer: companyType === 'buyer',
-          transport_company: companyType === 'transport_company'
-        }
-      })
+      contragent = await models.Contragent.findByPk(contragentId)
+      if (!contragent) {
+        return res.status(400).json({ message: 'Contragent not found' })
+      }
     }
 
     let passport = null
@@ -533,7 +522,7 @@ export const confirm = async (req, res) => {
 
 export const getJobs = async (req, res) => {
   try {
-    const jobs = await models.JobPosition.findAll()
+    const jobs = await models.JobPosition.findAll({ where: { show_on_page: true } })
     return res.status(200).json({ jobs })
   } catch (error) {
     console.error(error)
@@ -577,6 +566,76 @@ export const createPassport = async (req, res) => {
     }
 
     return res.status(200).json({ message: 'created', id: passport.id })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const updatePassport = async (req, res) => {
+  try {
+    const { passportId } = req.params
+
+    let passport = await models.Passport.findByPk(passportId)
+
+    if (!passport) {
+      return res.status(404).json({ error: 'Passport not found' })
+    }
+
+    const body = req.body
+
+    if (body.hasOwnProperty('passportSeries') && body.passportSeries !== null) {
+      body.series = body.passportSeries
+      delete body.passportSeries
+    }
+
+    if (body.hasOwnProperty('passportNumber') && body.passportNumber !== null) {
+      body.number = body.passportNumber
+      delete body.passportNumber
+    }
+
+    if (body.hasOwnProperty('passportIssuedBy') && body.passportIssuedBy !== null) {
+      body.authority = body.passportIssuedBy
+      delete body.passportIssuedBy
+    }
+
+    if (body.hasOwnProperty('passportIssueDate') && body.passportIssueDate !== null) {
+      body.date_of_issue = new Date(body.passportIssueDate).setHours(0, 0, 0, 0)
+      delete body.passportIssueDate
+    }
+
+    if (body.hasOwnProperty('passportDepartmentCode') && body.passportDepartmentCode !== null) {
+      body.department_code = body.passportDepartmentCode
+      delete body.passportDepartmentCode
+    }
+
+    await passport.update(body)
+
+    if (req.files) {
+      const passportPhotos = req.files.map((file) => {
+        return {
+          passport_id: passport.id,
+          photo_url: file.path
+        }
+      })
+
+      await models.PassportPhoto.delete({ where: { passport_id: passport.id } })
+
+      if (passportPhotos.length > 0) {
+        await models.PassportPhoto.bulkCreate(passportPhotos)
+      }
+    }
+
+    passport = await models.Passport.findByPk(passportId, {
+      include: [
+        {
+          model: models.PassportPhoto,
+          as: 'photos'
+        }
+      ]
+    })
+
+    return res.status(200).json({ message: 'updated', passport })
   } catch (error) {
     console.error(error)
     res.status(500).send()

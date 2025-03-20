@@ -77,6 +77,13 @@ router.post(
 )
 
 router.post(
+  '/updatePassport/:passportId',
+  checkRole([Roles.MANAGER]),
+  passportUpload.array('photos', 6),
+  driversController.updatePassport
+)
+
+router.post(
   '/createContragent',
   checkRole([Roles.MANAGER]),
   createContragentValidator,

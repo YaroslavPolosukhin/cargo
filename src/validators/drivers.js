@@ -67,7 +67,6 @@ export const updateDriverValidator = [
       'self_employed',
       'telegram',
       'contragentId',
-      'personId',
       'drivingLicenseSerial',
       'drivingLicenseNumber'
     ]

@@ -17,6 +17,11 @@ export default (sequelize) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    show_on_page: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
   }, {
     sequelize,

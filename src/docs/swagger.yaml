@@ -44,13 +44,15 @@ paths:
     $ref: 'src/docs/paths/drivers/confirm.yaml'
   /api/drivers/createPassport:
     $ref: 'src/docs/paths/drivers/createPassport.yaml'
+  /api/drivers/updatePassport/{passportId}:
+    $ref: 'src/docs/paths/drivers/updatePassport.yaml'
   /api/drivers/createContragent:
     $ref: 'src/docs/paths/drivers/createContragent.yaml'
   /api/drivers/updateContragent/{contragentId}:
     $ref: 'src/docs/paths/drivers/updateContragent.yaml'
   /api/drivers/jobs:
     $ref: 'src/docs/paths/drivers/jobs.yaml'
-  /api/drivers/update:
+  /api/drivers/update/{driverId}:
     $ref: 'src/docs/paths/drivers/update.yaml'
   /api/drivers/getManagerPhone:
     $ref: 'src/docs/paths/drivers/getManagerPhone.yaml'
