@@ -53,7 +53,7 @@ router.get(
 )
 
 router.put(
-  '/update',
+  '/update/:driverId',
   checkRole([Roles.MANAGER, Roles.DRIVER]),
   driverLicenseUpload.array('drivingLicensePhotos', 6),
   updateDriverValidator,
