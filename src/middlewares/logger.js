@@ -37,7 +37,7 @@ export const responseLogger = (req, res, next) => {
     const goodStatuses = [200, 201, 204, 304]
     const excludedUrls = ['/api/docs', '/', '/api/auth/refresh']
 
-    if (!goodStatuses.includes(res.statusCode) && !excludedUrls.includes(req.originalUrl)) {
+    if (!goodStatuses.includes(res.statusCode) && !excludedUrls.includes(req.originalUrl) && req.originalUrl.startsWith('/api/')) {
       try {
         let errorResponsesPath = path.join(__dirname, '..', '..', 'error_responses')
         if (!fs.existsSync(errorResponsesPath)) {

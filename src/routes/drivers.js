@@ -80,6 +80,7 @@ router.post(
   '/updatePassport/:passportId',
   checkRole([Roles.MANAGER]),
   passportUpload.array('photos', 6),
+  createPassportValidator,
   driversController.updatePassport
 )
 
