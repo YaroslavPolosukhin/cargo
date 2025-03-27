@@ -76,7 +76,7 @@ router.post(
   driversController.createPassport
 )
 
-router.post(
+router.put(
   '/updatePassport/:passportId',
   checkRole([Roles.MANAGER]),
   passportUpload.array('photos', 6),
@@ -91,7 +91,7 @@ router.post(
   driversController.createContragent
 )
 
-router.post(
+router.put(
   '/updateContragent/:contragentId',
   checkRole([Roles.MANAGER]),
   driversController.updateContraget
