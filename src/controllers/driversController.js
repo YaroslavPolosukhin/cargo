@@ -12,7 +12,7 @@ export const getUnapproved = async (req, res) => {
   try {
     const { limit, offset } = req.pagination
 
-    if (req.query.hasOwnProperty('search')) {
+    if (Object.prototype.hasOwnProperty.call(req.query, 'search')) {
       return search(req, res)
     }
 
@@ -71,7 +71,7 @@ export const getApproved = async (req, res) => {
   try {
     const { limit, offset } = req.pagination
 
-    if (req.query.hasOwnProperty('search')) {
+    if (Object.prototype.hasOwnProperty.call(req.query, 'search')) {
       return search(req, res)
     }
 
@@ -127,10 +127,10 @@ export const getApproved = async (req, res) => {
     users.forEach(user => {
       const userObj = user.toJSON()
 
-      if (userObj.hasOwnProperty('passport') && userObj.passport !== null) {
+      if (Object.prototype.hasOwnProperty.call(userObj, 'passport') && userObj.passport !== null) {
         const photos = []
 
-        if (userObj.passport.hasOwnProperty('photos') && userObj.passport.photos !== null) {
+        if (Object.prototype.hasOwnProperty.call(userObj.passport, 'photos') && userObj.passport.photos !== null) {
           userObj.passport.photos.forEach(photo => {
             if (photo.photo_url !== 'no_url') {
               photos.push(getFullUrl(req, photo.photo_url))
@@ -141,10 +141,10 @@ export const getApproved = async (req, res) => {
         userObj.passport.photos = photos
       }
 
-      if (userObj.hasOwnProperty('drivingLicense') && userObj.drivingLicense !== null) {
+      if (Object.prototype.hasOwnProperty.call(userObj, 'drivingLicense') && userObj.drivingLicense !== null) {
         const photos = []
 
-        if (userObj.drivingLicense.hasOwnProperty('photos') && userObj.drivingLicense.photos !== null) {
+        if (Object.prototype.hasOwnProperty.call(userObj.drivingLicense, 'photos') && userObj.drivingLicense.photos !== null) {
           userObj.drivingLicense.photos.forEach(photo => {
             if (photo.photo_url !== 'no_url') {
               photos.push(getFullUrl(req, photo.photo_url))
@@ -229,7 +229,7 @@ export const update = async (req, res) => {
 
   const body = JSON.parse(JSON.stringify(req.body))
 
-  if (!req.params.hasOwnProperty('driverId')) {
+  if (!Object.prototype.hasOwnProperty.call(req.params, 'driverId')) {
     return res.status(400).json({ error: 'Person ID is required' })
   }
 
@@ -279,7 +279,7 @@ export const update = async (req, res) => {
         return res.status(404).json({ error: 'Access denied' })
       }
 
-      if (body.hasOwnProperty('jobPositionId') && body.jobPositionId) {
+      if (Object.prototype.hasOwnProperty.call(body, 'jobPositionId') && body.jobPositionId) {
         const jobPositionId = body.jobPositionId
 
         const jobPosition = await models.JobPosition.findByPk(jobPositionId)
@@ -293,7 +293,7 @@ export const update = async (req, res) => {
         body.job_position_id = jobPosition.id
       }
 
-      if (body.hasOwnProperty('passportId') && body.passportId) {
+      if (Object.prototype.hasOwnProperty.call(body, 'passportId') && body.passportId) {
         let passportId = body.passportId
 
         if (isNaN(passportId)) {
@@ -313,7 +313,7 @@ export const update = async (req, res) => {
         body.passport_id = passport.id
       }
 
-      if (body.hasOwnProperty('contragentId') && body.contragentId) {
+      if (Object.prototype.hasOwnProperty.call(body, 'contragentId') && body.contragentId) {
         const contragentId = body.contragentId
 
         const contragent = await models.Contragent.findByPk(contragentId)
@@ -584,8 +584,6 @@ export const updatePassport = async (req, res) => {
 
     const body = req.body
 
-    console.log(body)
-
     if (Object.prototype.hasOwnProperty.call(body, 'passportSeries') && body.passportSeries !== null) {
       body.series = body.passportSeries
       delete body.passportSeries
@@ -621,9 +619,9 @@ export const updatePassport = async (req, res) => {
         }
       })
 
-      await models.PassportPhoto.delete({ where: { passport_id: passport.id } })
-
       if (passportPhotos.length > 0) {
+        await models.PassportPhoto.destroy({ where: { passport_id: passport.id } })
+
         await models.PassportPhoto.bulkCreate(passportPhotos)
       }
     }
