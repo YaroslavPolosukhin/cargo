@@ -327,7 +327,7 @@ export const update = async (req, res) => {
         body.contragent_id = contragent.id
       }
 
-      if (body.hasOwnProperty('drivingLicenseNumber') && body.hasOwnProperty('drivingLicenseSerial') && body.drivingLicenseNumber && body.drivingLicenseSerial) {
+      if (Object.prototype.hasOwnProperty.call(body, 'drivingLicenseNumber') && Object.prototype.hasOwnProperty.call(body, 'drivingLicenseSerial') && body.drivingLicenseNumber && body.drivingLicenseSerial) {
         const drivingLicenseNumber = body.drivingLicenseNumber
         const drivingLicenseSerial = body.drivingLicenseSerial
 
@@ -584,27 +584,29 @@ export const updatePassport = async (req, res) => {
 
     const body = req.body
 
-    if (body.hasOwnProperty('passportSeries') && body.passportSeries !== null) {
+    console.log(body)
+
+    if (Object.prototype.hasOwnProperty.call(body, 'passportSeries') && body.passportSeries !== null) {
       body.series = body.passportSeries
       delete body.passportSeries
     }
 
-    if (body.hasOwnProperty('passportNumber') && body.passportNumber !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'passportNumber') && body.passportNumber !== null) {
       body.number = body.passportNumber
       delete body.passportNumber
     }
 
-    if (body.hasOwnProperty('passportIssuedBy') && body.passportIssuedBy !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'passportIssuedBy') && body.passportIssuedBy !== null) {
       body.authority = body.passportIssuedBy
       delete body.passportIssuedBy
     }
 
-    if (body.hasOwnProperty('passportIssueDate') && body.passportIssueDate !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'passportIssueDate') && body.passportIssueDate !== null) {
       body.date_of_issue = new Date(body.passportIssueDate).setHours(0, 0, 0, 0)
       delete body.passportIssueDate
     }
 
-    if (body.hasOwnProperty('passportDepartmentCode') && body.passportDepartmentCode !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'passportDepartmentCode') && body.passportDepartmentCode !== null) {
       body.department_code = body.passportDepartmentCode
       delete body.passportDepartmentCode
     }
@@ -682,7 +684,7 @@ export const updateContraget = async (req, res) => {
 
     const body = req.body
 
-    if (body.hasOwnProperty('companyType') && body.companyType !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'companyType') && body.companyType !== null) {
       body.supplier = body.companyType === 'supplier'
       body.buyer = body.companyType === 'buyer'
       body.transport_company = body.companyType === 'transport_company'
@@ -690,12 +692,12 @@ export const updateContraget = async (req, res) => {
       delete body.companyType
     }
 
-    if (body.hasOwnProperty('contragentINN') && body.contragentINN !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'contragentINN') && body.contragentINN !== null) {
       body.inn = body.contragentINN
       delete body.contragentINN
     }
 
-    if (body.hasOwnProperty('contragentName') && body.contragentName !== null) {
+    if (Object.prototype.hasOwnProperty.call(body, 'contragentName') && body.contragentName !== null) {
       body.name = body.contragentName
       delete body.contragentName
     }
