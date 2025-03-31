@@ -1203,7 +1203,14 @@ export const confirmOrder = async (req, res) => {
     })
 
     if (trailerNumber) {
-      await truck.update({ trailerNumber })
+      await models.Truck.update(
+        { trailer_number: trailerNumber },
+        {
+          where: {
+            vin: formattedVinCode
+          }
+        }
+      )
     }
 
     const data = {

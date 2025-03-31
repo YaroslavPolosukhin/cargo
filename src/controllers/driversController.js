@@ -378,7 +378,13 @@ export const update = async (req, res) => {
           },
           {
             model: models.DrivingLicence,
-            as: 'drivingLicense'
+            as: 'drivingLicense',
+            include: [
+              {
+                model: models.DrivingLicencePhoto,
+                as: 'photos'
+              }
+            ]
           }
         ],
         attributes: { exclude: ['user_id', 'driving_license_id'] }
