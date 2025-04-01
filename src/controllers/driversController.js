@@ -37,7 +37,13 @@ export const getUnapproved = async (req, res) => {
             { model: models.JobPosition, as: 'jobPosition' },
             {
               model: models.DrivingLicence,
-              as: 'drivingLicense'
+              as: 'drivingLicense',
+              include: [
+                {
+                  model: models.DrivingLicencePhoto,
+                  as: 'photos'
+                }
+              ]
             },
             {
               model: models.Passport,
@@ -191,7 +197,13 @@ export const getOne = async (req, res) => {
             { model: models.JobPosition, as: 'jobPosition' },
             {
               model: models.DrivingLicence,
-              as: 'drivingLicense'
+              as: 'drivingLicense',
+              include: [
+                {
+                  model: models.DrivingLicencePhoto,
+                  as: 'photos'
+                }
+              ]
             },
             {
               model: models.Passport,
@@ -862,7 +874,13 @@ export const search = async (req, res) => {
         { model: models.Passport, as: 'passport' },
         {
           model: models.DrivingLicence,
-          as: 'drivingLicense'
+          as: 'drivingLicense',
+          include: [
+            {
+              model: models.DrivingLicencePhoto,
+              as: 'photos'
+            }
+          ]
         }
       ]
     }
