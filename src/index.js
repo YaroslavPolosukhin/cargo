@@ -66,7 +66,7 @@ const corsOptionsDelegate = function (req, callback) {
   callback(null, corsOptions)
 }
 
-app.use('/uploads', WebSocketExpress.static(path.join(__dirname, '..', 'uploads')))
+app.use('/uploads', cors(corsOptionsDelegate), WebSocketExpress.static(path.join(__dirname, '..', 'uploads')))
 
 const swaggerDocument = YAML.load(path.join(__dirname, 'docs', 'swagger.yaml'))
 
