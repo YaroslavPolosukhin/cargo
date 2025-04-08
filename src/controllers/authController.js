@@ -79,32 +79,30 @@ export const getContragent = async (req, res) => {
   try {
     const search = req.query.search
 
-    const contragents = await Promise.all([findOrganization(search)])
+    findOrganization(search).then(async contragents => {
+      const dbContragents = await models.Contragent.findOne({
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: `%${search}%` } },
+            { inn: { [Op.like]: `%${search}%` } },
+            { kpp: { [Op.like]: `%${search}%` } }
+          ]
+        },
+        attributes: ['name', 'inn', 'kpp']
+      })
 
-    console.log(contragents)
-
-    const dbContragents = await models.Contragent.findOne({
-      where: {
-        [Op.or]: [
-          { name: { [Op.like]: `%${search}%` } },
-          { inn: { [Op.like]: `%${search}%` } },
-          { kpp: { [Op.like]: `%${search}%` } }
-        ]
-      },
-      attributes: ['name', 'inn', 'kpp']
-    })
-
-    for (const dbContragent in dbContragents) {
-      if (!contragents.some((item) => item.inn === dbContragent.inn)) {
-        contragents.push({
-          name: dbContragent.name,
-          inn: dbContragent.inn,
-          kpp: dbContragent.kpp
-        })
+      for (const dbContragent in dbContragents) {
+        if (!contragents.some((item) => item.inn === dbContragent.inn)) {
+          contragents.push({
+            name: dbContragent.name,
+            inn: dbContragent.inn,
+            kpp: dbContragent.kpp
+          })
+        }
       }
-    }
 
-    return res.status(200).send({ contragents })
+      return res.status(200).send({ contragents })
+    })
   } catch (error) {
     console.error(error)
     res.status(500).send({ message: 'Internal server error' })
