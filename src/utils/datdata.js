@@ -22,7 +22,6 @@ export async function findOrganization (query) {
   )
     .then((response) => {
       const data = response.data
-      console.log(data)
       if (data.suggestions.length > 0) {
         return data.suggestions.map((item) => {
           return {

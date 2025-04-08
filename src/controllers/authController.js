@@ -81,6 +81,8 @@ export const getContragent = async (req, res) => {
 
     const contragents = findOrganization(search)
 
+    console.log(contragents)
+
     const dbContragents = await models.Contragent.findOne({
       where: {
         [Op.or]: [
