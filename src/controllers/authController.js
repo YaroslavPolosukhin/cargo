@@ -152,25 +152,30 @@ export const register = async (req, res) => {
     if (role.transport_company_linked) {
       let contragentId = 0
 
-      if (req.body.contragentId) {
-        const contragent = await models.Contragent.findOne({
-          where: { id: req.body.contragentId }
-        })
+      const contragentName = req.body.contragentName
+      const contragentINN = req.body.contragentINN
+      const kpp = req.body.kpp
 
-        if (!contragent) {
-          return res.status(400).send({ message: 'Contragent not found' })
+      if (!contragentName || !contragentINN) {
+        return res.status(400).send({ message: 'Contragent data is required' })
+      }
+
+      const existingContragent = await models.Contragent.findOne({
+        where: {
+          name: contragentName,
+          inn: contragentINN
         }
+      })
+      if (existingContragent) {
+        contragentId = existingContragent.id
 
-        contragentId = contragent.id
+        if (kpp && existingContragent.kpp !== kpp) {
+          await models.Contragent.update(
+            { kpp },
+            { where: { id: existingContragent.id } }
+          )
+        }
       } else {
-        const contragentName = req.body.contragentName
-        const contragentINN = req.body.contragentINN
-        const kpp = req.body.kpp
-
-        if (!contragentName || !contragentINN || !kpp) {
-          return res.status(400).send({ message: 'Contragent data is required' })
-        }
-
         const contragent = await models.Contragent.create({
           name: contragentName,
           inn: contragentINN,
