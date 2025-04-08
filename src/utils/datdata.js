@@ -23,13 +23,15 @@ export async function findOrganization (query) {
     .then((response) => {
       const data = response.data
       if (data.suggestions.length > 0) {
-        return data.suggestions.map((item) => {
+        const result = data.suggestions.map((item) => {
           return {
             inn: item.data.inn,
             name: item.value,
             kpp: item.data.kpp
           }
         })
+        console.log(result)
+        return result
       } else {
         return []
       }
