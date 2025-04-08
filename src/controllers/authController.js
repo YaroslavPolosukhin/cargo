@@ -81,7 +81,7 @@ export const getContragent = async (req, res) => {
 
     const contragents = await findOrganization(search)
 
-    const dbContragents = await models.Contragent.findOne({
+    const dbContragents = await models.Contragent.findAll({
       where: {
         [Op.or]: [
           { name: { [Op.like]: `%${search}%` } },
@@ -92,7 +92,7 @@ export const getContragent = async (req, res) => {
       attributes: ['name', 'inn', 'kpp']
     })
 
-    for (const dbContragent in dbContragents) {
+    for (const dbContragent of dbContragents) {
       if (!contragents.some((item) => item.inn === dbContragent.inn)) {
         contragents.push({
           name: dbContragent.name,
