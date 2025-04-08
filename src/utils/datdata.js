@@ -21,9 +21,8 @@ export async function findOrganization (query) {
     }
   )
     .then((response) => {
-      let data = response.data
+      const data = response.data
       console.log(data)
-      data = JSON.parse(data)
       if (data.suggestions.length > 0) {
         return data.suggestions.map((item) => {
           return {
