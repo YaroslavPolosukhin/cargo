@@ -1,4 +1,4 @@
-import { post } from 'axios'
+import axios from 'axios'
 
 export async function findOrganization (query) {
   const options = {
@@ -12,7 +12,7 @@ export async function findOrganization (query) {
     body: JSON.stringify({ query })
   }
 
-  post(
+  axios.post(
     'http://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party',
     options.body,
     {
