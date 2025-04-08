@@ -12,7 +12,7 @@ export async function findOrganization (query) {
     body: JSON.stringify({ query })
   }
 
-  axios.post(
+  const response = await axios.post(
     'http://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party',
     options.body,
     {
@@ -20,25 +20,16 @@ export async function findOrganization (query) {
       method: options.method
     }
   )
-    .then((response) => {
-      const data = response.data
-      if (data.suggestions.length > 0) {
-        const result = data.suggestions.map((item) => {
-          return {
-            inn: item.data.inn,
-            name: item.value,
-            kpp: item.data.kpp
-          }
-        })
-        console.log(result)
-        return result
-      } else {
-        return []
+  const data = response.data
+  if (data.suggestions.length > 0) {
+    return data.suggestions.map((item) => {
+      return {
+        inn: item.data.inn,
+        name: item.value,
+        kpp: item.data.kpp
       }
     })
-    .catch((error) => {
-      console.error('Error:', error)
-      return []
-    }
-    )
+  } else {
+    return []
+  }
 }
