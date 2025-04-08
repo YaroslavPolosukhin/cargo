@@ -5,6 +5,8 @@ import { validationResult } from 'express-validator'
 import { models } from '../models/index.js'
 import { SMSService } from '../services/SMSService.js'
 import Roles from '../enums/roles.js'
+import { findOrganization } from '../utils/datdata.js'
+import { Op } from 'sequelize'
 
 const MAX_SMS_CODE_LIFETIME_IN_MINUTES = 15
 const MIN_TIME_IN_MINUTES_BEFORE_CODE_RESEND = 1
@@ -75,26 +77,32 @@ export const getRoles = async (req, res) => {
 
 export const getContragent = async (req, res) => {
   try {
-    const query = {}
+    const search = req.query.search
 
-    if (req.query.name) {
-      query.name = req.query.name
-    } else if (req.query.inn) {
-      query.inn = req.query.inn
-    } else {
-      return res.status(400).send({ message: 'Name or INN is required' })
-    }
+    const contragents = findOrganization(search)
 
-    const contragent = await models.Contragent.findOne({
-      where: query,
-      attributes: ['id', 'name']
+    const dbContragents = await models.Contragent.findOne({
+      where: {
+        [Op.or]: [
+          { name: { [Op.like]: `%${search}%` } },
+          { inn: { [Op.like]: `%${search}%` } },
+          { kpp: { [Op.like]: `%${search}%` } }
+        ]
+      },
+      attributes: ['name', 'inn', 'kpp']
     })
 
-    if (!contragent) {
-      return res.status(404).send({ message: 'Contragent not found' })
+    for (const dbContragent in dbContragents) {
+      if (!contragents.some((item) => item.inn === dbContragent.inn)) {
+        contragents.push({
+          name: dbContragent.name,
+          inn: dbContragent.inn,
+          kpp: dbContragent.kpp
+        })
+      }
     }
 
-    res.status(200).send({ id: contragent.id, name: contragent.name })
+    return res.status(200).send({ contragents })
   } catch (error) {
     console.error(error)
     res.status(500).send({ message: 'Internal server error' })

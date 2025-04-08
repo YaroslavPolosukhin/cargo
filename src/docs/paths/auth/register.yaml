@@ -34,10 +34,6 @@ post:
               type: integer
               description: The role ID of the user (optional).
               example: 1
-            contragentId:
-              type: integer
-              description: The contragent ID of the user (optional).
-              example: 1
             contragentName:
               type: string
               description: Name of the contragent
