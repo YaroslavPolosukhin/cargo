@@ -79,7 +79,7 @@ export const getContragent = async (req, res) => {
   try {
     const search = req.query.search
 
-    const contragents = findOrganization(search)
+    const contragents = await findOrganization(search)
 
     console.log(contragents)
 
