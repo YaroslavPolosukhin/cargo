@@ -14,7 +14,7 @@ const router = express.Router()
 
 router.get(
   '/getManagerPhone',
-  checkRole([Roles.DRIVER]),
+  checkRole([Roles.DRIVER,Roles.COMPANY_DRIVER]),
   driversController.getManagerPhone
 )
 
