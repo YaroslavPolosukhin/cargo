@@ -1,0 +1,41 @@
+get:
+  tags:
+    - Managers
+  summary: Get a list of approved users by id
+  description: Retrieve all users that have been approved.
+  operationId: getApprovedByRoleId
+  parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+    - name: search
+      in: query
+      description: Search for approved users by name
+      required: false
+      schema:
+        type: string
+    - name: roleId
+      in: query
+      description: role id of users
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: A list of approved users
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              users:
+                type: array
+                items:
+                  $ref: '../../components/users.yaml#/components/schemas/Person'
+    '500':
+      description: Internal Server Error

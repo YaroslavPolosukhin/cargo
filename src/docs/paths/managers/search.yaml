@@ -1,0 +1,46 @@
+get:
+  summary: Search for drivers
+  operationId: searchDrivers
+  tags:
+    - Managers
+  parameters:
+    - name: search
+      in: query
+      description: Search for drivers by name
+      required: true
+      schema:
+        type: string
+    - name: roleId
+      in: query
+      description: role id of users
+      required: true
+      schema:
+        type: integer
+    - name: user_approved
+      in: query
+      description: is found roles is approved
+      required: true
+      schema:
+        type: boolean
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+  responses:
+    '200':
+      description: A list of users
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              drivers:
+                type: array
+                items:
+                  $ref: '../../components/users.yaml#/components/schemas/Person'
+    '500':
+      description: Internal Server Error

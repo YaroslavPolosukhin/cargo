@@ -64,6 +64,12 @@ paths:
   # MANAGERS
   /api/managers/confirm/companyManager:
     $ref: 'src/docs/paths/managers/confirm/companyManager.yaml'
+  /api/managers/approved:
+    $ref: 'src/docs/paths/managers/approved.yaml'
+  /api/managers/unapproved:
+    $ref: 'src/docs/paths/managers/unapproved.yaml'
+  /api/managers/search:
+    $ref: 'src/docs/paths/managers/search.yaml'
 
   # CONTACTS
   /api/contacts/all:
