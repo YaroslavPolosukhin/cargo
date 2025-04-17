@@ -1,0 +1,127 @@
+post:
+  tags:
+    - Managers
+  summary: Confirm company manager registration
+  description: >
+    This endpoint confirms a company manager's registration after validating the provided information.
+    It requires manager role and allows up to 6 photos to be uploaded.
+  operationId: confirmCompanyManager
+  requestBody:
+    required: false
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            userId:
+              type: integer
+              description: Numeric ID of the user
+            name:
+              type: string
+              description: Name of the driver
+              nullable: true
+            surname:
+              type: string
+              description: Surname of the driver
+              nullable: true
+            patronymic:
+              type: string
+              description: Patronymic of the driver
+              nullable: true
+            jobPositionId:
+              type: integer
+              description: Numeric ID of the job position
+              nullable: true
+            email:
+              type: string
+              format: email
+              description: Email address of the driver
+              nullable: true
+            telegram:
+              type: string
+              description: Telegram handle of the driver
+              nullable: tru
+            contragentName:
+              type: string
+              description: Name of the contragent
+              nullable: true
+            contragentINN:
+              type: string
+              description: Taxpayer Identification Number (INN) of the contragent
+              nullable: true
+            contragentKPP:
+              type: string
+              description: Code of reason for registration (KPP)
+              nullable: true
+            contragentType:
+              type: string
+              description: Company type
+              nullable: true
+            passportSeries:
+              type: string
+              description: Series of the passport
+              nullable: true
+            passportNumber:
+              type: string
+              description: Number of the passport
+              nullable: true
+            passportIssuedBy:
+              type: string
+              description: Authority that issued the passport
+              nullable: true
+            passportIssueDate:
+              type: string
+              format: date-time
+              description: Date when the passport was issued
+              nullable: true
+            passportDepartmentCode:
+              type: string
+              description: Department code of the passport
+              nullable: true
+            photos:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Passport photos of the driver
+              maxItems: 6
+              nullable: true
+  responses:
+    '200':
+      description: Driver registration confirmed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Company manager registration confirmed successfully
+              person:
+                type: object
+                $ref: '../../../components/users.yaml#/components/schemas/Person'
+    '400':
+      description: Bad Request - Validation failed or job position not found or driver not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    msg:
+                      type: string
+    '404':
+      description: User not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '500':
+      description: Internal server error

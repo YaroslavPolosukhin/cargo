@@ -670,7 +670,7 @@ export const createContragent = async (req, res) => {
     } = req.body
 
     const [contragent] = await models.Contragent.findOrCreate({
-      where: { inn: contragentINN },
+      where: { inn: contragentINN, name: contragentName },
       defaults: {
         name: contragentName,
         inn: contragentINN,

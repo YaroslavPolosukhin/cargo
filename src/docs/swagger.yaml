@@ -61,6 +61,10 @@ paths:
   /api/ws/drivers/updates (ws):
     $ref: 'src/docs/paths/drivers/updates.yaml'
 
+  # MANAGERS
+  /api/managers/confirm/companyManager:
+    $ref: 'src/docs/paths/managers/confirm/companyManager.yaml'
+
   # CONTACTS
   /api/contacts/all:
     $ref: 'src/docs/paths/contacts/all.yaml'
