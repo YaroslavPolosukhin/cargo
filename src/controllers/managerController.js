@@ -159,7 +159,7 @@ export const getUnapproved = async (req, res) => {
       return search(req, res)
     }
 
-    const role = models.Role.findByPk(roleId)
+    const role = await models.Role.findByPk(roleId)
     if (!role) {
       return res.status(400).json({ message: 'Role not found' })
     }
@@ -167,15 +167,12 @@ export const getUnapproved = async (req, res) => {
     const attrs = {
       where: {
         approved: false,
-        role_id: roleId
+        role_id: parseInt(roleId)
       },
       include: [
         {
           model: models.Role,
           as: 'role',
-          where: {
-            name: Roles.DRIVER
-          },
           attributes: ['name']
         },
         {
@@ -248,15 +245,12 @@ export const getApproved = async (req, res) => {
           as: 'user',
           where: {
             approved: true,
-            role_id: roleId
+            role_id: parseInt(roleId)
           },
           include: [
             {
               model: models.Role,
-              as: 'role',
-              where: {
-                name: Roles.DRIVER
-              }
+              as: 'role'
             }
           ]
         },
@@ -358,8 +352,6 @@ export const search = async (req, res) => {
 
     const attrs = {
       where: {
-        approved: req.user_approved,
-        role_id: roleId,
         [Sequelize.Op.or]: [
           {
             name: {
@@ -406,14 +398,12 @@ export const search = async (req, res) => {
           include: [
             {
               model: models.Role,
-              as: 'role',
-              where: {
-                name: Roles.DRIVER
-              }
+              as: 'role'
             }
           ],
           where: {
-            approved: true
+            approved: req.user_approved,
+            role_id: parseInt(roleId)
           }
         },
         { model: models.Contragent, as: 'contragent' },
