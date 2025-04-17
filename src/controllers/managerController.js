@@ -242,16 +242,13 @@ export const getApproved = async (req, res) => {
     }
 
     const attrs = {
-      where: {
-        approved: true,
-        role_id: roleId
-      },
       include: [
         {
           model: models.User,
           as: 'user',
           where: {
-            approved: true
+            approved: true,
+            role_id: roleId
           },
           include: [
             {
