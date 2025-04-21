@@ -7,7 +7,6 @@ import { search } from './managerController.js'
 import { search as searchOrder } from './ordersController.js'
 import OrderStatus from '../enums/orderStatus.js'
 import { Op } from 'sequelize'
-import contragent from '../models/users/contragent.js'
 
 export const getRoles = async (req, res) => {
   const allowedRoles = [roles.COMPANY_DRIVER]
