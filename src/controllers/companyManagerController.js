@@ -347,12 +347,12 @@ export const getAll = async (req, res) => {
     let orders = []
     if (status.toLowerCase() !== 'available') {
       for (const order of nsorders) {
-        if (orders.status === OrderStatus.CREATED) {
+        if (order.status === OrderStatus.CREATED) {
           orders.push(order)
           continue
         }
 
-        if (orders.driver.contragent_id === contragentId) {
+        if (order.driver.contragent_id === contragentId) {
           orders.push(order)
         }
       }
