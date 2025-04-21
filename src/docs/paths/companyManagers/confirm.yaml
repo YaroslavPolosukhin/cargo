@@ -1,11 +1,11 @@
 post:
   tags:
-    - Managers
-  summary: Confirm company manager registration
+    - CompanyManagers
+  summary: Confirm driver registration
   description: >
-    This endpoint confirms a company manager's registration after validating the provided information.
+    This endpoint confirms a driver's registration after validating the provided information.
     It requires manager role and allows up to 6 photos to be uploaded.
-  operationId: confirmCompanyManager
+  operationId: confirmDriver
   requestBody:
     required: false
     content:
@@ -28,6 +28,15 @@ post:
               type: string
               description: Patronymic of the driver
               nullable: true
+            inn:
+              type: integer
+              description: Taxpayer Identification Number (INN)
+              nullable: true
+            employmentType:
+              type: string
+              enum: [self_employed, individual, company]
+              description: Employment type of the driver
+              nullable: true
             jobPositionId:
               type: integer
               description: Numeric ID of the job position
@@ -40,55 +49,31 @@ post:
             telegram:
               type: string
               description: Telegram handle of the driver
-              nullable: tru
-            contragentName:
-              type: string
-              description: Name of the contragent
               nullable: true
-            contragentINN:
-              type: string
+            contragentId:
+              type: integer
               description: Taxpayer Identification Number (INN) of the contragent
               nullable: true
-            contragentKPP:
-              type: string
-              description: Code of reason for registration (KPP)
-              nullable: true
-            contragentType:
-              type: string
-              description: Company type
-              nullable: true
-            passportSeries:
-              type: string
-              description: Series of the passport
-              nullable: true
-            passportNumber:
-              type: string
-              description: Number of the passport
-              nullable: true
-            passportIssuedBy:
-              type: string
-              description: Authority that issued the passport
-              nullable: true
-            passportIssueDate:
-              type: string
-              format: date-time
-              description: Date when the passport was issued
-              nullable: true
-            passportDepartmentCode:
-              type: string
-              description: Department code of the passport
-              nullable: true
-            photos:
+            passportId:
+              type: integer
+              description: The ID of the passport
+            drivingLicenseSerial:
+              type: integer
+              description: Serial of driver's license
+            drivingLicenseNumber:
+              type: integer
+              description: Number of driver's license
+            drivingLicensePhotos:
               type: array
               items:
                 type: string
                 format: binary
-              description: Passport photos of the driver
+              description: Photos of driver's licenses
               maxItems: 6
               nullable: true
   responses:
     '200':
-      description: Manager registration confirmed successfully
+      description: Driver registration confirmed successfully
       content:
         application/json:
           schema:
@@ -96,10 +81,10 @@ post:
             properties:
               message:
                 type: string
-                description: Company manager registration confirmed successfully
+                description: Driver registration confirmed successfully
               person:
                 type: object
-                $ref: '../../../components/users.yaml#/components/schemas/Person'
+                $ref: '../../components/users.yaml#/components/schemas/Person'
     '400':
       description: Bad Request - Validation failed or job position not found or driver not found
       content:

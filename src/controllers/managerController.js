@@ -1,8 +1,8 @@
 import { models } from '../models/index.js'
 import { sendNotification } from '../utils/send_notification.js'
-import Roles from '../enums/roles.js'
 import { getFullUrl } from '../utils/utils.js'
 import Sequelize from 'sequelize'
+import roles from '../enums/roles.js'
 
 export const confirmCompanyManager = async (req, res) => {
   try {
@@ -204,6 +204,10 @@ export const getUnapproved = async (req, res) => {
           ]
         }
       ]
+    }
+
+    if (role.name === roles.COMPANY_DRIVER) {
+      attrs.where.approved_company = true
     }
 
     let users = await models.User.findAll({ ...attrs })
@@ -433,4 +437,59 @@ export const search = async (req, res) => {
     console.error(error)
     res.status(500).json({ error: 'Internal server error' })
   }
+}
+
+export const getRoles = async (req, res) => {
+  const allowedRoles = [roles.DRIVER, roles.COMPANY_MANAGER, roles.COMPANY_DRIVER]
+
+  const modelRoles = models.Role.findAll({
+    where: {
+      name: {
+        [Sequelize.Op.in]: allowedRoles
+      }
+    }
+  })
+
+  return res.status(200).json({ roles: modelRoles })
+}
+
+export const confirmCompanyDriver = async (req, res) => {
+  const {
+    userId
+  } = req.body
+
+  let person = await models.Person.findByUserId(userId)
+  if (!person) {
+    return res.status(400).json({ message: 'Company drivers not found' })
+  }
+
+  const user = await models.User.scope('withTokens').findByPk(userId)
+  if (!user) {
+    return res.status(400).json({ message: 'User not found' })
+  }
+
+  await user.update({
+    responsible_user: req.user.id,
+    approved: true
+  })
+
+  person = await models.Person.findByUserId(userId)
+  try {
+    const body = 'Регистрация подтверждена менеджером'
+
+    await sendNotification('Ваш статус обновлен', body, {
+      title: 'Ваш статус обновлен',
+      body
+    }, user.fcm_token, user.device_type)
+  } catch (e) {
+    console.log('something wrong with sending notification')
+    console.error(e)
+  }
+
+  res
+    .status(200)
+    .json({
+      message: 'Company driver registration confirmed successfully',
+      person
+    })
 }

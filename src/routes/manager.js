@@ -37,4 +37,16 @@ router.get(
   managerController.search
 )
 
+router.get(
+  '/roles',
+  checkRole([Roles.MANAGER]),
+  managerController.getRoles
+)
+
+router.post(
+  '/confirm/companyDriver',
+  checkRole([Roles.MANAGER]),
+  managerController.confirmCompanyDriver
+)
+
 export default router

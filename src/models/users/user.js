@@ -61,6 +61,11 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    approved_company: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    }
   }, {
     sequelize,
     modelName: 'User',

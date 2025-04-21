@@ -1,0 +1,43 @@
+get:
+  tags:
+    - CompanyManagers
+  summary: Get a list of unapproved users by id
+  description: Retrieve all users that haven't been approved.
+  operationId: getUnapprovedByRoleId
+  parameters:
+    - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
+    - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
+    - name: search
+      in: query
+      description: Search for unapproved users by name
+      required: false
+      schema:
+        type: string
+    - name: roleId
+      in: query
+      description: role id of users
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: A list of unapproved drivers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              totalPages:
+                type: integer
+                example: 1
+              count:
+                type: integer
+                example: 1
+              users:
+                type: array
+                items:
+                  $ref: '../../components/users.yaml#/components/schemas/User'
+    '401':
+      description: Unauthorized. User does not have the MANAGER role.
+    '500':
+      description: Internal Server Error

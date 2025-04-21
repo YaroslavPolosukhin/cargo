@@ -17,6 +17,7 @@ import measureRoutes from './routes/measure.js'
 import generalRoutes from './routes/general.js'
 import managerRoutes from './routes/manager.js'
 import logisticPointsRoutes from './routes/logisticPoints.js'
+import companyManagerRoutes from './routes/companyManager.js'
 import wsRoutes from './routes/ws.js'
 import admin from 'firebase-admin'
 import { createRequire } from 'node:module'
@@ -94,6 +95,7 @@ app.use('/api/nomenclature', cors(corsOptionsDelegate), authMiddleware, nomencla
 app.use('/api/drivers', cors(corsOptionsDelegate), authMiddleware, driversRoutes)
 app.use('/api/logisticPoint', cors(corsOptionsDelegate), authMiddleware, logisticPointsRoutes)
 app.use('/api/managers', cors(corsOptionsDelegate), authMiddleware, managerRoutes)
+app.use('/api/companyManagers', cors(corsOptionsDelegate), authMiddleware, companyManagerRoutes)
 app.use('/api/ws', authMiddleware, wsRoutes)
 
 const PORT = process.env.PORT || 8080

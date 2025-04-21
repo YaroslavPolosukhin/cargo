@@ -62,14 +62,30 @@ paths:
     $ref: 'src/docs/paths/drivers/updates.yaml'
 
   # MANAGERS
+  /api/managers/roles:
+    $ref: 'src/docs/paths/managers/roles.yaml'
   /api/managers/confirm/companyManager:
     $ref: 'src/docs/paths/managers/confirm/companyManager.yaml'
+  /api/managers/confirm/companyDriver:
+    $ref: 'src/docs/paths/managers/confirm/companyDriver.yaml'
   /api/managers/approved:
     $ref: 'src/docs/paths/managers/approved.yaml'
   /api/managers/unapproved:
     $ref: 'src/docs/paths/managers/unapproved.yaml'
   /api/managers/search:
     $ref: 'src/docs/paths/managers/search.yaml'
+
+  # CompanyManagers
+  /api/companyManagers/roles:
+    $ref: 'src/docs/paths/companyManagers/roles.yaml'
+  /api/companyManagers/approved:
+    $ref: 'src/docs/paths/companyManagers/approved.yaml'
+  /api/companyManagers/unapproved:
+    $ref: 'src/docs/paths/companyManagers/unapproved.yaml'
+  /api/companyManagers/search:
+    $ref: 'src/docs/paths/companyManagers/search.yaml'
+  /api/companyManagers/confirm:
+    $ref: 'src/docs/paths/companyManagers/confirm.yaml'
 
   # CONTACTS
   /api/contacts/all:

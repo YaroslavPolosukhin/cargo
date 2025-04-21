@@ -1,0 +1,57 @@
+post:
+  tags:
+    - Managers
+  summary: Confirm company driver registration
+  description: >
+    This endpoint confirms a company driver's registration after validating the provided information.
+    It requires driver role and allows up to 6 photos to be uploaded.
+  operationId: confirmCompanyDriver
+  requestBody:
+    required: false
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            userId:
+              type: integer
+              description: Numeric ID of the user
+  responses:
+    '200':
+      description: Driver registration confirmed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Company driver registration confirmed successfully
+              person:
+                type: object
+                $ref: '../../../components/users.yaml#/components/schemas/Person'
+    '400':
+      description: Bad Request - Validation failed or job position not found or driver not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    msg:
+                      type: string
+    '404':
+      description: User not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '500':
+      description: Internal server error
