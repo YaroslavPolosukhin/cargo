@@ -1,11 +1,11 @@
-import { models } from "../models/index.js";
-import { validationResult } from "express-validator";
+import { models } from '../models/index.js'
+import { validationResult } from 'express-validator'
 import Sequelize from 'sequelize'
 
 export const create = async (req, res) => {
-  const errors = validationResult(req);
+  const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: errors.array() });
+    return res.status(400).json({ message: errors.array() })
   }
 
   const {
@@ -19,28 +19,28 @@ export const create = async (req, res) => {
     description,
     apartment,
     region
-  } = req.body;
+  } = req.body
 
-  const body = JSON.parse(JSON.stringify(req.body));
+  const body = JSON.parse(JSON.stringify(req.body))
 
   try {
     const [cityObject] = await models.City.findOrCreate({
-      where: { name: city },
-    });
+      where: { name: city }
+    })
 
     let streetId = null
-    if (body.hasOwnProperty("street")) {
+    if (body.hasOwnProperty('street')) {
       const [streetObject] = await models.Street.findOrCreate({
-        where: { name: street },
-      });
+        where: { name: street }
+      })
       streetId = streetObject.id
     }
 
-    let region = null;
-    if (body.hasOwnProperty("region")) {
+    let region = null
+    if (body.hasOwnProperty('region')) {
       region = await models.Region.findOrCreate({
-        where: { name: body.region },
-      });
+        where: { name: body.region }
+      })
     }
 
     const address = await models.Address.create(
@@ -53,33 +53,33 @@ export const create = async (req, res) => {
         building,
         floor,
         postcode,
-        ...(body.hasOwnProperty("description") && {
-          description,
+        ...(body.hasOwnProperty('description') && {
+          description
         }),
-        ...(body.hasOwnProperty("apartment") && {
-          apartment,
+        ...(body.hasOwnProperty('apartment') && {
+          apartment
         }),
         ...(region && {
-          region_id: region[0].id,
-        }),
+          region_id: region[0].id
+        })
       },
       { include: [models.Country, models.City, models.Street, models.Region] }
-    );
-    res.status(201).json({ address });
+    )
+    res.status(201).json({ address })
   } catch (error) {
-    console.error(error);
-    res.status(500).send();
+    console.error(error)
+    res.status(500).send()
   }
-};
+}
 
 export const update = async (req, res) => {
-  const { addressId } = req.params;
-  const { name, city, street, house, building, floor, postcode } = req.body;
+  const { addressId } = req.params
+  const { name, city, street, house, building, floor, postcode } = req.body
 
   try {
-    const address = await models.Address.findByPk(addressId);
+    const address = await models.Address.findByPk(addressId)
     if (address === null) {
-      return res.status(404).json({ error: "Address not found" });
+      return res.status(404).json({ error: 'Address not found' })
     }
     await address.update(
       {
@@ -87,68 +87,67 @@ export const update = async (req, res) => {
         house,
         building,
         floor,
-        postcode,
+        postcode
       },
       {
         include: [
           models.Country,
           models.City,
-          models.Street,
+          models.Street
         ]
       }
-    );
+    )
 
     const cityObject = await models.City.findOrCreate({
-      where: { name: city },
-    });
+      where: { name: city }
+    })
 
     const streetObject = await models.Street.findOrCreate({
-      where: { name: street },
-    });
+      where: { name: street }
+    })
 
-    await address.setCity(cityObject[0]);
-    await address.setStreet(streetObject[0]);
+    await address.setCity(cityObject[0])
+    await address.setStreet(streetObject[0])
 
-
-    return res.status(200).json(address);
+    return res.status(200).json(address)
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error(error)
+    return res.status(500).json({ error: 'Internal server error' })
   }
-};
+}
 
 export const getAll = async (req, res) => {
   try {
     const {
       limit,
       offset
-    } = req.pagination;
+    } = req.pagination
 
-    if (req.query.hasOwnProperty("search")) {
-      return search(req, res);
+    if (req.query.hasOwnProperty('search')) {
+      return search(req, res)
     }
 
     const addresses = await models.Address.findAll({
       include: [models.Country, models.City, models.Street, models.Region],
       limit,
-      offset,
-    });
+      offset
+    })
 
-    res.json(addresses);
+    res.json(addresses)
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal serveaddressr error" });
+    console.error(error)
+    res.status(500).json({ error: 'Internal serveaddressr error' })
   }
-};
+}
 
 export const search = async (req, res) => {
   try {
-    const { limit, offset } = req.pagination;
-    const search = req.query.search;
+    const { limit, offset } = req.pagination
+    const search = req.query.search
 
-    const words = search.split(" ")
+    const words = search.split(' ')
     const searchVal = { [Sequelize.Op.or]: [] }
-    const findTabs = ["$Country.name$", "$City.name$", "$Street.name$", "house"]
+    const findTabs = ['$Country.name$', '$City.name$', '$Street.name$', 'house']
 
     if (words.length === 1) {
       for (let i = 0; i < 3; i++) {
@@ -185,7 +184,7 @@ export const search = async (req, res) => {
                   [findTabs[perm[1]]]: {
                     [Sequelize.Op.iLike]: `%${word2}%`
                   }
-                },
+                }
               ]
             })
           }
@@ -198,28 +197,28 @@ export const search = async (req, res) => {
         [Sequelize.Op.or]: [
           {
             name: {
-              [Sequelize.Op.iLike]: `%${search}%`,
-            },
+              [Sequelize.Op.iLike]: `%${search}%`
+            }
           },
           searchVal
         ]
       },
       include: [models.Country, models.City, models.Street],
-      attributes: ["id", "name", "house", "building", "floor", "postcode", "description", "apartment"],
+      attributes: ['id', 'name', 'house', 'building', 'floor', 'postcode', 'description', 'apartment'],
       limit,
-      offset,
-    };
+      offset
+    }
 
     // const count = await models.Address.count(attrs);
-    const addresses = await models.Address.findAll(attrs);
-    const count = addresses.length;
+    const addresses = await models.Address.findAll(attrs)
+    const count = addresses.length
 
-    const totalPages = Math.ceil(count / limit);
-    return res.status(200).json({ totalPages, count, addresses });
+    const totalPages = Math.ceil(count / limit)
+    return res.status(200).json({ totalPages, count, addresses })
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
   }
 }
 
-export default { create, getAll, update, search };
+export default { create, getAll, update, search }

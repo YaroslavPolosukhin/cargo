@@ -1,19 +1,19 @@
 import roles from '../enums/roles.js'
 import { models } from '../models/index.js'
-import Sequelize from 'sequelize'
 import { validationResult } from 'express-validator'
 import EmploymentType from '../enums/employmentType.js'
 import { sendNotification } from '../utils/send_notification.js'
 import { search } from './managerController.js'
+import { search as searchOrder } from './ordersController.js'
+import OrderStatus from '../enums/orderStatus.js'
+import { Op } from 'sequelize'
 
 export const getRoles = async (req, res) => {
   const allowedRoles = [roles.COMPANY_DRIVER]
 
-  const modelRoles = models.Role.findAll({
+  const modelRoles = await models.Role.findAll({
     where: {
-      name: {
-        [Sequelize.Op.in]: allowedRoles
-      }
+      name: allowedRoles
     }
   })
 
@@ -138,7 +138,7 @@ export const confirm = async (req, res) => {
   }
 }
 
-export const getUnapproved = async (req, res) => {
+export const getUnapprovedUser = async (req, res) => {
   try {
     const { limit, offset } = req.pagination
 
@@ -206,6 +206,158 @@ export const getUnapproved = async (req, res) => {
 
     const totalPages = Math.ceil(count / limit)
     return res.status(200).json({ totalPages, count, users })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const getAll = async (req, res) => {
+  const { limit, offset } = req.pagination
+  const { status = 'all' } = req.query
+
+  if (Object.prototype.hasOwnProperty.call(req.query, 'search')) {
+    return searchOrder(req, res)
+  }
+
+  let _status = [OrderStatus.LOADING, OrderStatus.DEPARTED, OrderStatus.CREATED, OrderStatus.CONFIRMATION, OrderStatus.COMPLETED, OrderStatus.CANCELLED]
+  switch (status.toLowerCase()) {
+    case 'confirmation':
+      _status = [OrderStatus.CONFIRMATION]
+      break
+    case 'inwork':
+      _status = [OrderStatus.LOADING, OrderStatus.DEPARTED]
+      break
+    case 'available':
+      _status = [OrderStatus.CREATED]
+      break
+    case 'completed':
+      _status = [OrderStatus.COMPLETED]
+      break
+    case 'cancelled':
+      _status = [OrderStatus.CANCELLED]
+      break
+  }
+
+  const person = await models.Person.findByUserId(req.user.id)
+  const contragentId = person.contragent_id
+
+  const options = {
+    where: { status: { [Op.in]: _status } },
+    include: [
+      {
+        model: models.Truck,
+        as: 'truck'
+      },
+      {
+        model: models.LogisticsPoint,
+        as: 'departure',
+        include: [
+          {
+            model: models.Address,
+            as: 'Address',
+            include: [
+              {
+                model: models.City,
+                as: 'City'
+              },
+              {
+                model: models.Country,
+                as: 'Country'
+              },
+              {
+                model: models.Street,
+                as: 'Street'
+              },
+              {
+                model: models.Region,
+                as: 'Region'
+              }
+            ]
+          },
+          {
+            model: models.Contact,
+            as: 'contacts'
+          }
+        ]
+      },
+      {
+        model: models.LogisticsPoint,
+        as: 'destination',
+        include: [
+          {
+            model: models.Address,
+            as: 'Address',
+            include: [
+              {
+                model: models.City,
+                as: 'City'
+              },
+              {
+                model: models.Country,
+                as: 'Country'
+              },
+              {
+                model: models.Street,
+                as: 'Street'
+              },
+              {
+                model: models.Region,
+                as: 'Region'
+              }
+            ]
+          },
+          {
+            model: models.Contact,
+            as: 'contacts'
+          }
+        ]
+      },
+      {
+        model: models.Person,
+        as: 'driver',
+        include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+      },
+      {
+        model: models.Person,
+        as: 'manager',
+        include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+      },
+      {
+        model: models.Nomenclature,
+        as: 'nomenclatures',
+        include: [
+          {
+            model: models.Measure,
+            as: 'measure'
+          }
+        ]
+      }
+    ]
+  }
+
+  try {
+    const nsorders = await models.Order.findAll({ ...options })
+    let orders = []
+    if (status.toLowerCase() !== 'available') {
+      for (const order of nsorders) {
+        if (orders.status === OrderStatus.CREATED) {
+          orders.push(order)
+          continue
+        }
+
+        if (orders.driver.contragent_id === contragentId) {
+          orders.push(order)
+        }
+      }
+    } else {
+      orders = nsorders
+    }
+
+    const count = orders.length
+    const totalPages = Math.ceil(count / limit)
+    orders = orders.slice(offset, offset + limit)
+    return res.status(200).json({ totalPages, count, orders })
   } catch (error) {
     console.error(error)
     res.status(500).send()

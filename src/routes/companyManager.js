@@ -7,6 +7,7 @@ import { confirmDriverValidator } from '../validators/drivers.js'
 import paginationMiddleware from '../middlewares/paginationMiddleware.js'
 import searchMiddleware from '../middlewares/searchMiddleware.js'
 import * as managerController from '../controllers/managerController.js'
+import ordersController from '../controllers/ordersController.js'
 
 const router = express.Router()
 
@@ -35,15 +36,34 @@ router.get(
   '/unapproved',
   checkRole([Roles.COMPANY_MANAGER]),
   paginationMiddleware,
-  companyManagerController.getUnapproved
+  companyManagerController.getUnapprovedUser
 )
 
 router.get(
   '/search',
-  checkRole([Roles.MANAGER]),
+  checkRole([Roles.COMPANY_MANAGER]),
   paginationMiddleware,
   searchMiddleware,
   managerController.search
+)
+
+router.get(
+  '/order/all',
+  checkRole([Roles.COMPANY_MANAGER]),
+  paginationMiddleware,
+  companyManagerController.getAll
+)
+
+router.get(
+  '/order/:orderId/geo',
+  checkRole([Roles.COMPANY_MANAGER]),
+  ordersController.getGeo
+)
+
+router.get(
+  '/order/:orderId',
+  checkRole([Roles.COMPANY_MANAGER]),
+  ordersController.getOrderById
 )
 
 export default router

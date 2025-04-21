@@ -442,11 +442,9 @@ export const search = async (req, res) => {
 export const getRoles = async (req, res) => {
   const allowedRoles = [roles.DRIVER, roles.COMPANY_MANAGER, roles.COMPANY_DRIVER]
 
-  const modelRoles = models.Role.findAll({
+  const modelRoles = await models.Role.findAll({
     where: {
-      name: {
-        [Sequelize.Op.in]: allowedRoles
-      }
+      name: allowedRoles
     }
   })
 
