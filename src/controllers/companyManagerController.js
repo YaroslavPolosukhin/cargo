@@ -7,6 +7,7 @@ import { search } from './managerController.js'
 import { search as searchOrder } from './ordersController.js'
 import OrderStatus from '../enums/orderStatus.js'
 import { Op } from 'sequelize'
+import contragent from '../models/users/contragent.js'
 
 export const getRoles = async (req, res) => {
   const allowedRoles = [roles.COMPANY_DRIVER]
@@ -157,6 +158,9 @@ export const getUnapprovedUser = async (req, res) => {
       return res.status(400).json({ message: 'Role not found' })
     }
 
+    const person = await models.Person.findByUserId(req.user.id)
+    const contragentId = person.contragent_id
+
     const attrs = {
       where: {
         approved: false,
@@ -194,7 +198,10 @@ export const getUnapprovedUser = async (req, res) => {
                 }
               ]
             }
-          ]
+          ],
+          where: {
+            contragent_id: contragentId
+          }
         }
       ]
     }
