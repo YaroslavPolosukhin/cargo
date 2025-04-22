@@ -4,6 +4,8 @@ import { getFullUrl } from '../utils/utils.js'
 import Sequelize from 'sequelize'
 import roles from '../enums/roles.js'
 
+export const companyManagerSockets = {}
+
 export const confirmCompanyManager = async (req, res) => {
   try {
     const {
@@ -121,6 +123,11 @@ export const confirmCompanyManager = async (req, res) => {
     await person.update(updateQuery)
 
     person = await models.Person.findByUserId(userId)
+
+    if (person.id in companyManagerSockets) {
+      companyManagerSockets[person.id].send(JSON.stringify({ status: 'approved' }))
+    }
+
     try {
       const body = 'Регистрация подтверждена менеджером'
 

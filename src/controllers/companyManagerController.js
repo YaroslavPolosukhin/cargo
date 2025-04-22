@@ -3,7 +3,7 @@ import { models } from '../models/index.js'
 import { validationResult } from 'express-validator'
 import EmploymentType from '../enums/employmentType.js'
 import { sendNotification } from '../utils/send_notification.js'
-import { search } from './managerController.js'
+import { search, companyManagerSockets } from './managerController.js'
 import { search as searchOrder } from './ordersController.js'
 import OrderStatus from '../enums/orderStatus.js'
 import { Op } from 'sequelize'
@@ -367,5 +367,25 @@ export const getAll = async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).send()
+  }
+}
+
+export const updates = async (req, res) => {
+  const ws = await res.accept()
+
+  switch (req.user.role) {
+    case roles.COMPANY_MANAGER:
+      companyManagerSockets[req.user.id] = ws
+
+      ws.on('close', () => {
+        delete companyManagerSockets[req.user.id]
+      })
+
+      break
+
+    default:
+      ws.send(JSON.stringify({ status: "You don't need websocket connection" }))
+      ws.close()
+      break
   }
 }
