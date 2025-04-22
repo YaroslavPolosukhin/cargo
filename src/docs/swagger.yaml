@@ -68,6 +68,8 @@ paths:
     $ref: 'src/docs/paths/managers/confirm/companyManager.yaml'
   /api/managers/confirm/companyDriver:
     $ref: 'src/docs/paths/managers/confirm/companyDriver.yaml'
+  /api/managers/update/companyManager/{managerId}:
+    $ref: 'src/docs/paths/managers/update.yaml'
   /api/managers/approved:
     $ref: 'src/docs/paths/managers/approved.yaml'
   /api/managers/unapproved:
@@ -76,15 +78,19 @@ paths:
     $ref: 'src/docs/paths/managers/search.yaml'
 
   # CompanyManagers
-  /api/companyManagers/roles:
-    $ref: 'src/docs/paths/companyManagers/roles.yaml'
-  /api/companyManagers/approved:
+  /api/companyManagers/drivers/approved:
     $ref: 'src/docs/paths/companyManagers/approved.yaml'
-  /api/companyManagers/unapproved:
+  /api/companyManagers/drivers/approved_company:
+    $ref: 'src/docs/paths/companyManagers/approved_company.yaml'
+  /api/companyManagers/drivers/{driverId}:
+    $ref: 'src/docs/paths/companyManagers/one.yaml'
+  /api/companyManagers/drivers/unapproved:
     $ref: 'src/docs/paths/companyManagers/unapproved.yaml'
+  /api/companyManagers/drivers/update/{driverId}:
+    $ref: 'src/docs/paths/companyManagers/update.yaml'
   /api/companyManagers/search:
     $ref: 'src/docs/paths/companyManagers/search.yaml'
-  /api/companyManagers/confirm:
+  /api/companyManagers/drivers/confirm:
     $ref: 'src/docs/paths/companyManagers/confirm.yaml'
   /api/companyManagers/order/all:
     $ref: 'src/docs/paths/companyManagers/all.yaml'

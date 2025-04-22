@@ -1,0 +1,81 @@
+put:
+  tags:
+    - Managers
+  summary: Update company manager information
+  description: >
+    Update company manager information
+    It requires manager or company manager role
+  operationId: updateCompanyManager
+  parameters:
+    - in: path
+      name: managerId
+      schema:
+        type: integer
+      required: true
+      description: Company Manager Id
+  requestBody:
+    required: false
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the person
+            surname:
+              type: string
+              description: The surname of the person
+            patronymic:
+              type: string
+              description: The patronymic of the person
+            passportId:
+              type: integer
+              description: The ID of the passport
+            jobPositionId:
+              type: integer
+              description: The ID of the job position
+            email:
+              type: string
+              description: The email of the person
+            telegram:
+              type: string
+              description: The telegram of the person
+            contragentId:
+              type: integer
+              description: The ID of the contragent
+  responses:
+    '200':
+      description: Company manager information updated successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The user's personal data has been updated
+              persons:
+                type: array
+                items:
+                  $ref: '../../components/users.yaml#/components/schemas/Person'
+    '404':
+      description: Job/Passport/Contragent not found. / Access denied / Person not found / You can only update the personal data of drivers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Job/Passport/Contragent with id ${name_id} not found / Access denied / Person not found / You can only update the personal data of drivers
+    '401':
+      description: Unauthorized request due to missing or invalid refresh token.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message indicating the reason for the unauthorized status.

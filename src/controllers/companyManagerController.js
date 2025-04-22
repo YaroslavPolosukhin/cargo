@@ -3,22 +3,12 @@ import { models } from '../models/index.js'
 import { validationResult } from 'express-validator'
 import EmploymentType from '../enums/employmentType.js'
 import { sendNotification } from '../utils/send_notification.js'
-import { search, companyManagerSockets } from './managerController.js'
+import { companyManagerSockets } from './managerController.js'
 import { search as searchOrder } from './ordersController.js'
 import OrderStatus from '../enums/orderStatus.js'
 import { Op } from 'sequelize'
-
-export const getRoles = async (req, res) => {
-  const allowedRoles = [roles.COMPANY_DRIVER]
-
-  const modelRoles = await models.Role.findAll({
-    where: {
-      name: allowedRoles
-    }
-  })
-
-  return res.status(200).json({ roles: modelRoles })
-}
+import { getFullUrl } from '../utils/utils.js'
+import { search } from './driversController.js'
 
 export const confirm = async (req, res) => {
   const errors = validationResult(req)
@@ -138,23 +128,12 @@ export const confirm = async (req, res) => {
   }
 }
 
-export const getUnapprovedUser = async (req, res) => {
+export const getUnapproved = async (req, res) => {
   try {
     const { limit, offset } = req.pagination
 
-    if (!('roleId' in req.query)) {
-      return res.status(400).json({ error: 'roleId query is required.' })
-    }
-    const { roleId } = req.query
-
     if (Object.prototype.hasOwnProperty.call(req.query, 'search')) {
-      req.user_approved = false
       return search(req, res)
-    }
-
-    const role = await models.Role.findByPk(roleId)
-    if (!role) {
-      return res.status(400).json({ message: 'Role not found' })
     }
 
     const person = await models.Person.findByUserId(req.user.id)
@@ -163,17 +142,23 @@ export const getUnapprovedUser = async (req, res) => {
     const attrs = {
       where: {
         approved: false,
-        role_id: parseInt(roleId)
+        approved_company: false
       },
       include: [
         {
           model: models.Role,
           as: 'role',
+          where: {
+            name: roles.COMPANY_DRIVER
+          },
           attributes: ['name']
         },
         {
           model: models.Person,
           as: 'Person',
+          where: {
+            contragent_id: contragentId
+          },
           include: [
             { model: models.Contragent, as: 'contragent' },
             { model: models.JobPosition, as: 'jobPosition' },
@@ -197,10 +182,7 @@ export const getUnapprovedUser = async (req, res) => {
                 }
               ]
             }
-          ],
-          where: {
-            contragent_id: contragentId
-          }
+          ]
         }
       ]
     }
@@ -212,6 +194,284 @@ export const getUnapprovedUser = async (req, res) => {
 
     const totalPages = Math.ceil(count / limit)
     return res.status(200).json({ totalPages, count, users })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const getFullApproved = async (req, res) => {
+  try {
+    const { limit, offset } = req.pagination
+
+    if (Object.prototype.hasOwnProperty.call(req.query, 'search')) {
+      return search(req, res)
+    }
+
+    const person = await models.Person.findByUserId(req.user.id)
+    const contragentId = person.contragent_id
+
+    const attrs = {
+      where: {
+        contragent_id: contragentId
+      },
+      include: [
+        {
+          model: models.User,
+          as: 'user',
+          where: {
+            approved: true
+          },
+          include: [
+            {
+              model: models.Role,
+              as: 'role',
+              where: {
+                name: roles.COMPANY_DRIVER
+              }
+            }
+          ]
+        },
+        { model: models.Contragent, as: 'contragent' },
+        { model: models.JobPosition, as: 'jobPosition' },
+        {
+          model: models.DrivingLicence,
+          as: 'drivingLicense',
+          include: [
+            {
+              model: models.DrivingLicencePhoto,
+              as: 'photos'
+            }
+          ]
+        },
+        {
+          model: models.Passport,
+          as: 'passport',
+          include: [
+            {
+              model: models.PassportPhoto,
+              as: 'photos'
+            }
+          ]
+        }
+      ]
+    }
+
+    // const count = await models.Person.count(attrs)
+    let users = await models.Person.findAll({ ...attrs })
+    const count = users.length
+    users = users.slice(offset, offset + limit)
+
+    const userList = []
+    users.forEach(user => {
+      const userObj = user.toJSON()
+
+      if (Object.prototype.hasOwnProperty.call(userObj, 'passport') && userObj.passport !== null) {
+        const photos = []
+
+        if (Object.prototype.hasOwnProperty.call(userObj.passport, 'photos') && userObj.passport.photos !== null) {
+          userObj.passport.photos.forEach(photo => {
+            if (photo.photo_url !== 'no_url') {
+              photos.push(getFullUrl(req, photo.photo_url))
+            }
+          })
+        }
+
+        userObj.passport.photos = photos
+      }
+
+      if (Object.prototype.hasOwnProperty.call(userObj, 'drivingLicense') && userObj.drivingLicense !== null) {
+        const photos = []
+
+        if (Object.prototype.hasOwnProperty.call(userObj.drivingLicense, 'photos') && userObj.drivingLicense.photos !== null) {
+          userObj.drivingLicense.photos.forEach(photo => {
+            if (photo.photo_url !== 'no_url') {
+              photos.push(getFullUrl(req, photo.photo_url))
+            }
+          })
+        }
+
+        userObj.drivingLicense.photos = photos
+      }
+
+      userList.push(userObj)
+    })
+
+    const totalPages = Math.ceil(count / limit)
+    return res.status(200).json({ totalPages, count, userList })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const getCompanyApproved = async (req, res) => {
+  try {
+    const { limit, offset } = req.pagination
+
+    if (Object.prototype.hasOwnProperty.call(req.query, 'search')) {
+      return search(req, res)
+    }
+
+    const person = await models.Person.findByUserId(req.user.id)
+    const contragentId = person.contragent_id
+
+    const attrs = {
+      where: {
+        contragent_id: contragentId
+      },
+      include: [
+        {
+          model: models.User,
+          as: 'user',
+          where: {
+            approved: false,
+            approved_company: true
+          },
+          include: [
+            {
+              model: models.Role,
+              as: 'role',
+              where: {
+                name: roles.COMPANY_DRIVER
+              }
+            }
+          ]
+        },
+        { model: models.Contragent, as: 'contragent' },
+        { model: models.JobPosition, as: 'jobPosition' },
+        {
+          model: models.DrivingLicence,
+          as: 'drivingLicense',
+          include: [
+            {
+              model: models.DrivingLicencePhoto,
+              as: 'photos'
+            }
+          ]
+        },
+        {
+          model: models.Passport,
+          as: 'passport',
+          include: [
+            {
+              model: models.PassportPhoto,
+              as: 'photos'
+            }
+          ]
+        }
+      ]
+    }
+
+    // const count = await models.Person.count(attrs)
+    let users = await models.Person.findAll({ ...attrs })
+    const count = users.length
+    users = users.slice(offset, offset + limit)
+
+    const userList = []
+    users.forEach(user => {
+      const userObj = user.toJSON()
+
+      if (Object.prototype.hasOwnProperty.call(userObj, 'passport') && userObj.passport !== null) {
+        const photos = []
+
+        if (Object.prototype.hasOwnProperty.call(userObj.passport, 'photos') && userObj.passport.photos !== null) {
+          userObj.passport.photos.forEach(photo => {
+            if (photo.photo_url !== 'no_url') {
+              photos.push(getFullUrl(req, photo.photo_url))
+            }
+          })
+        }
+
+        userObj.passport.photos = photos
+      }
+
+      if (Object.prototype.hasOwnProperty.call(userObj, 'drivingLicense') && userObj.drivingLicense !== null) {
+        const photos = []
+
+        if (Object.prototype.hasOwnProperty.call(userObj.drivingLicense, 'photos') && userObj.drivingLicense.photos !== null) {
+          userObj.drivingLicense.photos.forEach(photo => {
+            if (photo.photo_url !== 'no_url') {
+              photos.push(getFullUrl(req, photo.photo_url))
+            }
+          })
+        }
+
+        userObj.drivingLicense.photos = photos
+      }
+
+      userList.push(userObj)
+    })
+
+    const totalPages = Math.ceil(count / limit)
+    return res.status(200).json({ totalPages, count, userList })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const getOne = async (req, res) => {
+  try {
+    const { driverId } = req.params
+
+    const person = await models.Person.findByUserId(req.user.id)
+    const contragentId = person.contragent_id
+
+    const attrs = {
+      where: {
+        id: driverId
+      },
+      include: [
+        {
+          model: models.Role,
+          as: 'role',
+          where: {
+            name: roles.COMPANY_DRIVER
+          },
+          attributes: ['name']
+        },
+        {
+          model: models.Person,
+          as: 'Person',
+          where: {
+            contragent_id: contragentId
+          },
+          include: [
+            { model: models.Contragent, as: 'contragent' },
+            { model: models.JobPosition, as: 'jobPosition' },
+            {
+              model: models.DrivingLicence,
+              as: 'drivingLicense',
+              include: [
+                {
+                  model: models.DrivingLicencePhoto,
+                  as: 'photos'
+                }
+              ]
+            },
+            {
+              model: models.Passport,
+              as: 'passport',
+              include: [
+                {
+                  model: models.PassportPhoto,
+                  as: 'photos'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+
+    const user = await models.User.findOne(attrs)
+
+    if (user == null) {
+      return res.status(404).json({ error: 'Driver not found' })
+    }
+
+    return res.status(200).json({ user })
   } catch (error) {
     console.error(error)
     res.status(500).send()
@@ -387,5 +647,186 @@ export const updates = async (req, res) => {
       ws.send(JSON.stringify({ status: "You don't need websocket connection" }))
       ws.close()
       break
+  }
+}
+
+export const driverUpdate = async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    if (errors.array()[0].msg != 'Missing fields: drivingLicensePhotos') { return res.status(400).json({ message: errors.array() }) }
+  }
+
+  const body = JSON.parse(JSON.stringify(req.body))
+
+  if (!Object.prototype.hasOwnProperty.call(req.params, 'driverId')) {
+    return res.status(400).json({ error: 'Person ID is required' })
+  }
+
+  let { driverId } = req.params
+
+  if (isNaN(driverId)) {
+    return res.status(400).json({ error: 'Person ID must be numeric', driverId })
+  }
+
+  driverId = Number(driverId)
+
+  if (driverId) {
+    try {
+      const person = await models.Person.findByPk(driverId, {
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role'
+              }
+            ],
+            attributes: { exclude: ['role_id'] }
+          }
+        ],
+        attributes: { exclude: ['user_id'] }
+      })
+
+      if (person === null) {
+        return res.status(404).json({ error: 'Person not found' })
+      }
+
+      // если роль обновляемого пользователя не driver
+      if (person.user.role.name !== roles.COMPANY_DRIVER) {
+        return res
+          .status(404)
+          .json({ error: 'You can only update the personal data of drivers' })
+      }
+
+      const { role, id } = req.user
+
+      // если водитель, но не тот, который auth
+      if (role === roles.COMPANY_DRIVER && person.user.id !== id) {
+        return res.status(404).json({ error: 'Access denied' })
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'jobPositionId') && body.jobPositionId) {
+        const jobPositionId = body.jobPositionId
+
+        const jobPosition = await models.JobPosition.findByPk(jobPositionId)
+
+        if (!jobPosition) {
+          return res
+            .status(404)
+            .json({ error: `Job position with id ${jobPositionId} not found` })
+        }
+
+        body.job_position_id = jobPosition.id
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'passportId') && body.passportId) {
+        let passportId = body.passportId
+
+        if (isNaN(passportId)) {
+          return res.status(400).json({ error: 'Passport ID must be numeric' })
+        }
+
+        passportId = Number(passportId)
+
+        const passport = await models.Passport.findByPk(passportId)
+
+        if (!passport) {
+          return res
+            .status(404)
+            .json({ error: `Passport with id ${passportId} not found` })
+        }
+
+        body.passport_id = passport.id
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'contragentId') && body.contragentId) {
+        const contragentId = body.contragentId
+
+        const contragent = await models.Contragent.findByPk(contragentId)
+
+        if (!contragent) {
+          return res
+            .status(404)
+            .json({ error: `Contragent with id ${contragentId} not found` })
+        }
+
+        body.contragent_id = contragent.id
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'drivingLicenseNumber') && Object.prototype.hasOwnProperty.call(body, 'drivingLicenseSerial') && body.drivingLicenseNumber && body.drivingLicenseSerial) {
+        const drivingLicenseNumber = body.drivingLicenseNumber
+        const drivingLicenseSerial = body.drivingLicenseSerial
+
+        delete body.drivingLicenseNumber
+        delete body.drivingLicenseSerial
+
+        const drivingLicense = await models.DrivingLicence.create({
+          serial: drivingLicenseSerial,
+          number: drivingLicenseNumber
+        })
+
+        body.driving_license_id = drivingLicense.id
+
+        if (req.files) {
+          const drivingLicensePhotos = req.files.map((file) => {
+            return {
+              driving_license_id: drivingLicense.id,
+              photo_url: file.path
+            }
+          })
+
+          if (drivingLicensePhotos.length > 0) {
+            await models.DrivingLicencePhoto.bulkCreate(drivingLicensePhotos)
+          }
+        }
+      }
+
+      for (const key in body) {
+        if (!body[key]) {
+          delete body[key]
+        }
+      }
+
+      await models.Person.update(body, { where: { id: person.id } })
+
+      const persons = await models.Person.findAll({
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role'
+              }
+            ],
+            attributes: { exclude: ['role_id'] }
+          },
+          {
+            model: models.DrivingLicence,
+            as: 'drivingLicense',
+            include: [
+              {
+                model: models.DrivingLicencePhoto,
+                as: 'photos'
+              }
+            ]
+          }
+        ],
+        attributes: { exclude: ['user_id', 'driving_license_id'] }
+      })
+
+      return res
+        .status(200)
+        .json({
+          message: "The user's personal data has been updated",
+          persons
+        })
+    } catch (error) {
+      console.error(error)
+      res.status(500).send()
+    }
   }
 }

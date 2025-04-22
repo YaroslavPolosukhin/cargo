@@ -49,4 +49,10 @@ router.post(
   managerController.confirmCompanyDriver
 )
 
+router.put(
+  '/update/companyManager/:driverId',
+  checkRole([Roles.MANAGER, Roles.COMPANY_MANAGER]),
+  managerController.updateCompanyManager
+)
+
 export default router

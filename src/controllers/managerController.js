@@ -3,6 +3,7 @@ import { sendNotification } from '../utils/send_notification.js'
 import { getFullUrl } from '../utils/utils.js'
 import Sequelize from 'sequelize'
 import roles from '../enums/roles.js'
+import { validationResult } from 'express-validator'
 
 export const companyManagerSockets = {}
 
@@ -497,4 +498,153 @@ export const confirmCompanyDriver = async (req, res) => {
       message: 'Company driver registration confirmed successfully',
       person
     })
+}
+
+export const updateCompanyManager = async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    if (errors.array()[0].msg != 'Missing fields: drivingLicensePhotos') { return res.status(400).json({ message: errors.array() }) }
+  }
+
+  const body = JSON.parse(JSON.stringify(req.body))
+
+  if (!Object.prototype.hasOwnProperty.call(req.params, 'managerId')) {
+    return res.status(400).json({ error: 'Person ID is required' })
+  }
+
+  let { managerId } = req.params
+
+  if (isNaN(managerId)) {
+    return res.status(400).json({ error: 'Person ID must be numeric', managerId })
+  }
+
+  managerId = Number(managerId)
+
+  if (managerId) {
+    try {
+      const person = await models.Person.findByPk(managerId, {
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role'
+              }
+            ],
+            attributes: { exclude: ['role_id'] }
+          }
+        ],
+        attributes: { exclude: ['user_id'] }
+      })
+
+      if (person === null) {
+        return res.status(404).json({ error: 'Person not found' })
+      }
+
+      // если роль обновляемого пользователя не driver
+      if (person.user.role.name !== roles.COMPANY_MANAGER) {
+        return res
+          .status(404)
+          .json({ error: 'You can only update the personal data of manager' })
+      }
+
+      const { role, id } = req.user
+
+      // если водитель, но не тот, который auth
+      if (role === roles.COMPANY_MANAGER && person.user.id !== id) {
+        return res.status(404).json({ error: 'Access denied' })
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'jobPositionId') && body.jobPositionId) {
+        const jobPositionId = body.jobPositionId
+
+        const jobPosition = await models.JobPosition.findByPk(jobPositionId)
+
+        if (!jobPosition) {
+          return res
+            .status(404)
+            .json({ error: `Job position with id ${jobPositionId} not found` })
+        }
+
+        body.job_position_id = jobPosition.id
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'passportId') && body.passportId) {
+        let passportId = body.passportId
+
+        if (isNaN(passportId)) {
+          return res.status(400).json({ error: 'Passport ID must be numeric' })
+        }
+
+        passportId = Number(passportId)
+
+        const passport = await models.Passport.findByPk(passportId)
+
+        if (!passport) {
+          return res
+            .status(404)
+            .json({ error: `Passport with id ${passportId} not found` })
+        }
+
+        body.passport_id = passport.id
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, 'contragentId') && body.contragentId) {
+        const contragentId = body.contragentId
+
+        const contragent = await models.Contragent.findByPk(contragentId)
+
+        if (!contragent) {
+          return res
+            .status(404)
+            .json({ error: `Contragent with id ${contragentId} not found` })
+        }
+
+        body.contragent_id = contragent.id
+      }
+
+      for (const key in body) {
+        if (!body[key]) {
+          delete body[key]
+        }
+      }
+
+      await models.Person.update(body, { where: { id: person.id } })
+
+      const persons = await models.Person.findAll({
+        include: [
+          {
+            model: models.User,
+            as: 'user',
+            include: [
+              {
+                model: models.Role,
+                as: 'role',
+                where: {
+                  name: roles.COMPANY_MANAGER
+                }
+              }
+            ],
+            attributes: { exclude: ['role_id'] },
+            where: {
+              approved: true
+            }
+          }
+        ],
+        attributes: { exclude: ['user_id', 'driving_license_id'] }
+      })
+
+      return res
+        .status(200)
+        .json({
+          message: "The user's personal data has been updated",
+          persons
+        })
+    } catch (error) {
+      console.error(error)
+      res.status(500).send()
+    }
+  }
 }

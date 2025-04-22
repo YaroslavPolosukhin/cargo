@@ -14,7 +14,7 @@ const router = express.Router()
 
 router.get(
   '/getManagerPhone',
-  checkRole([Roles.DRIVER,Roles.COMPANY_DRIVER]),
+  checkRole([Roles.DRIVER, Roles.COMPANY_DRIVER]),
   driversController.getManagerPhone
 )
 
@@ -70,7 +70,7 @@ router.post(
 
 router.post(
   '/createPassport',
-  checkRole([Roles.MANAGER]),
+  checkRole([Roles.MANAGER, Roles.COMPANY_MANAGER]),
   passportUpload.array('photos', 6),
   createPassportValidator,
   driversController.createPassport
@@ -78,7 +78,7 @@ router.post(
 
 router.put(
   '/updatePassport/:passportId',
-  checkRole([Roles.MANAGER]),
+  checkRole([Roles.MANAGER, Roles.COMPANY_MANAGER]),
   passportUpload.array('photos', 6),
   createPassportValidator,
   driversController.updatePassport

@@ -1,27 +1,21 @@
 get:
   tags:
     - CompanyManagers
-  summary: Get a list of approved users by id
-  description: Retrieve all users that have been approved.
-  operationId: getApprovedByRoleId
+  summary: Get a list of approved drivers
+  description: Retrieve all drivers that have been approved.
+  operationId: getApprovedCompanyDrivers
   parameters:
     - $ref: '../../common-parameters.yaml#/parameters/LimitQueryParam'
     - $ref: '../../common-parameters.yaml#/parameters/OffsetQueryParam'
     - name: search
       in: query
-      description: Search for approved users by name
+      description: Search for approved drivers by name
       required: false
       schema:
         type: string
-    - name: roleId
-      in: query
-      description: role id of users
-      required: true
-      schema:
-        type: integer
   responses:
     '200':
-      description: A list of approved users
+      description: A list of approved drivers
       content:
         application/json:
           schema:

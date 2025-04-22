@@ -1,0 +1,104 @@
+put:
+  tags:
+    - CompanyManagers
+  summary: Update driver information
+  description: >
+    Update driver information
+    It requires manager or driver role
+  operationId: updateCompanyDriver
+  parameters:
+    - in: path
+      name: driverId
+      schema:
+        type: integer
+      required: true
+      description: Driver Id
+  requestBody:
+    required: false
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the person
+            surname:
+              type: string
+              description: The surname of the person
+            patronymic:
+              type: string
+              description: The patronymic of the person
+            inn:
+              type: string
+              description: The INN of the person
+            passportId:
+              type: integer
+              description: The ID of the passport
+            jobPositionId:
+              type: integer
+              description: The ID of the job position
+            email:
+              type: string
+              description: The email of the person
+            individual:
+              type: boolean
+              description: The individual of the person
+            self_employed:
+              type: boolean
+              description: The self employed of the person
+            telegram:
+              type: string
+              description: The telegram of the person
+            contragentId:
+              type: integer
+              description: The ID of the contragent
+            drivingLicenseSerial:
+              type: integer
+              description: Serial of driver's license
+            drivingLicenseNumber:
+              type: integer
+              description: Number of driver's license
+            drivingLicensePhotos:
+              type: array
+              items:
+                type: string
+                format: binary
+              description: Photos of driver's licenses
+              maxItems: 6
+              nullable: true
+  responses:
+    '200':
+      description: Driver information updated successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The user's personal data has been updated
+              persons:
+                type: array
+                items:
+                  $ref: '../../components/users.yaml#/components/schemas/Person'
+    '404':
+      description: Job/Passport/Contragent not found. / Access denied / Person not found / You can only update the personal data of drivers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Job/Passport/Contragent with id ${name_id} not found / Access denied / Person not found / You can only update the personal data of drivers
+    '401':
+      description: Unauthorized request due to missing or invalid refresh token.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message indicating the reason for the unauthorized status.
