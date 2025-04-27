@@ -78,6 +78,8 @@ paths:
     $ref: 'src/docs/paths/managers/search.yaml'
 
   # CompanyManagers
+  /api/companyManagers/jobs:
+    $ref: 'src/docs/paths/companyManagers/jobs.yaml'
   /api/companyManagers/drivers/approved:
     $ref: 'src/docs/paths/companyManagers/approved.yaml'
   /api/companyManagers/drivers/approved_company:

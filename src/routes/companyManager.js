@@ -11,6 +11,12 @@ import ordersController from '../controllers/ordersController.js'
 
 const router = express.Router()
 
+router.get(
+  '/jobs',
+  checkRole([Roles.COMPANY_MANAGER]),
+  companyManagerController.getJobs
+)
+
 router.post(
   '/drivers/confirm',
   checkRole([Roles.COMPANY_MANAGER]),

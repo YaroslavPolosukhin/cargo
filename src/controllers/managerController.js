@@ -78,7 +78,7 @@ export const confirmCompanyManager = async (req, res) => {
         await models.PassportPhoto.bulkCreate(passportPhotos)
       }
 
-      updateQuery.passportId = passport.id
+      updateQuery.passport_id = passport.id
     }
 
     if (contragentName || contragentINN || contragentKPP || contragentType) {

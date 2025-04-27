@@ -830,3 +830,15 @@ export const driverUpdate = async (req, res) => {
     }
   }
 }
+
+export const getJobs = async (req, res) => {
+  try {
+    const allowedJobs = ['Водители']
+
+    const jobs = await models.JobPosition.findAll({ where: { show_on_page: true, name: { [Op.in]: allowedJobs } } })
+    return res.status(200).json({ jobs })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
