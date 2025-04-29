@@ -88,7 +88,7 @@ router.get(
 )
 
 router.get(
-  'managers/:managerId',
+  '/managers/:managerId',
   checkRole([Roles.COMPANY_MANAGER]),
   managerController.getOne
 )
