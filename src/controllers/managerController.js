@@ -229,32 +229,32 @@ export const getUnapproved = async (req, res) => {
     users.forEach(user => {
       const userObj = user.toJSON()
 
-      if (Object.prototype.hasOwnProperty.call(userObj.Person, 'passport') && userObj.Person.passport !== null) {
+      if (Object.prototype.hasOwnProperty.call(userObj.Person[0], 'passport') && userObj.Person[0].passport !== null) {
         const photos = []
 
-        if (Object.prototype.hasOwnProperty.call(userObj.Person.passport, 'photos') && userObj.Person.passport.photos !== null) {
-          userObj.Person.passport.photos.forEach(photo => {
+        if (Object.prototype.hasOwnProperty.call(userObj.Person[0].passport, 'photos') && userObj.Person[0].passport.photos !== null) {
+          userObj.Person[0].passport.photos.forEach(photo => {
             if (photo.photo_url !== 'no_url') {
               photos.push(getFullUrl(req, photo.photo_url))
             }
           })
         }
 
-        userObj.Person.passport.photos = photos
+        userObj.Person[0].passport.photos = photos
       }
 
-      if (Object.prototype.hasOwnProperty.call(userObj.Person, 'drivingLicense') && userObj.Person.drivingLicense !== null) {
+      if (Object.prototype.hasOwnProperty.call(userObj.Person[0], 'drivingLicense') && userObj.Person[0].drivingLicense !== null) {
         const photos = []
 
-        if (Object.prototype.hasOwnProperty.call(userObj.Person.drivingLicense, 'photos') && userObj.Person.drivingLicense.photos !== null) {
-          userObj.Person.drivingLicense.photos.forEach(photo => {
+        if (Object.prototype.hasOwnProperty.call(userObj.Person[0].drivingLicense, 'photos') && userObj.Person[0].drivingLicense.photos !== null) {
+          userObj.Person[0].drivingLicense.photos.forEach(photo => {
             if (photo.photo_url !== 'no_url') {
               photos.push(getFullUrl(req, photo.photo_url))
             }
           })
         }
 
-        userObj.Person.drivingLicense.photos = photos
+        userObj.Person[0].drivingLicense.photos = photos
       }
 
       userList.push(userObj)
