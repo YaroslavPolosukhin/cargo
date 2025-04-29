@@ -733,5 +733,5 @@ export const getOne = async (req, res) => {
     userObj.drivingLicense.photos = photos
   }
 
-  return { manager: userObj }
+  return res.status(200).json({ manager: userObj })
 }
