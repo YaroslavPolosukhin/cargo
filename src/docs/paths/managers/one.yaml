@@ -1,0 +1,24 @@
+get:
+  tags:
+    - Managers
+  summary: Get manager by id
+  operationId: getManagerById
+  parameters:
+    - in: path
+      name: managerId
+      schema:
+        type: integer
+      required: true
+      description: Manager Id
+  responses:
+    '200':
+      description: A manager
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              manager:
+                $ref: '../../components/users.yaml#/components/schemas/Person'
+    '500':
+      description: Internal Server Error

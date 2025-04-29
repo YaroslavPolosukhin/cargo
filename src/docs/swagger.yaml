@@ -64,6 +64,8 @@ paths:
   # MANAGERS
   /api/managers/roles:
     $ref: 'src/docs/paths/managers/roles.yaml'
+  /api/managers/get/manager/{managerId}:
+    $ref: 'src/docs/paths/managers/one.yaml'
   /api/managers/confirm/companyManager:
     $ref: 'src/docs/paths/managers/confirm/companyManager.yaml'
   /api/managers/confirm/companyDriver:
@@ -80,6 +82,8 @@ paths:
   # CompanyManagers
   /api/companyManagers/jobs:
     $ref: 'src/docs/paths/companyManagers/jobs.yaml'
+  /api/companyManagers/managers/{managerId}:
+    $ref: 'src/docs/paths/companyManagers/one_manager.yaml'
   /api/companyManagers/drivers/approved:
     $ref: 'src/docs/paths/companyManagers/approved.yaml'
   /api/companyManagers/drivers/approved_company:

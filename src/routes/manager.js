@@ -23,6 +23,12 @@ router.get(
 )
 
 router.get(
+  '/get/manager/:managerId',
+  checkRole([Roles.MANAGER]),
+  managerController.getOne
+)
+
+router.get(
   '/unapproved',
   checkRole([Roles.MANAGER]),
   paginationMiddleware,
@@ -50,7 +56,7 @@ router.post(
 )
 
 router.put(
-  '/update/companyManager/:driverId',
+  '/update/companyManager/:managerId',
   checkRole([Roles.MANAGER, Roles.COMPANY_MANAGER]),
   managerController.updateCompanyManager
 )

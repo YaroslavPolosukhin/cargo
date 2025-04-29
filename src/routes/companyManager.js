@@ -87,4 +87,10 @@ router.get(
   ordersController.getOrderById
 )
 
+router.get(
+  'managers/:managerId',
+  checkRole([Roles.COMPANY_MANAGER]),
+  managerController.getOne
+)
+
 export default router

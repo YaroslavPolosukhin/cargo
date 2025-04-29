@@ -648,3 +648,90 @@ export const updateCompanyManager = async (req, res) => {
     }
   }
 }
+
+export const getOne = async (req, res) => {
+  if (!Object.prototype.hasOwnProperty.call(req.params, 'managerId')) {
+    return res.status(400).json({ error: 'Person ID is required' })
+  }
+
+  let { managerId } = req.params
+
+  if (isNaN(managerId)) {
+    return res.status(400).json({ error: 'Person ID must be numeric', managerId })
+  }
+
+  managerId = Number(managerId)
+
+  const attrs = {
+    where: {
+      id: managerId
+    },
+    include: [
+      {
+        model: models.User,
+        as: 'user',
+        include: [
+          {
+            model: models.Role,
+            as: 'role'
+          }
+        ]
+      },
+      { model: models.Contragent, as: 'contragent' },
+      { model: models.JobPosition, as: 'jobPosition' },
+      {
+        model: models.DrivingLicence,
+        as: 'drivingLicense',
+        include: [
+          {
+            model: models.DrivingLicencePhoto,
+            as: 'photos'
+          }
+        ]
+      },
+      {
+        model: models.Passport,
+        as: 'passport',
+        include: [
+          {
+            model: models.PassportPhoto,
+            as: 'photos'
+          }
+        ]
+      }
+    ]
+  }
+
+  const user = await models.Person.findOne({ ...attrs })
+
+  const userObj = user.toJSON()
+  if (Object.prototype.hasOwnProperty.call(userObj, 'passport') && userObj.passport !== null) {
+    const photos = []
+
+    if (Object.prototype.hasOwnProperty.call(userObj.passport, 'photos') && userObj.passport.photos !== null) {
+      userObj.passport.photos.forEach(photo => {
+        if (photo.photo_url !== 'no_url') {
+          photos.push(getFullUrl(req, photo.photo_url))
+        }
+      })
+    }
+
+    userObj.passport.photos = photos
+  }
+
+  if (Object.prototype.hasOwnProperty.call(userObj, 'drivingLicense') && userObj.drivingLicense !== null) {
+    const photos = []
+
+    if (Object.prototype.hasOwnProperty.call(userObj.drivingLicense, 'photos') && userObj.drivingLicense.photos !== null) {
+      userObj.drivingLicense.photos.forEach(photo => {
+        if (photo.photo_url !== 'no_url') {
+          photos.push(getFullUrl(req, photo.photo_url))
+        }
+      })
+    }
+
+    userObj.drivingLicense.photos = photos
+  }
+
+  return { manager: userObj }
+}

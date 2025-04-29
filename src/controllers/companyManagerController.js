@@ -220,7 +220,8 @@ export const getFullApproved = async (req, res) => {
           model: models.User,
           as: 'user',
           where: {
-            approved: true
+            approved: true,
+            approved_company: true
           },
           include: [
             {
