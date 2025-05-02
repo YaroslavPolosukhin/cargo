@@ -92,7 +92,8 @@ export const confirm = async (req, res) => {
     }
 
     await user.update({ responsible_user: req.user.id, approved_company: true })
-    await person.update({
+
+    const updateQuery = {
       name,
       surname,
       patronymic,
@@ -101,11 +102,16 @@ export const confirm = async (req, res) => {
       passport_id: passport ? passport.id : null,
       self_employed: employmentType === EmploymentType.SELF_EMPLOYED,
       individual: employmentType === EmploymentType.INDIVIDUAL,
-      contragent_id: contragent ? contragent.id : null,
       email,
       telegram,
       driving_license_id: drivingLicenseId
-    })
+    }
+
+    if (contragent) {
+      updateQuery.contragent_id = contragent.id
+    }
+
+    await person.update(updateQuery)
 
     try {
       const body = 'Регистрация подтверждена менеджером'
