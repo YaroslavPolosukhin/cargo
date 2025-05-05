@@ -54,6 +54,12 @@ router.put(
   companyManagerController.driverUpdate
 )
 
+router.put(
+  '/driver/block/:driverId',
+  checkRole([Roles.COMPANY_MANAGER]),
+  companyManagerController.blockDriver
+)
+
 router.get(
   '/drivers/:driverId',
   checkRole([Roles.COMPANY_MANAGER]),

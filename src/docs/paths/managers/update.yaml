@@ -16,7 +16,7 @@ put:
   requestBody:
     required: false
     content:
-      multipart/form-data:
+      application/json:
         schema:
           type: object
           properties:

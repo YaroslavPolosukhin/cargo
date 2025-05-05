@@ -849,3 +849,28 @@ export const getJobs = async (req, res) => {
     res.status(500).send()
   }
 }
+
+export const blockDriver = async (req, res) => {
+  const { driverId } = req.params
+
+  if (!driverId) {
+    return res.status(400).json({ error: 'Driver ID is required' })
+  }
+
+  try {
+    const person = await models.Person.findByPk(driverId)
+
+    if (!person) {
+      return res.status(404).json({ error: 'Driver not found' })
+    }
+
+    await models.PasswordRecoveryAttempt.destroy({ where: { user_id: person.user_id } })
+    await models.User.destroy({ where: { id: person.user_id } })
+    await models.Person.destroy({ where: { id: driverId } })
+
+    return res.status(200).json({ message: 'Driver blocked successfully' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}

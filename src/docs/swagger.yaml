@@ -94,6 +94,8 @@ paths:
     $ref: 'src/docs/paths/companyManagers/unapproved.yaml'
   /api/companyManagers/drivers/update/{driverId}:
     $ref: 'src/docs/paths/companyManagers/update.yaml'
+  /api/companyManagers/drivers/block/{driverId}:
+    $ref: 'src/docs/paths/companyManagers/block.yaml'
   /api/companyManagers/search:
     $ref: 'src/docs/paths/companyManagers/search.yaml'
   /api/companyManagers/drivers/confirm:

@@ -1,16 +1,16 @@
-import { DataTypes, Model } from "sequelize";
-import { getCurrentTimeFromDatabase } from "../../utils/getCurrentTimeFromDatabase.js";
+import { DataTypes, Model } from 'sequelize'
+import { getCurrentTimeFromDatabase } from '../../utils/getCurrentTimeFromDatabase.js'
 
 export default (sequelize) => {
   class PasswordRecoveryAttempt extends Model {
     static associate (models) {
-      this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+      this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' })
     }
 
     static async findByUserId (userId) {
       return await this.findOne({
         where: { user_id: userId }
-      });
+      })
     }
   }
 
@@ -44,21 +44,21 @@ export default (sequelize) => {
     modelName: 'PasswordRecoveryAttempt',
     tableName: 'password_recovery_attempts',
     timestamps: true
-  });
+  })
 
   PasswordRecoveryAttempt.getOrCreate = async (userId) => {
-    const attempt = await PasswordRecoveryAttempt.findOne({ where: { user_id: userId }});
+    const attempt = await PasswordRecoveryAttempt.findOne({ where: { user_id: userId } })
     if (attempt !== null) {
-      return attempt;
+      return attempt
     }
 
-    return await PasswordRecoveryAttempt.create({ user_id: userId });
+    return await PasswordRecoveryAttempt.create({ user_id: userId })
   }
 
   PasswordRecoveryAttempt.prototype.getLifetime = async function () {
-    const currentTime = await getCurrentTimeFromDatabase();
-    return (currentTime.getTime() - this.updatedAt.getTime()) / (1000  * 60);
+    const currentTime = await getCurrentTimeFromDatabase()
+    return (currentTime.getTime() - this.updatedAt.getTime()) / (1000 * 60)
   }
 
-  return PasswordRecoveryAttempt;
+  return PasswordRecoveryAttempt
 }
