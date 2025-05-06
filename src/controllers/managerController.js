@@ -484,290 +484,334 @@ export const search = async (req, res) => {
 }
 
 export const getRoles = async (req, res) => {
-  const allowedRoles = [roles.DRIVER, roles.COMPANY_MANAGER, roles.COMPANY_DRIVER]
+  try {
+    const allowedRoles = [roles.DRIVER, roles.COMPANY_MANAGER, roles.COMPANY_DRIVER]
 
-  const modelRoles = await models.Role.findAll({
-    where: {
-      name: allowedRoles
-    }
-  })
+    const modelRoles = await models.Role.findAll({
+      where: {
+        name: allowedRoles
+      }
+    })
 
-  return res.status(200).json({ roles: modelRoles })
+    return res.status(200).json({ roles: modelRoles })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
 }
 
 export const confirmCompanyDriver = async (req, res) => {
-  const {
-    userId
-  } = req.body
-
-  let person = await models.Person.findByUserId(userId)
-  if (!person) {
-    return res.status(400).json({ message: 'Company drivers not found' })
-  }
-
-  const user = await models.User.scope('withTokens').findByPk(userId)
-  if (!user) {
-    return res.status(400).json({ message: 'User not found' })
-  }
-
-  await user.update({
-    responsible_user: req.user.id,
-    approved: true
-  })
-
-  person = await models.Person.findByUserId(userId)
   try {
-    const body = 'Регистрация подтверждена менеджером'
+    const {
+      userId
+    } = req.body
 
-    await sendNotification('Ваш статус обновлен', body, {
-      title: 'Ваш статус обновлен',
-      body
-    }, user.fcm_token, user.device_type)
-  } catch (e) {
-    console.log('something wrong with sending notification')
-    console.error(e)
+    let person = await models.Person.findByUserId(userId)
+    if (!person) {
+      return res.status(400).json({ message: 'Company drivers not found' })
+    }
+
+    const user = await models.User.scope('withTokens').findByPk(userId)
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' })
+    }
+
+    await models.User.update(
+      {
+        responsible_user: req.user.id,
+        approved: true
+      },
+      {
+        where: {
+          id: userId
+        }
+      }
+    )
+
+    person = await models.Person.findByUserId(userId)
+    try {
+      const body = 'Регистрация подтверждена менеджером'
+
+      await sendNotification('Ваш статус обновлен', body, {
+        title: 'Ваш статус обновлен',
+        body
+      }, user.fcm_token, user.device_type)
+    } catch (e) {
+      console.log('something wrong with sending notification')
+      console.error(e)
+    }
+
+    res
+      .status(200)
+      .json({
+        message: 'Company driver registration confirmed successfully',
+        person
+      })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
   }
-
-  res
-    .status(200)
-    .json({
-      message: 'Company driver registration confirmed successfully',
-      person
-    })
 }
 
 export const updateCompanyManager = async (req, res) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    if (errors.array()[0].msg != 'Missing fields: drivingLicensePhotos') { return res.status(400).json({ message: errors.array() }) }
-  }
-
-  const body = JSON.parse(JSON.stringify(req.body))
-
-  if (!Object.prototype.hasOwnProperty.call(req.params, 'managerId')) {
-    return res.status(400).json({ error: 'Person ID is required' })
-  }
-
-  let { managerId } = req.params
-
-  if (isNaN(managerId)) {
-    return res.status(400).json({ error: 'Person ID must be numeric', managerId })
-  }
-
-  managerId = Number(managerId)
-
-  if (managerId) {
-    try {
-      const person = await models.Person.findByPk(managerId, {
-        include: [
-          {
-            model: models.User,
-            as: 'user',
-            include: [
-              {
-                model: models.Role,
-                as: 'role'
-              }
-            ],
-            attributes: { exclude: ['role_id'] }
-          }
-        ],
-        attributes: { exclude: ['user_id'] }
-      })
-
-      if (person === null) {
-        return res.status(404).json({ error: 'Person not found' })
+  try {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      if (errors.array()[0].msg != 'Missing fields: drivingLicensePhotos') {
+        return res.status(400).json({ message: errors.array() })
       }
-
-      // если роль обновляемого пользователя не driver
-      if (person.user.role.name !== roles.COMPANY_MANAGER) {
-        return res
-          .status(404)
-          .json({ error: 'You can only update the personal data of manager' })
-      }
-
-      const { role, id } = req.user
-
-      // если водитель, но не тот, который auth
-      if (role === roles.COMPANY_MANAGER && person.user.id !== id) {
-        return res.status(404).json({ error: 'Access denied' })
-      }
-
-      if (Object.prototype.hasOwnProperty.call(body, 'jobPositionId') && body.jobPositionId) {
-        const jobPositionId = body.jobPositionId
-
-        const jobPosition = await models.JobPosition.findByPk(jobPositionId)
-
-        if (!jobPosition) {
-          return res
-            .status(404)
-            .json({ error: `Job position with id ${jobPositionId} not found` })
-        }
-
-        body.job_position_id = jobPosition.id
-      }
-
-      if (Object.prototype.hasOwnProperty.call(body, 'passportId') && body.passportId) {
-        let passportId = body.passportId
-
-        if (isNaN(passportId)) {
-          return res.status(400).json({ error: 'Passport ID must be numeric' })
-        }
-
-        passportId = Number(passportId)
-
-        const passport = await models.Passport.findByPk(passportId)
-
-        if (!passport) {
-          return res
-            .status(404)
-            .json({ error: `Passport with id ${passportId} not found` })
-        }
-
-        body.passport_id = passport.id
-      }
-
-      if (Object.prototype.hasOwnProperty.call(body, 'contragentId') && body.contragentId) {
-        const contragentId = body.contragentId
-
-        const contragent = await models.Contragent.findByPk(contragentId)
-
-        if (!contragent) {
-          return res
-            .status(404)
-            .json({ error: `Contragent with id ${contragentId} not found` })
-        }
-
-        body.contragent_id = contragent.id
-      }
-
-      for (const key in body) {
-        if (!body[key]) {
-          delete body[key]
-        }
-      }
-
-      await models.Person.update(body, { where: { id: person.id } })
-
-      const persons = await models.Person.findAll({
-        include: [
-          {
-            model: models.User,
-            as: 'user',
-            include: [
-              {
-                model: models.Role,
-                as: 'role',
-                where: {
-                  name: roles.COMPANY_MANAGER
-                }
-              }
-            ],
-            attributes: { exclude: ['role_id'] },
-            where: {
-              approved: true
-            }
-          }
-        ],
-        attributes: { exclude: ['user_id', 'driving_license_id'] }
-      })
-
-      return res
-        .status(200)
-        .json({
-          message: "The user's personal data has been updated",
-          persons
-        })
-    } catch (error) {
-      console.error(error)
-      res.status(500).send()
     }
+
+    const body = JSON.parse(JSON.stringify(req.body))
+
+    if (!Object.prototype.hasOwnProperty.call(req.params, 'managerId')) {
+      return res.status(400).json({ error: 'Person ID is required' })
+    }
+
+    let { managerId } = req.params
+
+    if (isNaN(managerId)) {
+      return res.status(400).json({
+        error: 'Person ID must be numeric',
+        managerId
+      })
+    }
+
+    managerId = Number(managerId)
+
+    if (managerId) {
+      try {
+        const person = await models.Person.findByPk(managerId, {
+          include: [
+            {
+              model: models.User,
+              as: 'user',
+              include: [
+                {
+                  model: models.Role,
+                  as: 'role'
+                }
+              ],
+              attributes: { exclude: ['role_id'] }
+            }
+          ],
+          attributes: { exclude: ['user_id'] }
+        })
+
+        if (person === null) {
+          return res.status(404).json({ error: 'Person not found' })
+        }
+
+        // если роль обновляемого пользователя не driver
+        if (person.user.role.name !== roles.COMPANY_MANAGER) {
+          return res
+            .status(404)
+            .json({ error: 'You can only update the personal data of manager' })
+        }
+
+        const {
+          role,
+          id
+        } = req.user
+
+        // если водитель, но не тот, который auth
+        if (role === roles.COMPANY_MANAGER && person.user.id !== id) {
+          return res.status(404).json({ error: 'Access denied' })
+        }
+
+        if (Object.prototype.hasOwnProperty.call(body, 'jobPositionId') && body.jobPositionId) {
+          const jobPositionId = body.jobPositionId
+
+          const jobPosition = await models.JobPosition.findByPk(jobPositionId)
+
+          if (!jobPosition) {
+            return res
+              .status(404)
+              .json({ error: `Job position with id ${jobPositionId} not found` })
+          }
+
+          body.job_position_id = jobPosition.id
+        }
+
+        if (Object.prototype.hasOwnProperty.call(body, 'passportId') && body.passportId) {
+          let passportId = body.passportId
+
+          if (isNaN(passportId)) {
+            return res.status(400).json({ error: 'Passport ID must be numeric' })
+          }
+
+          passportId = Number(passportId)
+
+          const passport = await models.Passport.findByPk(passportId)
+
+          if (!passport) {
+            return res
+              .status(404)
+              .json({ error: `Passport with id ${passportId} not found` })
+          }
+
+          body.passport_id = passport.id
+        }
+
+        if (Object.prototype.hasOwnProperty.call(body, 'contragentId') && body.contragentId) {
+          const contragentId = body.contragentId
+
+          const contragent = await models.Contragent.findByPk(contragentId)
+
+          if (!contragent) {
+            return res
+              .status(404)
+              .json({ error: `Contragent with id ${contragentId} not found` })
+          }
+
+          body.contragent_id = contragent.id
+        }
+
+        for (const key in body) {
+          if (!body[key]) {
+            delete body[key]
+          }
+        }
+
+        await models.Person.update(body, { where: { id: person.id } })
+
+        const persons = await models.Person.findAll({
+          include: [
+            {
+              model: models.User,
+              as: 'user',
+              include: [
+                {
+                  model: models.Role,
+                  as: 'role',
+                  where: {
+                    name: roles.COMPANY_MANAGER
+                  }
+                }
+              ],
+              attributes: { exclude: ['role_id'] },
+              where: {
+                approved: true
+              }
+            }
+          ],
+          attributes: { exclude: ['user_id', 'driving_license_id'] }
+        })
+
+        return res
+          .status(200)
+          .json({
+            message: "The user's personal data has been updated",
+            persons
+          })
+      } catch (error) {
+        console.error(error)
+        res.status(500).send()
+      }
+    }
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
   }
 }
 
 export const getOne = async (req, res) => {
-  if (!Object.prototype.hasOwnProperty.call(req.params, 'managerId')) {
-    return res.status(400).json({ error: 'Person ID is required' })
-  }
+  try {
+    if (!Object.prototype.hasOwnProperty.call(req.params, 'managerId')) {
+      return res.status(400).json({ error: 'Person ID is required' })
+    }
 
-  let { managerId } = req.params
+    let { managerId } = req.params
 
-  if (isNaN(managerId)) {
-    return res.status(400).json({ error: 'Person ID must be numeric', managerId })
-  }
+    if (isNaN(managerId)) {
+      return res.status(400).json({
+        error: 'Person ID must be numeric',
+        managerId
+      })
+    }
 
-  managerId = Number(managerId)
+    managerId = Number(managerId)
 
-  const attrs = {
-    where: {
-      id: managerId
-    },
-    include: [
-      {
-        model: models.User,
-        as: 'user',
-        include: [
-          {
-            model: models.Role,
-            as: 'role'
-          }
-        ]
+    const attrs = {
+      where: {
+        id: managerId
       },
-      { model: models.Contragent, as: 'contragent' },
-      { model: models.JobPosition, as: 'jobPosition' },
-      {
-        model: models.DrivingLicence,
-        as: 'drivingLicense',
-        include: [
-          {
-            model: models.DrivingLicencePhoto,
-            as: 'photos'
+      include: [
+        {
+          model: models.User,
+          as: 'user',
+          include: [
+            {
+              model: models.Role,
+              as: 'role'
+            }
+          ]
+        },
+        {
+          model: models.Contragent,
+          as: 'contragent'
+        },
+        {
+          model: models.JobPosition,
+          as: 'jobPosition'
+        },
+        {
+          model: models.DrivingLicence,
+          as: 'drivingLicense',
+          include: [
+            {
+              model: models.DrivingLicencePhoto,
+              as: 'photos'
+            }
+          ]
+        },
+        {
+          model: models.Passport,
+          as: 'passport',
+          include: [
+            {
+              model: models.PassportPhoto,
+              as: 'photos'
+            }
+          ]
+        }
+      ]
+    }
+
+    const user = await models.Person.findOne({ ...attrs })
+
+    const userObj = user.toJSON()
+    if (Object.prototype.hasOwnProperty.call(userObj, 'passport') && userObj.passport !== null) {
+      const photos = []
+
+      if (Object.prototype.hasOwnProperty.call(userObj.passport, 'photos') && userObj.passport.photos !== null) {
+        userObj.passport.photos.forEach(photo => {
+          if (photo.photo_url !== 'no_url') {
+            photos.push(getFullUrl(req, photo.photo_url))
           }
-        ]
-      },
-      {
-        model: models.Passport,
-        as: 'passport',
-        include: [
-          {
-            model: models.PassportPhoto,
-            as: 'photos'
-          }
-        ]
+        })
       }
-    ]
-  }
 
-  const user = await models.Person.findOne({ ...attrs })
-
-  const userObj = user.toJSON()
-  if (Object.prototype.hasOwnProperty.call(userObj, 'passport') && userObj.passport !== null) {
-    const photos = []
-
-    if (Object.prototype.hasOwnProperty.call(userObj.passport, 'photos') && userObj.passport.photos !== null) {
-      userObj.passport.photos.forEach(photo => {
-        if (photo.photo_url !== 'no_url') {
-          photos.push(getFullUrl(req, photo.photo_url))
-        }
-      })
+      userObj.passport.photos = photos
     }
 
-    userObj.passport.photos = photos
-  }
+    if (Object.prototype.hasOwnProperty.call(userObj, 'drivingLicense') && userObj.drivingLicense !== null) {
+      const photos = []
 
-  if (Object.prototype.hasOwnProperty.call(userObj, 'drivingLicense') && userObj.drivingLicense !== null) {
-    const photos = []
+      if (Object.prototype.hasOwnProperty.call(userObj.drivingLicense, 'photos') && userObj.drivingLicense.photos !== null) {
+        userObj.drivingLicense.photos.forEach(photo => {
+          if (photo.photo_url !== 'no_url') {
+            photos.push(getFullUrl(req, photo.photo_url))
+          }
+        })
+      }
 
-    if (Object.prototype.hasOwnProperty.call(userObj.drivingLicense, 'photos') && userObj.drivingLicense.photos !== null) {
-      userObj.drivingLicense.photos.forEach(photo => {
-        if (photo.photo_url !== 'no_url') {
-          photos.push(getFullUrl(req, photo.photo_url))
-        }
-      })
+      userObj.drivingLicense.photos = photos
     }
 
-    userObj.drivingLicense.photos = photos
+    return res.status(200).json({ manager: userObj })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
   }
-
-  return res.status(200).json({ manager: userObj })
 }
