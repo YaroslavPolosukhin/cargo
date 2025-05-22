@@ -102,7 +102,7 @@ paths:
     $ref: 'src/docs/paths/companyManagers/confirm.yaml'
   /api/companyManagers/order/all:
     $ref: 'src/docs/paths/companyManagers/all.yaml'
-  /api/companyManagers/orders/take:
+  /api/companyManagers/order/take:
     $ref: 'src/docs/paths/companyManagers/take.yaml'
   /api/companyManagers/order/{orderId}:
     $ref: 'src/docs/paths/companyManagers/order.yaml'
