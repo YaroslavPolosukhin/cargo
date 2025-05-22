@@ -95,7 +95,7 @@ router.get(
 
 router.post(
   '/order/take',
-  checkRole([Roles.COMPANY_DRIVER]),
+  checkRole([Roles.COMPANY_MANAGER]),
   companyManagerController.takeOrder
 )
 
