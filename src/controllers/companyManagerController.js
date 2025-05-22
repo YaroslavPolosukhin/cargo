@@ -4,7 +4,7 @@ import { validationResult } from 'express-validator'
 import EmploymentType from '../enums/employmentType.js'
 import { sendNotification } from '../utils/send_notification.js'
 import { companyManagerSockets } from './managerController.js'
-import { search as searchOrder } from './ordersController.js'
+import { ordersSockets, search as searchOrder } from './ordersController.js'
 import OrderStatus from '../enums/orderStatus.js'
 import { Op } from 'sequelize'
 import { getFullUrl } from '../utils/utils.js'
@@ -597,6 +597,11 @@ export const getAll = async (req, res) => {
         include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
       },
       {
+        model: models.Person,
+        as: 'company_manager',
+        include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+      },
+      {
         model: models.Nomenclature,
         as: 'nomenclatures',
         include: [
@@ -869,6 +874,319 @@ export const blockDriver = async (req, res) => {
     await models.Person.destroy({ where: { id: driverId } })
 
     return res.status(200).json({ message: 'Driver blocked successfully' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send()
+  }
+}
+
+export const takeOrder = async (req, res) => {
+  const {
+    orderId,
+    driverId
+  } = req.body
+
+  try {
+    const person = await models.Person.findByUserId(driverId)
+    if (!person) {
+      return res.status(404).send({ message: 'Driver not found' })
+    }
+
+    const personManager = await models.Person.findByUserId(req.user.id)
+    if (!personManager) {
+      return res.status(404).send({ message: 'Manager not found' })
+    }
+
+    const existingOrder = await models.Order.findOne({
+      where: {
+        driver_id: person.id,
+        status: {
+          [Op.not]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED]
+        }
+      },
+      include: [
+        {
+          model: models.Truck,
+          as: 'truck'
+        },
+        {
+          model: models.LogisticsPoint,
+          as: 'departure',
+          include: [
+            {
+              model: models.Address,
+              as: 'Address',
+              include: [
+                {
+                  model: models.City,
+                  as: 'City'
+                },
+                {
+                  model: models.Country,
+                  as: 'Country'
+                },
+                {
+                  model: models.Street,
+                  as: 'Street'
+                },
+                {
+                  model: models.Region,
+                  as: 'Region'
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: 'contacts'
+            }
+          ]
+        },
+        {
+          model: models.LogisticsPoint,
+          as: 'destination',
+          include: [
+            {
+              model: models.Address,
+              as: 'Address',
+              include: [
+                {
+                  model: models.City,
+                  as: 'City'
+                },
+                {
+                  model: models.Country,
+                  as: 'Country'
+                },
+                {
+                  model: models.Street,
+                  as: 'Street'
+                },
+                {
+                  model: models.Region,
+                  as: 'Region'
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: 'contacts'
+            }
+          ]
+        },
+        {
+          model: models.Person,
+          as: 'driver',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
+          model: models.Person,
+          as: 'manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
+          model: models.Nomenclature,
+          as: 'nomenclatures',
+          include: [
+            {
+              model: models.Measure,
+              as: 'measure'
+            }
+          ]
+        }
+      ]
+    })
+
+    if (existingOrder) {
+      return res
+        .status(400)
+        .send({ message: 'Driver already has an active order' })
+    }
+
+    // Mark the order as "Waiting for Confirmation"
+    const result = await models.Order.update(
+      { status: OrderStatus.CONFIRMATION, driver_id: person.id, company_manager_id: personManager.id },
+      {
+        where: { id: orderId, status: OrderStatus.CREATED }
+      }
+    )
+
+    if (result[0] === 0) {
+      return res
+        .status(404)
+        .send({ message: 'Order not found or not available for confirmation' })
+    }
+
+    const order = await models.Order.findOne({
+      where: { id: orderId },
+      include: [
+        {
+          model: models.Truck,
+          as: 'truck'
+        },
+        {
+          model: models.LogisticsPoint,
+          as: 'departure',
+          include: [
+            {
+              model: models.Address,
+              as: 'Address',
+              include: [
+                {
+                  model: models.City,
+                  as: 'City'
+                },
+                {
+                  model: models.Country,
+                  as: 'Country'
+                },
+                {
+                  model: models.Street,
+                  as: 'Street'
+                },
+                {
+                  model: models.Region,
+                  as: 'Region'
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: 'contacts'
+            }
+          ]
+        },
+        {
+          model: models.LogisticsPoint,
+          as: 'destination',
+          include: [
+            {
+              model: models.Address,
+              as: 'Address',
+              include: [
+                {
+                  model: models.City,
+                  as: 'City'
+                },
+                {
+                  model: models.Country,
+                  as: 'Country'
+                },
+                {
+                  model: models.Street,
+                  as: 'Street'
+                },
+                {
+                  model: models.Region,
+                  as: 'Region'
+                }
+              ]
+            },
+            {
+              model: models.Contact,
+              as: 'contacts'
+            }
+          ]
+        },
+        {
+          model: models.Person,
+          as: 'driver',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
+          model: models.Person,
+          as: 'manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
+          model: models.Nomenclature,
+          as: 'nomenclatures',
+          include: [
+            {
+              model: models.Measure,
+              as: 'measure'
+            }
+          ]
+        }
+      ]
+    })
+
+    try {
+      const manager = await models.User.scope('withTokens').findOne({ where: { id: order.manager.user_id } })
+      const driver = await models.User.scope('withTokens').findByPk(person.user_id)
+
+      let fio = null
+      if (person.surname) {
+        fio = person.surname
+      }
+
+      if (person.name) {
+        if (fio) {
+          fio += ' ' + person.name
+        } else {
+          fio = person.name
+        }
+      }
+      if (person.patronymic) {
+        if (fio) {
+          fio += ' ' + person.patronymic
+        } else {
+          fio = person.patronymic
+        }
+      }
+
+      let body = 'Водитель'
+      if (fio) {
+        body += ' ' + fio
+      }
+      body += ` ${driver.phone} взял заказ`
+
+      await sendNotification(
+        'Статус рейса изменен',
+        body,
+        {
+          title: 'Статус рейса изменен',
+          body,
+          url: `cargodelivery://order/${order.id}`
+        },
+        manager.fcm_token,
+        manager.device_type
+      )
+
+      body = 'Вам выдали заказ'
+      await sendNotification(
+        'Новый заказ',
+        body,
+        {
+          title: 'Новый заказ',
+          body,
+          url: `cargodelivery://order/${order.id}`
+        },
+        driver.fcm_token,
+        driver.device_type
+      )
+    } catch (e) {
+      console.log('something wrong with sending notification')
+      console.error(e)
+    }
+
+    if (order.manager.user.id in ordersSockets) {
+      ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
+    }
+    if (order.driver.user.id in ordersSockets) {
+      ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'New order', geo: order.geo }))
+    }
+
+    res
+      .status(200)
+      .send({
+        message: 'Order marked as waiting for confirmation',
+        order
+      })
   } catch (error) {
     console.error(error)
     res.status(500).send()

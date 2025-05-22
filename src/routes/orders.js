@@ -11,7 +11,7 @@ router.get('/available', paginationMiddleware, ordersController.getAvailableOrde
 router.get('/current', ordersController.getCurrentOrder)
 router.get('/all', checkRole([Roles.MANAGER]), paginationMiddleware, ordersController.getAll)
 router.get('/getManagerPhone', checkRole([Roles.DRIVER]), ordersController.getManagerPhone)
-router.get('/search', checkRole([Roles.MANAGER, Roles.DRIVER]), paginationMiddleware, searchMiddleware, ordersController.search)
+router.get('/search', checkRole([Roles.MANAGER, Roles.DRIVER, Roles.COMPANY_DRIVER]), paginationMiddleware, searchMiddleware, ordersController.search)
 router.get('/:orderId/geo', checkRole([Roles.MANAGER, Roles.DRIVER]), ordersController.getGeo)
 router.get('/:orderId', checkRole([Roles.MANAGER]), ordersController.getOrderById)
 router.get('/drivers', checkRole([Roles.MANAGER]), ordersController.getDriversOnTrip)
@@ -20,10 +20,10 @@ router.put('/:orderId', checkRole([Roles.MANAGER]), updateOrderValidator, orders
 router.post('/take', checkRole([Roles.DRIVER]), ordersController.takeOrder)
 router.post('/confirm', checkRole([Roles.MANAGER]), ordersController.confirmOrder)
 router.post('/rejectDriver', checkRole([Roles.MANAGER]), ordersController.rejectDriver)
-router.post('/depart', checkRole([Roles.DRIVER]), ordersController.markOrderAsDeparted)
-router.post('/complete', checkRole([Roles.DRIVER]), ordersController.markOrderAsCompleted)
-router.post('/updateGeo', checkRole([Roles.DRIVER]), updateGeoValidator, ordersController.updateGeo)
-router.post('/cancel', checkRole([Roles.DRIVER]), ordersController.cancelOrder)
+router.post('/depart', checkRole([Roles.DRIVER, Roles.COMPANY_DRIVER]), ordersController.markOrderAsDeparted)
+router.post('/complete', checkRole([Roles.DRIVER, Roles.COMPANY_DRIVER]), ordersController.markOrderAsCompleted)
+router.post('/updateGeo', checkRole([Roles.DRIVER, Roles.COMPANY_DRIVER]), updateGeoValidator, ordersController.updateGeo)
+router.post('/cancel', checkRole([Roles.DRIVER, Roles.COMPANY_DRIVER]), ordersController.cancelOrder)
 router.delete('/:orderId', checkRole([Roles.MANAGER]), ordersController.deleteOrder)
 
 export default router

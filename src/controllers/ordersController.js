@@ -7,7 +7,7 @@ import Roles from '../enums/roles.js'
 import { sendNotification } from '../utils/send_notification.js'
 import config from '../config/config.js'
 
-const ordersSockets = {}
+export const ordersSockets = {}
 const geoOrderSockets = {}
 
 /**
@@ -99,6 +99,11 @@ export const getAvailableOrders = async (req, res) => {
       {
         model: models.Person,
         as: 'manager',
+        include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+      },
+      {
+        model: models.Person,
+        as: 'company_manager',
         include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
       },
       {
@@ -233,6 +238,11 @@ export const getCurrentOrder = async (req, res) => {
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
           model: models.Nomenclature,
           as: 'nomenclatures',
           include: [
@@ -340,6 +350,11 @@ export const getOrderById = async (req, res) => {
         {
           model: models.Person,
           as: 'manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
+          model: models.Person,
+          as: 'company_manager',
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
@@ -1324,6 +1339,11 @@ export const confirmOrder = async (req, res) => {
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
           model: models.Nomenclature,
           as: 'nomenclatures',
           include: [
@@ -1352,6 +1372,21 @@ export const confirmOrder = async (req, res) => {
         driver.fcm_token,
         driver.device_type
       )
+
+      if (order.company_manager) {
+        const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
+        await sendNotification(
+          'Статус рейса изменен',
+          body,
+          {
+            title: 'Статус рейса изменен',
+            body,
+            url: `cargodelivery://order/${order.id}`
+          },
+          companyManager.fcm_token,
+          companyManager.device_type
+        )
+      }
     } catch (e) {
       console.log('something wrong with sending notification')
       console.error(e)
@@ -1359,6 +1394,9 @@ export const confirmOrder = async (req, res) => {
 
     if (order.driver.user.id in ordersSockets) {
       ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'Confirmed', geo: order.geo }))
+    }
+    if (order.company_manager && order.company_manager.user.id in ordersSockets) {
+      ordersSockets[order.company_manager.user.id].send(JSON.stringify({ id: order.id, status: 'Confirmed', geo: order.geo }))
     }
 
     return res
@@ -1468,6 +1506,11 @@ export const rejectDriver = async (req, res) => {
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
           model: models.Nomenclature,
           as: 'nomenclatures',
           include: [
@@ -1502,6 +1545,21 @@ export const rejectDriver = async (req, res) => {
         driver.fcm_token,
         driver.device_type
       )
+
+      if (order.company_manager) {
+        const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
+        await sendNotification(
+          'Статус рейса изменен',
+          body,
+          {
+            title: 'Статус рейса изменен',
+            body,
+            url: `cargodelivery://order/${order.id}`
+          },
+          companyManager.fcm_token,
+          companyManager.device_type
+        )
+      }
     } catch (e) {
       console.log('something wrong with sending notification')
       console.error(e)
@@ -1510,10 +1568,13 @@ export const rejectDriver = async (req, res) => {
     if (order.driver.user.id in ordersSockets) {
       ordersSockets[order.driver.user.id].send(JSON.stringify({ id: order.id, status: 'Rejected', geo: order.geo }))
     }
+    if (order.company_manager && order.company_manager.user.id in ordersSockets) {
+      ordersSockets[order.company_manager.user.id].send(JSON.stringify({ id: order.id, status: 'Rejected', geo: order.geo }))
+    }
 
     // Reset the order status to 'created' and clear the driver_id
-    const [updated] = await models.Order.update(
-      { status: OrderStatus.CREATED, driver_id: null, truck_id: null },
+    await models.Order.update(
+      { status: OrderStatus.CREATED, driver_id: null, truck_id: null, company_manager_id: null },
       {
         where: {
           id: orderId,
@@ -1616,6 +1677,11 @@ export const rejectDriver = async (req, res) => {
               as: 'role'
             }
           }
+        },
+        {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
           model: models.Nomenclature,
@@ -1751,6 +1817,11 @@ export const markOrderAsDeparted = async (req, res) => {
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
           model: models.Nomenclature,
           as: 'nomenclatures',
           include: [
@@ -1804,6 +1875,21 @@ export const markOrderAsDeparted = async (req, res) => {
         manager.fcm_token,
         manager.device_type
       )
+
+      if (order.company_manager) {
+        const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
+        await sendNotification(
+          'Статус рейса изменен',
+          body,
+          {
+            title: 'Статус рейса изменен',
+            body,
+            url: `cargodelivery://order/${order.id}`
+          },
+          companyManager.fcm_token,
+          companyManager.device_type
+        )
+      }
     } catch (e) {
       console.log('something wrong with sending notification')
       console.error(e)
@@ -1811,6 +1897,9 @@ export const markOrderAsDeparted = async (req, res) => {
 
     if (order.manager.user.id in ordersSockets) {
       ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
+    }
+    if (order.company_manager && order.company_manager.user.id in ordersSockets) {
+      ordersSockets[order.company_manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
 
     return res
@@ -1932,6 +2021,11 @@ export const markOrderAsCompleted = async (req, res) => {
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
           model: models.Nomenclature,
           as: 'nomenclatures',
           include: [
@@ -1985,6 +2079,21 @@ export const markOrderAsCompleted = async (req, res) => {
         manager.fcm_token,
         manager.device_type
       )
+
+      if (order.company_manager) {
+        const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
+        await sendNotification(
+          'Статус рейса изменен',
+          body,
+          {
+            title: 'Статус рейса изменен',
+            body,
+            url: `cargodelivery://order/${order.id}`
+          },
+          companyManager.fcm_token,
+          companyManager.device_type
+        )
+      }
     } catch (e) {
       console.log('something wrong with sending notification')
       console.error(e)
@@ -1992,6 +2101,9 @@ export const markOrderAsCompleted = async (req, res) => {
 
     if (order.manager.user.id in ordersSockets) {
       ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
+    }
+    if (order.company_manager && order.company_manager.user.id in ordersSockets) {
+      ordersSockets[order.company_manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
 
     return res
@@ -2393,6 +2505,11 @@ export const cancelOrder = async (req, res) => {
           include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
         },
         {
+          model: models.Person,
+          as: 'company_manager',
+          include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+        },
+        {
           model: models.Nomenclature,
           as: 'nomenclatures',
           include: [
@@ -2408,6 +2525,18 @@ export const cancelOrder = async (req, res) => {
     if (order.manager.user.id in ordersSockets) {
       ordersSockets[order.manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
     }
+    if (order.company_manager && order.company_manager.user.id in ordersSockets) {
+      ordersSockets[order.company_manager.user.id].send(JSON.stringify({ id: order.id, status: order.status, geo: order.geo }))
+    }
+
+    await models.Order.update(
+      { company_manager_id: null },
+      {
+        where: {
+          id: orderId
+        }
+      }
+    )
 
     return res.status(200).send({
       message:
@@ -2693,6 +2822,11 @@ export const search = async (req, res) => {
             include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
           },
           {
+            model: models.Person,
+            as: 'company_manager',
+            include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+          },
+          {
             model: models.Nomenclature,
             as: 'nomenclatures',
             include: [
@@ -2724,7 +2858,7 @@ export const getGeo = async (req, res) => {
       return res.status(404).send({ message: 'Order not found' })
     }
 
-    if (!order.hasOwnProperty('geo') || !order.geo) {
+    if (!Object.prototype.hasOwnProperty.call(order, 'geo') || !order.geo) {
       return res.status(404).send({ message: "Order doen't have geolocation" })
     }
 
@@ -2775,19 +2909,8 @@ export const location = async (req, res) => {
 
     let interval = null
 
-    switch (req.user.role) {
-      case Roles.MANAGER:
-        interval = setInterval(async () => {
-          order = await models.Order.findOne({ where: { id: orderId } })
-
-          if (Object.prototype.hasOwnProperty.call(order.dataValues, 'geo') && order.geo) {
-            ws.send(JSON.stringify({
-              latitude: order.geo.coordinates[0],
-              longitude: order.geo.coordinates[1]
-            }))
-          }
-        }, 15 * 60 * 1000)
-
+    if (req.user.role === Roles.MANAGER || req.user.role === Roles.COMPANY_MANAGER) {
+      interval = setInterval(async () => {
         order = await models.Order.findOne({ where: { id: orderId } })
 
         if (Object.prototype.hasOwnProperty.call(order.dataValues, 'geo') && order.geo) {
@@ -2796,28 +2919,33 @@ export const location = async (req, res) => {
             longitude: order.geo.coordinates[1]
           }))
         }
+      }, 15 * 60 * 1000)
 
-        ws.on('close', function close () {
-          clearInterval(interval)
-          ordersSockets[orderId] = ordersSockets[orderId].filter((socket) => socket !== ws)
-          if (ordersSockets[orderId].length === 0) {
-            delete ordersSockets[orderId]
-          }
-        })
+      order = await models.Order.findOne({ where: { id: orderId } })
 
-        if (orderId in ordersSockets) {
-          ordersSockets[orderId].push(ws)
-        } else {
-          ordersSockets[orderId] = [ws]
+      if (Object.prototype.hasOwnProperty.call(order.dataValues, 'geo') && order.geo) {
+        ws.send(JSON.stringify({
+          latitude: order.geo.coordinates[0],
+          longitude: order.geo.coordinates[1]
+        }))
+      }
+
+      ws.on('close', function close () {
+        clearInterval(interval)
+        geoOrderSockets[orderId] = geoOrderSockets[orderId].filter((socket) => socket !== ws)
+        if (geoOrderSockets[orderId].length === 0) {
+          delete geoOrderSockets[orderId]
         }
+      })
 
-        break
-
-      default:
-        ws.send(JSON.stringify({ status: "You don't need websocket connection" }))
-        ws.close()
-
-        break
+      if (orderId in geoOrderSockets) {
+        geoOrderSockets[orderId].push(ws)
+      } else {
+        geoOrderSockets[orderId] = [ws]
+      }
+    } else {
+      ws.send(JSON.stringify({ status: "You don't need websocket connection" }))
+      ws.close()
     }
   } catch (e) {
     console.log(e)
@@ -2842,6 +2970,11 @@ async function checkLocationDisabled () {
       {
         model: models.Person,
         as: 'manager',
+        include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
+      },
+      {
+        model: models.Person,
+        as: 'company_manager',
         include: { model: models.User, as: 'user', include: { model: models.Role, as: 'role' } }
       }
     ]
@@ -2870,6 +3003,21 @@ async function checkLocationDisabled () {
       manager.fcm_token,
       manager.device_type
     )
+
+    if (order.company_manager) {
+      const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
+      await sendNotification(
+        'Геолокация отключена',
+        body,
+        {
+          title: 'Геолокация отключена',
+          body,
+          url: `cargodelivery://order/${order.id}`
+        },
+        companyManager.fcm_token,
+        companyManager.device_type
+      )
+    }
   }
 }
 

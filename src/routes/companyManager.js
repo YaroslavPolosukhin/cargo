@@ -93,6 +93,12 @@ router.get(
   ordersController.getOrderById
 )
 
+router.post(
+  '/order/take',
+  checkRole([Roles.COMPANY_DRIVER]),
+  companyManagerController.takeOrder
+)
+
 router.get(
   '/managers/:managerId',
   checkRole([Roles.COMPANY_MANAGER]),

@@ -18,6 +18,10 @@ export default (sequelize) => {
         foreignKey: 'manager_id',
         as: 'manager'
       })
+      this.belongsTo(models.Person, {
+        foreignKey: 'company_manager_id',
+        as: 'company_manager'
+      })
       this.belongsTo(models.Truck, { foreignKey: 'truck_id', as: 'truck' })
       this.belongsToMany(models.Nomenclature, {
         through: models.OrderNomenclature,
@@ -69,6 +73,14 @@ export default (sequelize) => {
       manager_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: 'persons',
+          key: 'id'
+        }
+      },
+      company_manager_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
         references: {
           model: 'persons',
           key: 'id'
