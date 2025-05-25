@@ -883,7 +883,11 @@ export const blockDriver = async (req, res) => {
 export const takeOrder = async (req, res) => {
   const {
     orderId,
-    driverId
+    driverId,
+    plannedLoadingDate,
+    plannedArrivalDate,
+    vinCode,
+    trailerNumber
   } = req.body
 
   try {
@@ -1002,9 +1006,45 @@ export const takeOrder = async (req, res) => {
         .send({ message: 'Driver already has an active order' })
     }
 
+    const updateData = {
+      status: OrderStatus.CONFIRMATION,
+      driver_id: person.id,
+      company_manager_id: personManager.id,
+      last_geo_update: new Date()
+    }
+
+    if (plannedArrivalDate) {
+      updateData.delivery_date_plan = new Date(plannedArrivalDate)
+    }
+    if (plannedLoadingDate) {
+      updateData.departure_date_plan = new Date(plannedLoadingDate)
+    }
+
+    if (vinCode) {
+      const formattedVinCode = vinCode.replace(/\s/g, '')
+
+      const [truck] = await models.Truck.findOrCreate({
+        where: { vin: formattedVinCode },
+        defaults: { vin: formattedVinCode }
+      })
+
+      updateData.truck_id = truck.id
+
+      if (trailerNumber) {
+        await models.Truck.update(
+          { trailer_number: trailerNumber },
+          {
+            where: {
+              vin: formattedVinCode
+            }
+          }
+        )
+      }
+    }
+
     // Mark the order as "Waiting for Confirmation"
     const result = await models.Order.update(
-      { status: OrderStatus.CONFIRMATION, driver_id: person.id, company_manager_id: personManager.id },
+      updateData,
       {
         where: { id: orderId, status: OrderStatus.CREATED }
       }

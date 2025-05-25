@@ -1210,27 +1210,9 @@ export const confirmOrder = async (req, res) => {
   try {
     const { orderId, plannedLoadingDate, plannedArrivalDate, vinCode, trailerNumber } =
       req.body
-    const formattedVinCode = vinCode.replace(/\s/g, '')
-
-    const [truck] = await models.Truck.findOrCreate({
-      where: { vin: formattedVinCode },
-      defaults: { vin: formattedVinCode }
-    })
-
-    if (trailerNumber) {
-      await models.Truck.update(
-        { trailer_number: trailerNumber },
-        {
-          where: {
-            vin: formattedVinCode
-          }
-        }
-      )
-    }
 
     const data = {
       status: OrderStatus.LOADING,
-      truck_id: truck.id,
       last_geo_update: new Date()
     }
 
@@ -1239,6 +1221,28 @@ export const confirmOrder = async (req, res) => {
     }
     if (plannedLoadingDate) {
       data.departure_date_plan = new Date(plannedLoadingDate)
+    }
+
+    if (vinCode) {
+      const formattedVinCode = vinCode.replace(/\s/g, '')
+
+      const [truck] = await models.Truck.findOrCreate({
+        where: { vin: formattedVinCode },
+        defaults: { vin: formattedVinCode }
+      })
+
+      data.truck_id = truck.id
+
+      if (trailerNumber) {
+        await models.Truck.update(
+          { trailer_number: trailerNumber },
+          {
+            where: {
+              vin: formattedVinCode
+            }
+          }
+        )
+      }
     }
 
     const [updated] = await models.Order.update(

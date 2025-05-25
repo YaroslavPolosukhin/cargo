@@ -35,9 +35,6 @@ post:
               example: "T1234"
           required:
             - orderId
-            - plannedLoadingDate
-            - plannedArrivalDate
-            - vinCode
   responses:
     '200':
       description: Order confirmed and status updated to loading.

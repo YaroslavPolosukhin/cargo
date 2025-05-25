@@ -19,6 +19,24 @@ post:
               type: integer
               description: The unique identifier of the driver to be taken.
               example: 1
+            plannedLoadingDate:
+              type: string
+              format: date-time
+              description: The planned loading date.
+              example: "2021-04-01"
+            plannedArrivalDate:
+              type: integer
+              format: date-time
+              description: The planned arrival date.
+              example: "2021-04-01"
+            vinCode:
+              type: string
+              description: The Vehicle Identification Number of the truck.
+              example: "1HGBH41JXMN109186"
+            trailerNumber:
+              type: string
+              description: The trailer number.
+              example: "T1234"
           required:
             - orderId
             - driverId
