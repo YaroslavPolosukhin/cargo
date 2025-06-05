@@ -93,7 +93,7 @@ router.post(
 
 router.put(
   '/updateContragent/:contragentId',
-  checkRole([Roles.MANAGER]),
+  checkRole([Roles.MANAGER, Roles.COMPANY_MANAGER]),
   driversController.updateContraget
 )
 

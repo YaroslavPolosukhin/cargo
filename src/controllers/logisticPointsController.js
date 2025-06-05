@@ -235,6 +235,19 @@ export const deleteLogisticsPoint = async (req, res) => {
       return res.status(404).json({ error: 'Logistic point not found' })
     }
 
+    // Check if the logistic point has any associated contacts
+    const orders = await models.Order.findAll({
+      where: {
+        [Sequelize.Op.or]: [
+          { departure_id: pointId },
+          { destination_id: pointId }
+        ]
+      }
+    })
+    if (orders.length > 0) {
+      return res.status(400).json({ message: 'Cannot delete logistic point with associated orders' })
+    }
+
     await logisticPoint.destroy()
 
     return res.status(200).json({ message: 'Logistic point has been deleted' })
