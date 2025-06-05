@@ -75,3 +75,24 @@ put:
       description: Validation error or error updating new logistics point
     '500':
       description: Internal Server Error
+
+delete:
+  summary: Delete logistics point
+  operationId: deleteLogisticsPoint
+  tags:
+    - Logistics Points
+  parameters:
+    - in: path
+      name: pointId
+      required: true
+      schema:
+        type: integer
+        format: int64
+      description: Logistics point id
+  responses:
+    '200':
+      description: Logistics point deleted successfully
+    '400':
+      description: Cannot delete logistic point with associated orders
+    '500':
+      description: Internal Server Error
