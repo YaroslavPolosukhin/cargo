@@ -278,7 +278,7 @@ export const update = async (req, res) => {
       }
 
       // если роль обновляемого пользователя не driver
-      if (person.user.role.name !== Roles.DRIVER) {
+      if (person.user.role.name !== Roles.DRIVER && person.user.role.name !== Roles.COMPANY_DRIVER) {
         return res
           .status(404)
           .json({ error: 'You can only update the personal data of drivers' })
