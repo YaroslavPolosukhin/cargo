@@ -6,7 +6,7 @@ import Sequelize from 'sequelize'
 import { sendNotification } from '../utils/send_notification.js'
 import { getFullUrl } from '../utils/utils.js'
 
-const driversSockets = {}
+export const driversSockets = {}
 
 export const getUnapproved = async (req, res) => {
   try {

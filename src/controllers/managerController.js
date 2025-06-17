@@ -4,6 +4,7 @@ import { getFullUrl } from '../utils/utils.js'
 import Sequelize from 'sequelize'
 import roles from '../enums/roles.js'
 import { validationResult } from 'express-validator'
+import { driversSockets } from './driversController.js'
 
 export const companyManagerSockets = {}
 
@@ -539,6 +540,11 @@ export const confirmCompanyDriver = async (req, res) => {
     } catch (e) {
       console.log('something wrong with sending notification')
       console.error(e)
+    }
+
+    if (person.id in driversSockets) {
+      driversSockets[person.id].send(JSON.stringify({ status: 'approved' }))
+      driversSockets[person.id].close()
     }
 
     res
