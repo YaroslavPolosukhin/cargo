@@ -7,6 +7,8 @@ services:
       - 8000
     env_file:
       - .env
+    volumes:
+      - error_responses:/app/error_responses
 
     restart: always
 
@@ -23,3 +25,4 @@ services:
 
 volumes:
   nginx_logs:
+  error_responses:
