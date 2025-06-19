@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: it_site
+    container_name: api
     build:
       context: .
     expose:
