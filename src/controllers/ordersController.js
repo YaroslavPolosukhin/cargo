@@ -2991,25 +2991,12 @@ async function checkLocationDisabled () {
   }
 
   for (const order of orders) {
-    const manager = await models.User.scope('withTokens').findOne({ where: { id: order.manager.user_id } })
-    const driver = await models.User.findByPk(order.driver.user_id)
+    try {
+      const manager = await models.User.scope('withTokens').findOne({ where: { id: order.manager.user_id } })
+      const driver = await models.User.findByPk(order.driver.user_id)
 
-    const body = `Водитель ${driver.phone} не обновлял геолокацию в течение ${config.order_geo_update_interval / (1000 * 60)} минут`
+      const body = `Водитель ${driver.phone} не обновлял геолокацию в течение ${config.order_geo_update_interval / (1000 * 60)} минут`
 
-    await sendNotification(
-      'Геолокация отключена',
-      body,
-      {
-        title: 'Геолокация отключена',
-        body,
-        url: `cargodelivery://order/${order.id}`
-      },
-      manager.fcm_token,
-      manager.device_type
-    )
-
-    if (order.company_manager) {
-      const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
       await sendNotification(
         'Геолокация отключена',
         body,
@@ -3018,9 +3005,26 @@ async function checkLocationDisabled () {
           body,
           url: `cargodelivery://order/${order.id}`
         },
-        companyManager.fcm_token,
-        companyManager.device_type
+        manager.fcm_token,
+        manager.device_type
       )
+
+      if (order.company_manager) {
+        const companyManager = await models.User.scope('withTokens').findOne({ where: { id: order.company_manager.user_id } })
+        await sendNotification(
+          'Геолокация отключена',
+          body,
+          {
+            title: 'Геолокация отключена',
+            body,
+            url: `cargodelivery://order/${order.id}`
+          },
+          companyManager.fcm_token,
+          companyManager.device_type
+        )
+      }
+    } catch (e) {
+
     }
   }
 }
