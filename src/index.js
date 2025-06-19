@@ -40,13 +40,19 @@ app.use(WebSocketExpress.urlencoded({ extended: true }))
 app.use(responseLogger)
 app.set('shutdown timeout', 1000)
 
+const serverIps = process.env.WEB_SERVER.split(',')
+
 const allowlist = [
   'http://localhost:4000',
-  'localhost:4000',
-  process.env.WEB_SERVER,
-  'http://' + process.env.WEB_SERVER,
-  'https://' + process.env.WEB_SERVER
+  'localhost:4000'
 ]
+
+for (const ip of serverIps) {
+  allowlist.push(ip)
+  allowlist.push('http://' + ip)
+  allowlist.push('https://' + ip)
+}
+
 const corsOptionsDelegate = function (req, callback) {
   let corsOptions
 
