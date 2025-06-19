@@ -23,6 +23,7 @@ import admin from 'firebase-admin'
 import { createRequire } from 'node:module'
 import { responseLogger } from './middlewares/logger.js'
 import fs from 'fs'
+import * as https from 'node:https'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -110,10 +111,11 @@ const PORT = process.env.PORT || 8080
 const privateKey = fs.readFileSync(process.env.PRIVATE_KEY)
 const certificate = fs.readFileSync(process.env.CERT)
 
-const server = app.createServer({
+const server = https.createServer({
   key: privateKey,
   cert: certificate
-})
+}, app)
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`)
 })
