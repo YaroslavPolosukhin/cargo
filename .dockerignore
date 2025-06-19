@@ -1,0 +1,9 @@
+nginx
+.idea
+node_modules
+.dockerignore
+package-lock.json
+docker-compose.yml
+Dockerfile
+.env
+.gitignore

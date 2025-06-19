@@ -1,0 +1,25 @@
+services:
+  api:
+    container_name: it_site
+    build:
+      context: .
+    expose:
+      - 8000
+    env_file:
+      - .env
+
+    restart: always
+
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    volumes:
+      - nginx_logs:/var/log/nginx
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api
+    restart: always
+
+volumes:
+  nginx_logs:
