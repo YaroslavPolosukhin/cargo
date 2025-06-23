@@ -1,5 +1,5 @@
 const getFullUrl = (req, relativePath) => {
-  return `${req.protocol}://${req.get('host')}/${relativePath}`;
-};
+  return `${process.env.PROTOCOL || 'http'}://${req.get('host')}/${relativePath}`
+}
 
-export { getFullUrl };
+export { getFullUrl }
