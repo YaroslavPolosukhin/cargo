@@ -624,7 +624,7 @@ export const getAll = async (req, res) => {
           continue
         }
 
-        if (order.driver.hasOwnProperty('contragent_id') && order.driver.contragent_id && order.driver.contragent_id === contragentId) {
+        if (order.hasOwnProperty('driver') && order.driver && order.driver.hasOwnProperty('contragent_id') && order.driver.contragent_id && order.driver.contragent_id === contragentId) {
           orders.push(order)
         }
       }
