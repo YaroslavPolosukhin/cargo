@@ -113,15 +113,6 @@ export const confirm = async (req, res) => {
 
     await person.update(updateQuery)
 
-    try {
-      const body = 'Регистрация подтверждена менеджером'
-
-      await sendNotification('Ваш статус обновлен', body, { title: 'Ваш статус обновлен', body }, user.fcm_token, user.device_type)
-    } catch (e) {
-      console.log('something wrong with sending notification')
-      console.error(e)
-    }
-
     res
       .status(200)
       .json({
